@@ -1,8 +1,19 @@
 "use client";
 
 import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import type { Monument } from "@/lib/api";
+
+const markerIcon = L.icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
 
 export default function MapView({ monuments }: { monuments: Monument[] }) {
   const points = monuments.filter((m) => m.latitude !== 0 || m.longitude !== 0);
@@ -18,7 +29,7 @@ export default function MapView({ monuments }: { monuments: Monument[] }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {points.map((monument) => (
-          <Marker key={monument.id} position={[monument.latitude, monument.longitude]}>
+          <Marker key={monument.id} position={[monument.latitude, monument.longitude]} icon={markerIcon}>
             <Popup>
               <strong>{monument.name}</strong>
             </Popup>
