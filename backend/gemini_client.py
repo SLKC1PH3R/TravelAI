@@ -10,7 +10,7 @@ from config import settings
 
 genai.configure(api_key=settings.gemini_api_key)
 
-MODEL_NAME = "gemini-1.5-flash"
+MODEL_NAME = "gemini-2.5-flash"
 
 VISION_PROMPT = """Tu es un guide touristique expert. Analyse cette image.
 Si c'est un monument, donne : nom, pays, ville, description courte (3 phrases),
