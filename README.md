@@ -76,10 +76,11 @@ Ce repo est concu pour etre deploye tel quel via Dokploy (Docker Compose) :
 3. Renseigner les variables d'environnement du projet dans Dokploy (memes cles que `.env.example`) :
    - `GEMINI_API_KEY`, `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXT_PUBLIC_API_URL`.
 4. **Volumes persistants** : Dokploy doit monter un volume persistant sur `./data/users` (cote backend) pour ne pas perdre les photos a chaque redeploiement, et un volume sur les donnees Postgres (`postgres_data`, deja defini dans le compose).
-5. **Domaines** : configurer deux domaines/sous-domaines dans Dokploy (un proxy par service) :
+5. **Domaines** : configurer deux domaines/sous-domaines dans Dokploy (un proxy par service). Le champ **Port** doit correspondre au port que le conteneur ecoute reellement (pas un port hote a inventer) :
    - frontend -> port `3000` -> ex. `travelai.digitalstack.cloud`
    - backend -> port `8000` -> ex. `api.travelai.digitalstack.cloud`
    Ces URLs doivent correspondre a `NEXTAUTH_URL` et `NEXT_PUBLIC_API_URL`.
+   `docker-compose.yml` n'expose plus de port hote (`ports:`) pour `backend`/`frontend`, uniquement `expose:` -> c'est le reseau interne de Dokploy/Traefik qui route vers le conteneur via le port configure dans la Domain. Si Dokploy a precedemment suggere d'autres ports (ex. `3125`, `8125`), les remplacer par `3000` et `8000` pour qu'ils correspondent a ce que le conteneur ecoute reellement.
 6. **Google OAuth** : dans la console Google Cloud, ajouter `https://travelai.digitalstack.cloud/api/auth/callback/google` comme URI de redirection autorisee.
 7. Lancer le deploiement. Dokploy build les images `backend` et `frontend` via leurs `Dockerfile` respectifs et execute `docker-compose up`.
 8. Au premier demarrage, le backend cree les tables automatiquement (et `alembic upgrade head` s'execute au lancement du conteneur).
