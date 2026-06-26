@@ -100,3 +100,4 @@ Cette variable est injectee **au build** du frontend (Next.js inline les variabl
 ```
 
 Une photo n'est ecrite sur disque que si `users.photo_consent = true` (consentement RGPD) ET qu'une image a ete envoyee a `/analyze`.
+# TravelAI
