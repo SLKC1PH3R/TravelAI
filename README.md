@@ -32,7 +32,7 @@ Copier `.env.example` en `.env` et renseigner :
 | `NEXTAUTH_SECRET` | Secret aleatoire (`openssl rand -base64 32`) |
 | `NEXTAUTH_URL` | URL publique du frontend (ex : `https://travelai.digitalstack.cloud`) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Identifiants OAuth Google (console Google Cloud) |
-| `NEXT_PUBLIC_API_URL` | URL publique de l'API backend (ex : `https://api.travelai.digitalstack.cloud`) |
+| `NEXT_PUBLIC_API_URL` | URL publique de l'API backend (ex : `https://travelai-api.digitalstack.cloud`) |
 
 > Note auth Email : NextAuth v5 "Email provider" (magic link) necessite normalement un adapter de base de donnees pour stocker les jetons de verification + un serveur SMTP. Pour rester simple ici, l'auth par email est implementee via un provider Credentials sans mot de passe. Pour une vraie auth magic-link, brancher un adapter (`@auth/pg-adapter`) sur la meme base Postgres et ajouter les variables `EMAIL_SERVER` / `EMAIL_FROM`.
 
@@ -78,8 +78,11 @@ Ce repo est concu pour etre deploye tel quel via Dokploy (Docker Compose) :
 4. **Volumes persistants** : Dokploy doit monter un volume persistant sur `./data/users` (cote backend) pour ne pas perdre les photos a chaque redeploiement, et un volume sur les donnees Postgres (`postgres_data`, deja defini dans le compose).
 5. **Domaines** : configurer deux domaines/sous-domaines dans Dokploy (un proxy par service). Le champ **Port** doit correspondre au port que le conteneur ecoute reellement (pas un port hote a inventer) :
    - frontend -> port `3000` -> ex. `travelai.digitalstack.cloud`
-   - backend -> port `8000` -> ex. `api.travelai.digitalstack.cloud`
+   - backend -> port `8000` -> ex. `travelai-api.digitalstack.cloud`
    Ces URLs doivent correspondre a `NEXTAUTH_URL` et `NEXT_PUBLIC_API_URL`.
+
+   Le sous-domaine backend utilise un **sous-domaine de 1er niveau** (`travelai-api.digitalstack.cloud`) et non un sous-sous-domaine (`api.travelai.digitalstack.cloud`) : le certificat Universal SSL gratuit de Cloudflare ne couvre que l'apex + `*.digitalstack.cloud` (un seul niveau). Un sous-domaine de 2e niveau provoque un `handshake_failure` TLS a l'edge Cloudflare, sauf si "Total TLS" est active sur le compte.
+
    `docker-compose.yml` n'expose plus de port hote (`ports:`) pour `backend`/`frontend`, uniquement `expose:` -> c'est le reseau interne de Dokploy/Traefik qui route vers le conteneur via le port configure dans la Domain. Si Dokploy a precedemment suggere d'autres ports (ex. `3125`, `8125`), les remplacer par `3000` et `8000` pour qu'ils correspondent a ce que le conteneur ecoute reellement.
 6. **Google OAuth** : dans la console Google Cloud, ajouter `https://travelai.digitalstack.cloud/api/auth/callback/google` comme URI de redirection autorisee.
 7. Lancer le deploiement. Dokploy build les images `backend` et `frontend` via leurs `Dockerfile` respectifs et execute `docker-compose up`.
