@@ -1,0 +1,43 @@
+"use client";
+
+import { useState } from "react";
+import { generateCarnetUrl, type Trip } from "@/lib/api";
+
+export default function TravelBooklet({ trip }: { trip: Trip }) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleGenerate() {
+    setLoading(true);
+    try {
+      const res = await fetch(generateCarnetUrl(trip.id), { method: "POST" });
+      if (!res.ok) throw new Error("Echec de generation du carnet");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `carnet-${trip.city}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-5">
+      <h3 className="text-lg font-semibold">
+        Carnet de voyage - {trip.city}, {trip.country}
+      </h3>
+      <p className="mt-1 text-sm text-slate-500">
+        {trip.monuments.length} monument(s) visite(s) - genere un PDF souvenir de ce voyage.
+      </p>
+      <button
+        onClick={handleGenerate}
+        disabled={loading}
+        className="mt-4 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50"
+      >
+        {loading ? "Generation en cours..." : "Generer mon carnet de voyage"}
+      </button>
+    </div>
+  );
+}

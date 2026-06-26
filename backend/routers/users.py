@@ -1,0 +1,29 @@
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+import models
+import schemas
+from database import get_db
+
+router = APIRouter(prefix="/users", tags=["users"])
+
+
+@router.get("/me", response_model=schemas.UserOut)
+def get_me(uuid: str, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.anonymous_uuid == uuid).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+@router.patch("/{user_id}/consent", response_model=schemas.UserOut)
+def update_consent(user_id: uuid.UUID, payload: schemas.ConsentUpdate, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.photo_consent = payload.photo_consent
+    db.commit()
+    db.refresh(user)
+    return user
