@@ -15,7 +15,7 @@ MODEL_NAME = "gemini-1.5-flash"
 VISION_PROMPT = """Tu es un guide touristique expert. Analyse cette image.
 Si c'est un monument, donne : nom, pays, ville, description courte (3 phrases),
 anecdote historique. Reponds uniquement en JSON valide, sans markdown, au format :
-{"name": "...", "country": "...", "city": "...", "description": "...", "anecdote": "...", "answer": "..."}
+{{"name": "...", "country": "...", "city": "...", "description": "...", "anecdote": "...", "answer": "..."}}
 
 Question de l'utilisateur : {question}
 """
