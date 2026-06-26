@@ -1,11 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { fetchTrips, type Trip } from "@/lib/api";
 
 export default function TripsPage() {
+  return (
+    <Suspense fallback={<main className="px-6 py-10 text-sm text-slate-500">Chargement...</main>}>
+      <TripsContent />
+    </Suspense>
+  );
+}
+
+function TripsContent() {
   const searchParams = useSearchParams();
   const uuid = searchParams.get("uuid") || "";
   const [trips, setTrips] = useState<Trip[]>([]);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -11,6 +11,14 @@ import TravelBooklet from "@/components/TravelBooklet";
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={<main className="px-6 py-10 text-sm text-slate-500">Chargement...</main>}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+function DashboardContent() {
   const searchParams = useSearchParams();
   const initialUuid = searchParams.get("uuid") || "";
 
