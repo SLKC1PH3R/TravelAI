@@ -47,6 +47,8 @@ class Monument(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     visited_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     is_favorite: Mapped[bool] = mapped_column(Boolean, default=False)
+    trivia_question: Mapped[str | None] = mapped_column(Text, nullable=True)
+    trivia_answer: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     trip: Mapped["Trip"] = relationship(back_populates="monuments")
     photos: Mapped[list["Photo"]] = relationship(back_populates="monument", cascade="all, delete-orphan")

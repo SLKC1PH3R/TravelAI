@@ -38,6 +38,8 @@ class MonumentOut(BaseModel):
     description: str | None
     visited_at: datetime
     is_favorite: bool
+    trivia_question: str | None
+    trivia_answer: str | None
     photos: list[PhotoOut] = []
     conversations: list[ConversationOut] = []
 

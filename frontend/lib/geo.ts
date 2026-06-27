@@ -79,3 +79,5 @@ export function continentFor(country: string | null | undefined): string {
 }
 
 export const ALL_CONTINENTS = ["Europe", "Asie", "Amerique du Nord", "Amerique du Sud", "Afrique", "Oceanie"];
+
+export const TOTAL_COUNTRIES_IN_WORLD = 195;

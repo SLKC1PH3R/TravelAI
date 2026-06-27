@@ -52,13 +52,15 @@ def get_or_create_trip(db: Session, user: models.User, country: str, city: str) 
 def analyze(payload: schemas.AnalyzeRequest, db: Session = Depends(get_db)):
     user = get_or_create_user(db, payload.uuid)
 
-    name, country, city, description, anecdote, answer = (
+    name, country, city, description, anecdote, answer, trivia_question, trivia_answer = (
         "Lieu inconnu",
         "Inconnu",
         "Inconnu",
         None,
         None,
         "",
+        None,
+        None,
     )
 
     if payload.image_base64:
@@ -69,6 +71,8 @@ def analyze(payload: schemas.AnalyzeRequest, db: Session = Depends(get_db)):
         description = result.get("description")
         anecdote = result.get("anecdote")
         answer = result.get("answer", "")
+        trivia_question = result.get("trivia_question")
+        trivia_answer = result.get("trivia_answer")
     else:
         answer = "Aucune image fournie, je n'ai pas pu identifier de monument."
 
@@ -84,6 +88,8 @@ def analyze(payload: schemas.AnalyzeRequest, db: Session = Depends(get_db)):
         latitude=payload.latitude or 0.0,
         longitude=payload.longitude or 0.0,
         description=full_description,
+        trivia_question=trivia_question,
+        trivia_answer=trivia_answer,
     )
     db.add(monument)
     db.commit()

@@ -24,6 +24,8 @@ export type Monument = {
   description: string | null;
   visited_at: string;
   is_favorite: boolean;
+  trivia_question: string | null;
+  trivia_answer: string | null;
   photos: Photo[];
   conversations: Conversation[];
 };
