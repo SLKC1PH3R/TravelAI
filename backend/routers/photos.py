@@ -46,6 +46,15 @@ def add_photo(monument_id: uuid.UUID, payload: schemas.PhotoUpload, db: Session 
     return photo
 
 
+@router.delete("/{photo_id}", status_code=204)
+def delete_photo(photo_id: uuid.UUID, db: Session = Depends(get_db)):
+    photo = db.query(models.Photo).filter(models.Photo.id == photo_id).first()
+    if photo is None:
+        raise HTTPException(status_code=404, detail="Photo not found")
+    db.delete(photo)
+    db.commit()
+
+
 @router.get("/{photo_id}/file")
 def get_photo_file(photo_id: uuid.UUID, db: Session = Depends(get_db)):
     photo = db.query(models.Photo).filter(models.Photo.id == photo_id).first()

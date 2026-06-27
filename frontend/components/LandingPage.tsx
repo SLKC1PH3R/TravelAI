@@ -406,11 +406,6 @@ export default function LandingPage() {
     'linear-gradient(135deg,#c8f7c5,#4caf50)',
   ]
 
-  function handleEmailSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    signIn('email', { email, callbackUrl: '/dashboard' })
-  }
-
   return (
     <div className="ta-root">
       <style>{CSS}</style>
