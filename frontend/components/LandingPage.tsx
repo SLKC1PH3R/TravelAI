@@ -12,7 +12,7 @@
 'use client'
 
 import { useEffect, useRef, useState, Fragment } from 'react'
-import { signIn } from 'next-auth/react'
+import Link from 'next/link'
 import { QRCodeSVG } from 'qrcode.react'
 
 const SNAPCODE_PLACEHOLDER = 'https://www.snapchat.com/unlock/?type=SNAPCODE&uuid=travelai-lens-placeholder'
@@ -439,9 +439,9 @@ export default function LandingPage() {
           <a href="#features" className="ta-nav-link">Fonctionnalites</a>
         </div>
 
-        <button type="button" onClick={() => signIn('google', { callbackUrl: '/dashboard' })} className="ta-nav-cta">
-          Se connecter avec Google
-        </button>
+        <Link href="/login" className="ta-nav-cta">
+          Se connecter
+        </Link>
       </nav>
 
       {/* ===== HERO ===== */}
