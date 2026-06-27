@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { generateCarnetUrl, type Trip } from "@/lib/api";
+import { downloadCarnet, type Trip } from "@/lib/api";
 
 export default function TravelBooklet({ trip }: { trip: Trip }) {
   const [loading, setLoading] = useState(false);
@@ -9,15 +9,7 @@ export default function TravelBooklet({ trip }: { trip: Trip }) {
   async function handleGenerate() {
     setLoading(true);
     try {
-      const res = await fetch(generateCarnetUrl(trip.id), { method: "POST" });
-      if (!res.ok) throw new Error("Echec de generation du carnet");
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `carnet-${trip.title || trip.city || trip.id}.pdf`;
-      link.click();
-      URL.revokeObjectURL(url);
+      await downloadCarnet(trip.id, `carnet-${trip.title || trip.city || trip.id}`);
     } finally {
       setLoading(false);
     }

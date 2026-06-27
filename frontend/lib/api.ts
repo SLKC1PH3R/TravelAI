@@ -100,6 +100,18 @@ export function generateCarnetUrl(tripId: string): string {
   return `${API_URL}/carnet/${tripId}`;
 }
 
+export async function downloadCarnet(tripId: string, filename: string): Promise<void> {
+  const res = await fetch(generateCarnetUrl(tripId), { method: "POST" });
+  if (!res.ok) throw new Error("Echec de generation du carnet");
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${filename}.pdf`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export function photoUrl(photoId: string): string {
   return `${API_URL}/photos/${photoId}/file`;
 }
