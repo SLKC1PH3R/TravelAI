@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useState, Fragment } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { downloadCarnet, fetchTrips, mergeTrips, thumbnailUrl, type Monument, type Trip } from '@/lib/api'
+import { downloadCarnet, fetchTrips, mergeTrips, photoUrl, type Monument, type Trip } from '@/lib/api'
 import { flagFor } from '@/lib/geo'
 
 /* ===== Embedded CSS ===== */
@@ -67,7 +67,7 @@ function tripLabel(t: Trip): string {
 
 function monumentCoverUrl(m: Monument): string | null {
   const stored = m.photos.find((p) => p.stored)
-  return stored ? thumbnailUrl(stored.id) : null
+  return stored ? photoUrl(stored.id) : null
 }
 
 export default function TravelAIDashboard() {

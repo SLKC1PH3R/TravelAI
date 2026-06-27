@@ -103,3 +103,19 @@ class TripMergeRequest(BaseModel):
     end_date: datetime
     country: str | None = None
     city: str | None = None
+
+
+class TripCreate(BaseModel):
+    uuid: str
+    country: str | None = None
+    city: str | None = None
+    title: str | None = None
+    started_at: datetime
+    ended_at: datetime | None = None
+
+
+class MonumentAdminUpdate(BaseModel):
+    trip_id: uuid.UUID | None = None
+    visited_at: datetime | None = None
+    trivia_question: str | None = None
+    trivia_answer: str | None = None

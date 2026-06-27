@@ -29,6 +29,7 @@ const CSS = `
   @media (max-width: 900px) {
     .ta-grid-4 { grid-template-columns: repeat(2,1fr) !important; }
     .ta-grid-2 { grid-template-columns: 1fr !important; }
+    .ta-grid-3 { grid-template-columns: 1fr !important; }
   }
   @media (max-width: 600px) {
     .ta-grid-4 { grid-template-columns: 1fr !important; }
@@ -221,56 +222,59 @@ export default function TravelAIStats() {
       </nav>
 
       <main style={{ maxWidth: 1080, margin: '0 auto', padding: '92px 28px 64px' }}>
-        <h1 style={{ fontSize: 30, fontWeight: 700, letterSpacing: '-0.8px', marginBottom: 6 }}>Mes statistiques</h1>
-        <p style={{ fontSize: 14, color: '#6B6B6B', marginBottom: 32 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <h1 style={{ fontSize: 30, fontWeight: 700, letterSpacing: '-0.8px' }}>Mes statistiques</h1>
+          <span style={{ background: '#FFFC00', borderRadius: 100, padding: '3px 11px', fontSize: 12, fontWeight: 700, color: '#0D0D0D' }}>
+            {new Date().getFullYear()}
+          </span>
+        </div>
+        <p style={{ fontSize: 14, color: '#6B6B6B', marginBottom: 28 }}>
           {stats.firstTrip ? `Voyageur depuis ${fmtMonthYear(stats.firstTrip.started_at)}` : 'Aucun voyage encore'}
           {' · '}
           {stats.voyages} voyage(s) complete(s)
         </p>
 
+        <p style={{ fontSize: 11, fontWeight: 700, color: '#B0B0B0', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Vous avez vu</p>
+
         {/* VOUS AVEZ VU */}
-        <div className="ta-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
-          <div className="ta-stat-card" style={{ background: '#fff', borderRadius: 18, border: '0.5px solid rgba(0,0,0,0.07)', padding: 22 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: '#8A8A8A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Vous avez vu</p>
-            <div style={{ fontSize: 38, fontWeight: 700, letterSpacing: '-1px' }}>{stats.countries.size}</div>
-            <div style={{ fontSize: 13, color: '#6B6B6B', marginTop: 2, marginBottom: 12 }}>pays explores</div>
-            <div style={{ display: 'flex', gap: 6, fontSize: 22 }}>
+        <div className="ta-grid-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.2fr', gap: 16, marginBottom: 20 }}>
+          <div className="ta-stat-card" style={{ position: 'relative', overflow: 'hidden', background: '#0D0D0D', borderRadius: 18, padding: 22 }}>
+            <div style={{ fontSize: 44, fontWeight: 700, letterSpacing: '-1.5px', color: '#fff' }}>{stats.countries.size}</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginTop: 2, marginBottom: 16 }}>pays explores</div>
+            <div style={{ display: 'inline-flex', gap: 5, background: 'rgba(255,255,255,0.1)', borderRadius: 100, padding: '6px 12px', fontSize: 16 }}>
               {Array.from(stats.countries.keys()).map((c) => <span key={c}>{flagFor(c)}</span>)}
             </div>
           </div>
 
-          <div className="ta-stat-card" style={{ background: '#fff', borderRadius: 18, border: '0.5px solid rgba(0,0,0,0.07)', padding: 22 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: '#8A8A8A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>🌍 du monde visite</p>
-            <div style={{ fontSize: 38, fontWeight: 700, letterSpacing: '-1px' }}>{worldPercent}%</div>
-            <div style={{ fontSize: 13, color: '#6B6B6B', marginTop: 2 }}>{stats.countries.size} / {TOTAL_COUNTRIES_IN_WORLD} pays</div>
+          <div className="ta-stat-card" style={{ position: 'relative', overflow: 'hidden', background: '#FFFC00', borderRadius: 18, padding: 22 }}>
+            <div style={{ position: 'absolute', top: -30, right: -30, width: 110, height: 110, borderRadius: '50%', background: 'rgba(255,255,255,0.18)' }} />
+            <div style={{ position: 'absolute', bottom: -36, right: 10, width: 70, height: 70, borderRadius: '50%', background: 'rgba(255,255,255,0.18)' }} />
+            <div style={{ fontSize: 13, marginBottom: 2 }}>🌍</div>
+            <div style={{ fontSize: 44, fontWeight: 700, letterSpacing: '-1.5px', color: '#0D0D0D', position: 'relative' }}>{worldPercent}%</div>
+            <div style={{ fontSize: 13, color: 'rgba(13,13,13,0.7)', marginTop: 2, marginBottom: 16, position: 'relative' }}>du monde visite</div>
+            <span style={{ background: '#0D0D0D', color: '#FFFC00', borderRadius: 100, padding: '5px 12px', fontSize: 11.5, fontWeight: 700, position: 'relative' }}>
+              {stats.countries.size} / {TOTAL_COUNTRIES_IN_WORLD} pays
+            </span>
           </div>
-        </div>
 
-        {/* CONTINENTS VISITES */}
-        <div style={{ background: '#fff', borderRadius: 18, border: '0.5px solid rgba(0,0,0,0.07)', padding: 22, marginBottom: 20 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Continents visites</h2>
-          <p style={{ fontSize: 12, color: '#8A8A8A', marginBottom: 16 }}>{stats.continents.size} sur 6 continents habites</p>
-          <div className="ta-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10 }}>
-            {ALL_CONTINENTS.map((continent) => {
-              const countriesInContinent = Array.from(stats.countries.keys()).filter((c) => continentFor(c) === continent)
-              const visited = countriesInContinent.length > 0
-              return (
-                <div
-                  key={continent}
-                  style={{
-                    borderRadius: 12,
-                    padding: '12px 14px',
-                    background: visited ? '#FFFBE0' : '#FAFAFA',
-                    border: visited ? '0.5px solid rgba(255,220,0,0.5)' : '0.5px solid rgba(0,0,0,0.06)',
-                  }}
-                >
-                  <div style={{ fontSize: 12.5, fontWeight: 700, color: visited ? '#0D0D0D' : '#B0B0B0', marginBottom: 6 }}>{continent}</div>
-                  <div style={{ fontSize: 16 }}>
-                    {visited ? countriesInContinent.map((c) => flagFor(c)).join(' ') : <span style={{ fontSize: 11, color: '#C0C0C0' }}>Non visite</span>}
+          <div className="ta-stat-card" style={{ background: '#fff', borderRadius: 18, border: '0.5px solid rgba(0,0,0,0.07)', padding: 22 }}>
+            <h2 style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 2 }}>Continents visites</h2>
+            <p style={{ fontSize: 11.5, color: '#8A8A8A', marginBottom: 14 }}>{stats.continents.size} sur 6 continents habites</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+              {ALL_CONTINENTS.map((continent) => {
+                const countriesInContinent = Array.from(stats.countries.keys()).filter((c) => continentFor(c) === continent)
+                const visited = countriesInContinent.length > 0
+                return (
+                  <div key={continent} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: visited ? '#FFFC00' : '#E5E5E3', border: visited ? '1px solid #0D0D0D' : 'none', flexShrink: 0 }} />
+                      <span style={{ fontSize: 12.5, fontWeight: visited ? 700 : 500, color: visited ? '#0D0D0D' : '#C0C0C0' }}>{continent}</span>
+                    </div>
+                    <span style={{ fontSize: 13 }}>{visited ? countriesInContinent.map((c) => flagFor(c)).join(' ') : ''}</span>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         </div>
 

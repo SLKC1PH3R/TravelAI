@@ -25,6 +25,37 @@ def list_trips(uuid: str, db: Session = Depends(get_db)):
     )
 
 
+@router.post("", response_model=schemas.TripOut)
+def create_trip(payload: schemas.TripCreate, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.anonymous_uuid == payload.uuid).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    trip = models.Trip(
+        user_id=user.id,
+        country=payload.country,
+        city=payload.city,
+        title=payload.title,
+        started_at=payload.started_at,
+        ended_at=payload.ended_at,
+    )
+    db.add(trip)
+    db.commit()
+    db.refresh(trip)
+    return trip
+
+
+@router.delete("/{trip_id}", status_code=204)
+def delete_trip(trip_id: uuid.UUID, db: Session = Depends(get_db)):
+    trip = db.query(models.Trip).filter(models.Trip.id == trip_id).first()
+    if trip is None:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    if trip.monuments:
+        raise HTTPException(status_code=400, detail="Trip still has monuments, reassign them first")
+    db.delete(trip)
+    db.commit()
+
+
 @router.post("/merge", response_model=schemas.TripOut)
 def merge_trips(payload: schemas.TripMergeRequest, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.anonymous_uuid == payload.uuid).first()

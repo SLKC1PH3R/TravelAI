@@ -35,6 +35,24 @@ def update_favorite(monument_id: uuid.UUID, payload: schemas.FavoriteUpdate, db:
     return monument
 
 
+@router.patch("/{monument_id}", response_model=schemas.MonumentOut)
+def update_monument(monument_id: uuid.UUID, payload: schemas.MonumentAdminUpdate, db: Session = Depends(get_db)):
+    monument = db.query(models.Monument).filter(models.Monument.id == monument_id).first()
+    if monument is None:
+        raise HTTPException(status_code=404, detail="Monument not found")
+    if payload.trip_id is not None:
+        monument.trip_id = payload.trip_id
+    if payload.visited_at is not None:
+        monument.visited_at = payload.visited_at
+    if payload.trivia_question is not None:
+        monument.trivia_question = payload.trivia_question
+    if payload.trivia_answer is not None:
+        monument.trivia_answer = payload.trivia_answer
+    db.commit()
+    db.refresh(monument)
+    return monument
+
+
 @router.patch("/{monument_id}/location", response_model=schemas.MonumentOut)
 def update_location(monument_id: uuid.UUID, payload: schemas.LocationUpdate, db: Session = Depends(get_db)):
     monument = db.query(models.Monument).filter(models.Monument.id == monument_id).first()
