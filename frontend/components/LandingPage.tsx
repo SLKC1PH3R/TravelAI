@@ -181,7 +181,7 @@ interface Polaroid {
 export default function LandingPage() {
   const navRef = useRef<HTMLElement>(null)
   const [showSnapcode, setShowSnapcode] = useState(false)
-  const [email, setEmail] = useState('')
+  const [activeDemoIndex, setActiveDemoIndex] = useState(0)
 
   useEffect(() => {
     const nav = navRef.current
@@ -353,11 +353,50 @@ export default function LandingPage() {
     },
   ]
 
-  /* -- Thumbnail cards -- */
-  const thumbnails = [
-    { src: '/4.jpg', title: 'Duomo de Milan',      sub: 'Cathedrale · Milan, Italie',     tags: ['Gothique', '1386'],   delay: 100 },
-    { src: '/8.jpg', title: 'Statue de la Liberte', sub: 'Monument · New York, USA',      tags: ['UNESCO', '1886'],     delay: 200 },
-    { src: '/2.jpg', title: 'Mont Rushmore',        sub: 'Memorial · Dakota du Sud, USA', tags: ['National', '1927'],   delay: 300 },
+  /* -- Demo items (carte principale + miniatures cliquables) -- */
+  const demoItems = [
+    {
+      src: '/6.png', title: 'Notre-Dame de Paris', city: 'Paris, France',
+      tags: ['Architecture gothique', 'Paris, France'], badge: 'UNESCO',
+      question: 'Quand a-t-elle ete construite ?',
+      answer: "La construction a commence en 1163 sous l'eveque Maurice de Sully et s'est largement achevee au XIVe siecle. Elle reste l'un des plus beaux exemples d'architecture gothique francaise, reconnue pour ses arcs-boutants, ses rosaces et ses tours jumelles.",
+    },
+    {
+      src: '/4.jpg', title: 'Duomo de Milan', city: 'Milan, Italie',
+      tags: ['Gothique', 'Milan, Italie'], badge: '1386',
+      question: 'Pourquoi a-t-elle pris autant de temps a construire ?',
+      answer: "Le chantier a debute en 1386 et s'est etale sur pres de six siecles. Avec ses 135 fleches et plus de 3 400 statues, c'est l'une des plus grandes cathedrales gothiques au monde, couronnee par la statue doree de la Madonnina.",
+    },
+    {
+      src: '/8.jpg', title: 'Statue de la Liberte', city: 'New York, USA',
+      tags: ['Monument', 'New York, USA'], badge: 'UNESCO',
+      question: "Qui l'a offerte aux Etats-Unis ?",
+      answer: "C'est un cadeau de la France pour le centenaire de l'independance americaine, inaugure en 1886. Sculptee par Frederic Auguste Bartholdi, sa structure interne en fer a ete concue par Gustave Eiffel.",
+    },
+    {
+      src: '/2.jpg', title: 'Mont Rushmore', city: 'Dakota du Sud, USA',
+      tags: ['Memorial national', 'Dakota du Sud, USA'], badge: '1927',
+      question: 'Qui sont les quatre presidents sculptes ?',
+      answer: "George Washington, Thomas Jefferson, Theodore Roosevelt et Abraham Lincoln. Le sculpteur Gutzon Borglum a dirige les travaux de 1927 a 1941, taillant chaque visage directement dans le granit de la montagne.",
+    },
+    {
+      src: '/1.jpg', title: 'Taj Mahal', city: 'Agra, Inde',
+      tags: ['Mausolee moghol', 'Agra, Inde'], badge: 'UNESCO',
+      question: 'Quelle histoire se cache derriere sa construction ?',
+      answer: "L'empereur moghol Shah Jahan l'a fait construire en memoire de son epouse Mumtaz Mahal. Une legende populaire (non confirmee historiquement) raconte que les mains des artisans auraient ete coupees pour qu'ils ne puissent jamais recreer un tel chef-d'oeuvre.",
+    },
+    {
+      src: '/7.jpg', title: 'Mont Saint-Michel', city: 'Normandie, France',
+      tags: ['Abbaye', 'Normandie, France'], badge: 'UNESCO',
+      question: "Pourquoi cet ilot est-il si particulier ?",
+      answer: "Cette abbaye benedictine se dresse sur un ilot rocheux soumis a des marees parmi les plus fortes d'Europe. Lieu de pelerinage depuis le Moyen Age, elle a aussi servi de prison avant de redevenir un haut lieu spirituel et touristique.",
+    },
+    {
+      src: '/10.jpg', title: 'Parthenon', city: 'Athenes, Grece',
+      tags: ['Temple dorique', 'Athenes, Grece'], badge: '447 av. J.-C.',
+      question: 'A quelle divinite est-il dedie ?',
+      answer: "Le Parthenon est dedie a Athena, deesse protectrice d'Athenes. Construit entre 447 et 432 av. J.-C. sur l'Acropole, il est considere comme l'un des sommets de l'architecture dorique antique.",
+    },
   ]
 
   /* -- Avatar colors -- */
@@ -405,9 +444,8 @@ export default function LandingPage() {
           <a href="#features" className="ta-nav-link">Fonctionnalites</a>
         </div>
 
-        <button type="button" onClick={() => setShowSnapcode((v) => !v)} className="ta-nav-cta">
-          <GhostIcon size={14} />
-          Ouvrir la Lens
+        <button type="button" onClick={() => signIn('google', { callbackUrl: '/dashboard' })} className="ta-nav-cta">
+          Se connecter avec Google
         </button>
       </nav>
 
@@ -439,10 +477,10 @@ export default function LandingPage() {
             </p>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-              <button type="button" onClick={() => setShowSnapcode((v) => !v)} className="ta-btn-primary">
+              <a href="https://travelai.digitalstack.cloud/dashboard?uuid=test-uuid-eiffel-001" className="ta-btn-primary">
                 <GhostIcon size={17} />
-                Ouvrir la Lens Snapchat
-              </button>
+                Voir le compte Demo
+              </a>
               <a href="#how" className="ta-btn-ghost">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
@@ -458,23 +496,6 @@ export default function LandingPage() {
                 <span style={{ fontSize: 11, color: '#6B6B6B' }}>Snapcode (placeholder) — scanne avec Snapchat</span>
               </div>
             )}
-
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginTop: 24 }}>
-              <button type="button" onClick={() => signIn('google', { callbackUrl: '/dashboard' })} className="ta-btn-ghost">
-                Se connecter avec Google
-              </button>
-              <form onSubmit={handleEmailSubmit} style={{ display: 'flex', gap: 8 }}>
-                <input
-                  type="email"
-                  required
-                  placeholder="ton@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="ta-input-email"
-                />
-                <button type="submit" className="ta-btn-primary">Continuer</button>
-              </form>
-            </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 44 }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -605,70 +626,81 @@ export default function LandingPage() {
 
           <div className="ta-demo-inner" style={{ display: 'flex', gap: 28, alignItems: 'flex-start' }}>
             {/* Main card */}
-            <div data-fade="" style={{ flex: '1.3 1 0%', background: '#fff', borderRadius: 20, border: '0.5px solid rgba(0,0,0,0.07)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
-              <img src="/6.png" alt="Notre-Dame" style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block' }} />
-              <div style={{ padding: 28 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <h3 style={{ fontSize: 22, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.5px' }}>Notre-Dame de Paris</h3>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#F7F7F7', borderRadius: 8, padding: '5px 10px' }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                    <span style={{ fontSize: 11, color: '#6B6B6B', fontWeight: 500 }}>Paris, France</span>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: 7, marginBottom: 22, flexWrap: 'wrap' }}>
-                  {['Architecture gothique', 'Paris, France'].map((t) => (
-                    <span key={t} style={{ background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 100, padding: '5px 13px', fontSize: 12, fontWeight: 500, color: '#0D0D0D' }}>{t}</span>
-                  ))}
-                  <span style={{ background: '#FFFC00', borderRadius: 100, padding: '5px 13px', fontSize: 12, fontWeight: 700, color: '#0D0D0D' }}>UNESCO</span>
-                </div>
+            {(() => {
+              const active = demoItems[activeDemoIndex]
+              return (
+                <div data-fade="" style={{ flex: '1.3 1 0%', background: '#fff', borderRadius: 20, border: '0.5px solid rgba(0,0,0,0.07)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+                  <img src={active.src} alt={active.title} style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block' }} />
+                  <div style={{ padding: 28 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <h3 style={{ fontSize: 22, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.5px' }}>{active.title}</h3>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#F7F7F7', borderRadius: 8, padding: '5px 10px' }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                        <span style={{ fontSize: 11, color: '#6B6B6B', fontWeight: 500 }}>{active.city}</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 7, marginBottom: 22, flexWrap: 'wrap' }}>
+                      {active.tags.map((t) => (
+                        <span key={t} style={{ background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 100, padding: '5px 13px', fontSize: 12, fontWeight: 500, color: '#0D0D0D' }}>{t}</span>
+                      ))}
+                      <span style={{ background: '#FFFC00', borderRadius: 100, padding: '5px 13px', fontSize: 12, fontWeight: 700, color: '#0D0D0D' }}>{active.badge}</span>
+                    </div>
 
-                {/* Chat */}
-                <div style={{ borderTop: '0.5px solid rgba(0,0,0,0.07)', paddingTop: 20, marginBottom: 20 }}>
-                  <div style={{ fontSize: 11.5, fontWeight: 600, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>Conversation IA</div>
-                  {/* User */}
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-                    <div style={{ background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: '14px 14px 4px 14px', padding: '11px 16px', maxWidth: '75%' }}>
-                      <p style={{ fontSize: 13.5, color: '#0D0D0D', margin: 0 }}>&quot;Quand a-t-elle ete construite ?&quot;</p>
+                    {/* Chat */}
+                    <div style={{ borderTop: '0.5px solid rgba(0,0,0,0.07)', paddingTop: 20, marginBottom: 20 }}>
+                      <div style={{ fontSize: 11.5, fontWeight: 600, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>Conversation IA</div>
+                      {/* User */}
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+                        <div style={{ background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: '14px 14px 4px 14px', padding: '11px 16px', maxWidth: '75%' }}>
+                          <p style={{ fontSize: 13.5, color: '#0D0D0D', margin: 0 }}>&quot;{active.question}&quot;</p>
+                        </div>
+                      </div>
+                      {/* AI */}
+                      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                        <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#FFFC00', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
+                          <GhostIcon size={13} color="#0D0D0D" />
+                        </div>
+                        <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.1)', borderRadius: '4px 14px 14px 14px', padding: '12px 16px', flex: 1 }}>
+                          <p style={{ fontSize: 13.5, color: '#0D0D0D', lineHeight: 1.6, margin: 0 }}>{active.answer}</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  {/* AI */}
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#FFFC00', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
-                      <GhostIcon size={13} color="#0D0D0D" />
-                    </div>
-                    <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.1)', borderRadius: '4px 14px 14px 14px', padding: '12px 16px', flex: 1 }}>
-                      <p style={{ fontSize: 13.5, color: '#0D0D0D', lineHeight: 1.6, margin: 0 }}>
-                        La construction a commence en <strong>1163</strong> sous l&apos;eveque Maurice de Sully et s&apos;est largement achevee au <strong>XIVe siecle</strong>. Elle reste l&apos;un des plus beaux exemples d&apos;architecture gothique francaise, reconnue pour ses arcs-boutants, ses rosaces et ses tours jumelles.
-                      </p>
-                    </div>
+
+                    <button className="ta-btn-save" type="button">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14z" />
+                        <polyline points="17 21 17 13 7 13 7 21" />
+                        <polyline points="7 3 7 8 15 8" />
+                      </svg>
+                      Sauvegarder dans le carnet
+                    </button>
                   </div>
                 </div>
-
-                <button className="ta-btn-save" type="button">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14z" />
-                    <polyline points="17 21 17 13 7 13 7 21" />
-                    <polyline points="7 3 7 8 15 8" />
-                  </svg>
-                  Sauvegarder dans le carnet
-                </button>
-              </div>
-            </div>
+              )
+            })()}
 
             {/* Thumbnails */}
-            <div style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', gap: 20 }}>
-              {thumbnails.map(({ src, title, sub, tags, delay }) => (
-                <div key={src} className="ta-thumb-card" data-fade="" data-delay={delay} style={{ background: '#fff', borderRadius: 16, border: '0.5px solid rgba(0,0,0,0.07)', boxShadow: '0 4px 16px rgba(0,0,0,0.05)', overflow: 'hidden', display: 'flex' }}>
-                  <img src={src} alt={title} style={{ width: 110, height: 90, objectFit: 'cover', flexShrink: 0 }} />
-                  <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <div style={{ fontSize: 14.5, fontWeight: 700, color: '#0D0D0D', marginBottom: 5, letterSpacing: '-0.3px' }}>{title}</div>
-                    <div style={{ fontSize: 11.5, color: '#6B6B6B', marginBottom: 8 }}>{sub}</div>
-                    <div style={{ display: 'flex', gap: 5 }}>
-                      {tags.map((t) => <span key={t} style={{ background: '#F7F7F7', borderRadius: 100, padding: '2px 9px', fontSize: 10, fontWeight: 500, color: '#6B6B6B' }}>{t}</span>)}
+            <div style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', gap: 20, maxHeight: 640, overflowY: 'auto', paddingRight: 4 }}>
+              {demoItems.map((item, i) =>
+                i === activeDemoIndex ? null : (
+                  <button
+                    key={item.src}
+                    type="button"
+                    onClick={() => setActiveDemoIndex(i)}
+                    className="ta-thumb-card"
+                    style={{ background: '#fff', borderRadius: 16, border: '0.5px solid rgba(0,0,0,0.07)', boxShadow: '0 4px 16px rgba(0,0,0,0.05)', overflow: 'hidden', display: 'flex', textAlign: 'left', cursor: 'pointer', width: '100%' }}
+                  >
+                    <img src={item.src} alt={item.title} style={{ width: 110, height: 90, objectFit: 'cover', flexShrink: 0 }} />
+                    <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                      <div style={{ fontSize: 14.5, fontWeight: 700, color: '#0D0D0D', marginBottom: 5, letterSpacing: '-0.3px' }}>{item.title}</div>
+                      <div style={{ fontSize: 11.5, color: '#6B6B6B', marginBottom: 8 }}>{item.tags[0]} · {item.city}</div>
+                      <div style={{ display: 'flex', gap: 5 }}>
+                        {[item.tags[1] || item.city, item.badge].map((t) => <span key={t} style={{ background: '#F7F7F7', borderRadius: 100, padding: '2px 9px', fontSize: 10, fontWeight: 500, color: '#6B6B6B' }}>{t}</span>)}
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
+                  </button>
+                )
+              )}
             </div>
           </div>
         </div>
@@ -785,11 +817,6 @@ export default function LandingPage() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <a href="https://github.com/SLKC1PH3R/TravelAI" target="_blank" rel="noreferrer" className="ta-social-btn" aria-label="GitHub">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-                </svg>
-              </a>
               <button type="button" onClick={() => setShowSnapcode((v) => !v)} className="ta-social-btn" aria-label="Snapchat" style={{ border: 'none', cursor: 'pointer' }}>
                 <GhostIcon size={17} color="rgba(255,255,255,0.7)" />
               </button>
@@ -797,7 +824,7 @@ export default function LandingPage() {
           </div>
 
           <div style={{ borderTop: '0.5px solid rgba(255,255,255,0.08)', paddingTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.3)' }}>© 2026 TravelAI — Cree avec passion a Paris</span>
+            <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.3)' }}>© 2026 TravelAI — Cree avec passion a Paris ❤️</span>
             <a href="https://travelai.digitalstack.cloud" target="_blank" rel="noreferrer" className="ta-footer-url" style={{ fontSize: 12.5 }}>
               travelai.digitalstack.cloud
             </a>

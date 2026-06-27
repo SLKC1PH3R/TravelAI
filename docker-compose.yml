@@ -25,7 +25,7 @@ services:
       CORS_ORIGINS: ${NEXTAUTH_URL}
       DATA_DIR: /data/users
     volumes:
-      - ./data/users:/data/users
+      - photos_data:/data/users
     expose:
       - "8000"
 
@@ -48,3 +48,4 @@ services:
 
 volumes:
   postgres_data:
+  photos_data:

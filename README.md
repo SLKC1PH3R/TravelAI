@@ -75,7 +75,7 @@ Ce repo est concu pour etre deploye tel quel via Dokploy (Docker Compose) :
 2. Dans Dokploy, creer une nouvelle application de type **Docker Compose**, pointer sur ce repo (fichier `docker-compose.yml` a la racine).
 3. Renseigner les variables d'environnement du projet dans Dokploy (memes cles que `.env.example`) :
    - `GEMINI_API_KEY`, `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXT_PUBLIC_API_URL`.
-4. **Volumes persistants** : Dokploy doit monter un volume persistant sur `./data/users` (cote backend) pour ne pas perdre les photos a chaque redeploiement, et un volume sur les donnees Postgres (`postgres_data`, deja defini dans le compose).
+4. **Volumes persistants** : le stockage des photos (`photos_data`) et de Postgres (`postgres_data`) utilise des volumes Docker nommes (deja definis dans `docker-compose.yml`), pas des bind mounts relatifs au repo clone. C'est important : Dokploy re-clone le repo a chaque deploiement et peut nettoyer le repertoire de travail, ce qui supprimerait un dossier `./data/users` relatif au code. Les volumes nommes sont geres independamment par Docker et survivent aux redeploiements.
 5. **Domaines** : configurer deux domaines/sous-domaines dans Dokploy (un proxy par service). Le champ **Port** doit correspondre au port que le conteneur ecoute reellement (pas un port hote a inventer) :
    - frontend -> port `3000` -> ex. `travelai.digitalstack.cloud`
    - backend -> port `8000` -> ex. `travelai-api.digitalstack.cloud`
