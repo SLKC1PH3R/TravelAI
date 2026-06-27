@@ -25,7 +25,7 @@ function GoogleIcon() {
 
 function LoginContent() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard/stats";
 
   return (
     <div className="ta-login-root">

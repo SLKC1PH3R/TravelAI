@@ -9,17 +9,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import { fetchTrips, type Monument, type Trip } from '@/lib/api'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { downloadCarnet, fetchTrips, type Monument, type Trip } from '@/lib/api'
 import { ALL_CONTINENTS, continentFor, flagFor, haversineKm, PARIS, TOTAL_COUNTRIES_IN_WORLD } from '@/lib/geo'
+import { DASHBOARD_CHROME_CSS, DashboardSidebar, DashboardTopNav, tripLabel } from '@/components/DashboardChrome'
 
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
 
 const CSS = `
   .ta-stats-root { background: #F4F3F1; color: #0D0D0D; -webkit-font-smoothing: antialiased; }
   .ta-stats-root *, .ta-stats-root *::before, .ta-stats-root *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  .ta-nav-pill { transition: color 0.15s, background 0.15s; }
-  .ta-nav-pill:hover { color: #0D0D0D !important; background: rgba(0,0,0,0.04) !important; }
   .ta-stat-card { transition: box-shadow 0.2s; }
   .ta-stat-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.07) !important; }
   .ta-country-bar { transition: width 0.6s cubic-bezier(0.22,1,0.36,1); }
@@ -85,21 +84,38 @@ function QuizCard({ monument }: { monument: Monument }) {
 }
 
 export default function TravelAIStats() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const uuid = searchParams.get('uuid') || ''
 
   const [trips, setTrips] = useState<Trip[]>([])
   const [loading, setLoading] = useState(false)
+  const [selectedTripId, setSelectedTripId] = useState<string | null>(null)
+  const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     if (!uuid) return
     setLoading(true)
     fetchTrips(uuid)
-      .then(setTrips)
+      .then((data) => {
+        setTrips(data)
+        setSelectedTripId((current) => (current && data.some((t) => t.id === current) ? current : data[0]?.id ?? null))
+      })
       .finally(() => setLoading(false))
   }, [uuid])
 
   const allMonuments = useMemo(() => trips.flatMap((t) => t.monuments), [trips])
+
+  async function handleDownload() {
+    const trip = trips.find((t) => t.id === selectedTripId)
+    if (!trip) return
+    setDownloading(true)
+    try {
+      await downloadCarnet(trip.id, `carnet-${tripLabel(trip)}`)
+    } finally {
+      setDownloading(false)
+    }
+  }
 
   const stats = useMemo(() => {
     const voyages = trips.length
@@ -204,24 +220,25 @@ export default function TravelAIStats() {
 
   return (
     <div className="ta-stats-root">
+      <style>{DASHBOARD_CHROME_CSS}</style>
       <style>{CSS}</style>
 
-      {/* NAV */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', background: 'rgba(255,255,255,0.97)', borderBottom: '0.5px solid rgba(0,0,0,0.07)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}>
-          <div style={{ width: 28, height: 28, background: '#FFFC00', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="4" fill="#0D0D0D" /><path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" /></svg>
-          </div>
-          <span style={{ fontSize: 16, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.4px' }}>TravelAI</span>
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#F3F3F3', borderRadius: 9, padding: 3 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#0D0D0D', padding: '6px 14px', borderRadius: 7, background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>Statistiques</span>
-          <Link href={`/dashboard?uuid=${encodeURIComponent(uuid)}`} className="ta-nav-pill" style={{ fontSize: 13, fontWeight: 500, color: '#6B6B6B', textDecoration: 'none', padding: '6px 14px', borderRadius: 7 }}>Mes voyages</Link>
-        </div>
-        <div style={{ width: 110 }} />
-      </nav>
+      <DashboardTopNav uuid={uuid} active="profil" />
 
-      <main style={{ maxWidth: 1080, margin: '0 auto', padding: '92px 28px 64px' }}>
+      <div style={{ display: 'flex', paddingTop: 60, minHeight: '100vh' }}>
+        <DashboardSidebar
+          uuid={uuid}
+          trips={trips}
+          selectedTripId={selectedTripId}
+          onSelectTrip={setSelectedTripId}
+          downloading={downloading}
+          onDownload={handleDownload}
+          showMerge={false}
+          onToggleMerge={() => router.push(`/dashboard?uuid=${encodeURIComponent(uuid)}&merge=1`)}
+        />
+
+        <main className="ta-main-pad" style={{ flex: 1, minWidth: 0, overflowY: 'auto', background: '#F4F3F1' }}>
+        <div style={{ maxWidth: 1080, margin: '0 auto', padding: '32px 28px 64px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
           <h1 style={{ fontSize: 30, fontWeight: 700, letterSpacing: '-0.8px' }}>Mes statistiques</h1>
           <span style={{ background: '#FFFC00', borderRadius: 100, padding: '3px 11px', fontSize: 12, fontWeight: 700, color: '#0D0D0D' }}>
@@ -408,7 +425,9 @@ export default function TravelAIStats() {
             </div>
           </div>
         )}
-      </main>
+        </div>
+        </main>
+      </div>
     </div>
   )
 }

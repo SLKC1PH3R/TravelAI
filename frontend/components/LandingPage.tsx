@@ -472,7 +472,7 @@ export default function LandingPage() {
             </p>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-              <a href="https://travelai.digitalstack.cloud/dashboard?uuid=test-uuid-eiffel-001" className="ta-btn-primary">
+              <a href="https://travelai.digitalstack.cloud/dashboard/stats?uuid=test-uuid-eiffel-001" className="ta-btn-primary">
                 <GhostIcon size={17} />
                 Voir le compte Demo
               </a>

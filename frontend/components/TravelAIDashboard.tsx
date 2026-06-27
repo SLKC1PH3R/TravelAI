@@ -6,13 +6,14 @@
 
 'use client'
 
-import { useEffect, useMemo, useState, Fragment } from 'react'
+import { useEffect, useState, Fragment } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { downloadCarnet, fetchTrips, mergeTrips, photoUrl, type Monument, type Trip } from '@/lib/api'
 import { flagFor } from '@/lib/geo'
+import { DASHBOARD_CHROME_CSS, DashboardSidebar, DashboardTopNav, GhostIcon, fmtShort, tripLabel } from '@/components/DashboardChrome'
 
-/* ===== Embedded CSS ===== */
+/* ===== Embedded CSS (page-specific only ; chrome partage dans DashboardChrome.tsx) ===== */
 const CSS = `
   .ta-dash-root { background: #F4F3F1; color: #0D0D0D; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
   .ta-dash-root *, .ta-dash-root *::before, .ta-dash-root *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,24 +21,14 @@ const CSS = `
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 4px; }
 
-  .ta-trip-item { transition: background 0.15s; cursor: pointer; }
-  .ta-trip-item:hover { background: #FFFBDF !important; }
   .ta-monument-card { transition: box-shadow 0.2s ease; }
   .ta-monument-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.09) !important; }
   .ta-monument-card:hover .ta-view-btn { opacity: 1 !important; }
   .ta-action-btn { transition: background 0.2s, color 0.2s, border-color 0.2s; }
   .ta-action-btn:hover { background: #FFFC00 !important; color: #0D0D0D !important; border-color: transparent !important; }
-  .ta-nav-pill { transition: color 0.15s, background 0.15s; }
-  .ta-nav-pill:hover { color: #0D0D0D !important; background: rgba(0,0,0,0.04) !important; }
-  .ta-sidebar-btn:hover { opacity: 0.85; }
-  .ta-sidebar-btn:disabled { opacity: 0.5; cursor: default; }
   .ta-share-btn:hover { background: rgba(255,255,255,0.25) !important; }
   .ta-share-btn { transition: background 0.15s; }
 
-  @media (max-width: 1024px) {
-    .ta-sidebar { display: none !important; }
-    .ta-main-pad { padding: 20px !important; }
-  }
   @media (max-width: 720px) {
     .ta-hero { height: 220px !important; }
     .ta-hero-title { font-size: 24px !important; }
@@ -47,23 +38,7 @@ const CSS = `
   }
 `
 
-const GHOST_PATH =
-  'M12 1.5C8.3 1.5 5.3 4.5 5.3 8.2v4.8l-1.6 1 .8 1.4.8-.5v1.3c-.6.2-1.5.8-1.9 2.1-.3 1-.1 2.2-.1 2.2s2.9-.4 4.2 1.4c.5.8 1.6 1.3 2.8 1.3 1.1 0 1.6-.2 1.6-.2s.6.2 1.6.2c1.2 0 2.3-.5 2.8-1.3 1.3-1.8 4.2-1.4 4.2-1.4s.2-1.2-.1-2.2c-.4-1.3-1.3-1.9-1.9-2.1v-1.3l.8.5.8-1.4-1.6-1V8.2C18.7 4.5 15.7 1.5 12 1.5z'
-
-function GhostIcon({ size = 13, color = 'currentColor' }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <path d={GHOST_PATH} />
-    </svg>
-  )
-}
-
 const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-const fmtShort = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
-
-function tripLabel(t: Trip): string {
-  return t.title || [t.city, t.country].filter(Boolean).join(', ') || 'Voyage'
-}
 
 function monumentCoverUrl(m: Monument): string | null {
   const stored = m.photos.find((p) => p.stored)
@@ -78,7 +53,7 @@ export default function TravelAIDashboard() {
   const [trips, setTrips] = useState<Trip[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null)
-  const [showMerge, setShowMerge] = useState(false)
+  const [showMerge, setShowMerge] = useState(searchParams.get('merge') === '1')
   const [mergeTitle, setMergeTitle] = useState('')
   const [mergeCountry, setMergeCountry] = useState('')
   const [mergeStart, setMergeStart] = useState('')
@@ -102,12 +77,6 @@ export default function TravelAIDashboard() {
   }, [uuid])
 
   const selectedTrip = trips.find((t) => t.id === selectedTripId) ?? null
-  const totalMonuments = useMemo(() => trips.reduce((s, t) => s + t.monuments.length, 0), [trips])
-  const totalConversations = useMemo(
-    () => trips.reduce((s, t) => s + t.monuments.reduce((ms, m) => ms + m.conversations.length, 0), 0),
-    [trips]
-  )
-  const countriesCount = useMemo(() => new Set(trips.map((t) => t.country).filter(Boolean)).size, [trips])
   const tripFavorites = selectedTrip ? selectedTrip.monuments.filter((m) => m.is_favorite).length : 0
   const tripConvs = selectedTrip ? selectedTrip.monuments.reduce((s, m) => s + m.conversations.length, 0) : 0
 
@@ -212,82 +181,24 @@ export default function TravelAIDashboard() {
 
   return (
     <div className="ta-dash-root">
+      <style>{DASHBOARD_CHROME_CSS}</style>
       <style>{CSS}</style>
 
-      {/* ===== NAV ===== */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', background: 'rgba(255,255,255,0.97)', borderBottom: '0.5px solid rgba(0,0,0,0.07)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}>
-          <div style={{ width: 28, height: 28, background: '#FFFC00', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="4" fill="#0D0D0D" /><path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" /></svg>
-          </div>
-          <span style={{ fontSize: 16, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.4px' }}>TravelAI</span>
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#F3F3F3', borderRadius: 9, padding: 3 }}>
-          <Link href={`/dashboard/stats?uuid=${encodeURIComponent(uuid)}`} className="ta-nav-pill" style={{ fontSize: 13, fontWeight: 500, color: '#6B6B6B', textDecoration: 'none', padding: '6px 14px', borderRadius: 7 }}>Statistiques</Link>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#0D0D0D', padding: '6px 14px', borderRadius: 7, background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>Mes voyages</span>
-        </div>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#F7F7F7', color: '#0D0D0D', padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 700 }}>
-          <GhostIcon size={13} />
-          Compte demo
-        </span>
-      </nav>
+      <DashboardTopNav uuid={uuid} active="voyages" />
 
       {/* ===== LAYOUT ===== */}
       <div style={{ display: 'flex', paddingTop: 60, minHeight: '100vh' }}>
 
-        {/* ===== SIDEBAR ===== */}
-        <aside className="ta-sidebar" style={{ width: 272, flexShrink: 0, background: '#fff', borderRight: '0.5px solid rgba(0,0,0,0.06)', position: 'sticky', top: 60, height: 'calc(100vh - 60px)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '24px 20px 20px', borderBottom: '0.5px solid rgba(0,0,0,0.06)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-              <div style={{ width: 42, height: 42, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, color: '#0D0D0D', flexShrink: 0, border: '2px solid #0D0D0D' }}>YA</div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0D0D0D' }}>Voyageur Anonyme</div>
-                <div style={{ fontSize: 10.5, color: '#6B6B6B', fontFamily: 'monospace', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{uuid}</div>
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: '#F7F7F7', borderRadius: 12, overflow: 'hidden' }}>
-              {[[totalMonuments, 'Sites'], [countriesCount, 'Pays'], [totalConversations, 'Questions']].map(([n, label], i) => (
-                <div key={String(label)} style={{ padding: '12px 8px', textAlign: 'center', borderRight: i < 2 ? '0.5px solid rgba(0,0,0,0.07)' : undefined }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: '#0D0D0D', lineHeight: 1 }}>{n}</div>
-                  <div style={{ fontSize: 9.5, color: '#6B6B6B', marginTop: 3, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ padding: '16px 12px', flex: 1, overflowY: 'auto' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#B0B0B0', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0 8px', marginBottom: 8 }}>Mes voyages</div>
-            {trips.map((t) => {
-              const selected = t.id === selectedTripId
-              return (
-                <div key={t.id} className="ta-trip-item" onClick={() => setSelectedTripId(t.id)} style={{ borderRadius: 10, padding: '11px 12px', marginBottom: 4, background: selected ? '#FFFBE0' : 'transparent', border: selected ? '0.5px solid rgba(255,220,0,0.45)' : '0.5px solid transparent' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
-                    <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0, marginTop: 1 }}>{flagFor(t.country)}</span>
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: selected ? 700 : 500, color: '#0D0D0D', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tripLabel(t)}</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 4 }}>
-                        <span style={{ fontSize: 10.5, color: '#8A8A8A' }}>{fmtShort(t.started_at)}{t.ended_at ? ` - ${fmtShort(t.ended_at)}` : ''}</span>
-                        <span style={{ color: '#ccc', fontSize: 10 }}>·</span>
-                        <span style={{ fontSize: 10.5, color: '#8A8A8A' }}>{t.monuments.length} etapes</span>
-                      </div>
-                    </div>
-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: selected ? '#FFFC00' : '#E0E0E0', flexShrink: 0, marginTop: 5 }} />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-
-          <div style={{ padding: '14px 16px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
-            <button className="ta-sidebar-btn" disabled={downloading} onClick={handleDownload} style={{ width: '100%', background: '#FFFC00', border: 'none', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 700, color: '#0D0D0D', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 8 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
-              {downloading ? 'Generation...' : 'Telecharger le carnet PDF'}
-            </button>
-            <button onClick={() => setShowMerge(!showMerge)} style={{ width: '100%', background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.09)', borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 600, color: '#0D0D0D', cursor: 'pointer' }}>
-              {showMerge ? '✕ Fermer' : '+ Fusionner des voyages'}
-            </button>
-          </div>
-        </aside>
+        <DashboardSidebar
+          uuid={uuid}
+          trips={trips}
+          selectedTripId={selectedTripId}
+          onSelectTrip={setSelectedTripId}
+          downloading={downloading}
+          onDownload={handleDownload}
+          showMerge={showMerge}
+          onToggleMerge={() => setShowMerge(!showMerge)}
+        />
 
         {/* ===== MAIN ===== */}
         <main className="ta-main-pad" style={{ flex: 1, minWidth: 0, overflowY: 'auto', background: '#F4F3F1' }}>
