@@ -14,6 +14,10 @@ class PhotoOut(BaseModel):
     stored: bool
 
 
+class PhotoUpload(BaseModel):
+    image_base64: str
+
+
 class ConversationOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -79,6 +83,11 @@ class AnalyzeResponse(BaseModel):
 
 class FavoriteUpdate(BaseModel):
     is_favorite: bool
+
+
+class LocationUpdate(BaseModel):
+    latitude: float
+    longitude: float
 
 
 class ConsentUpdate(BaseModel):

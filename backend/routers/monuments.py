@@ -33,3 +33,15 @@ def update_favorite(monument_id: uuid.UUID, payload: schemas.FavoriteUpdate, db:
     db.commit()
     db.refresh(monument)
     return monument
+
+
+@router.patch("/{monument_id}/location", response_model=schemas.MonumentOut)
+def update_location(monument_id: uuid.UUID, payload: schemas.LocationUpdate, db: Session = Depends(get_db)):
+    monument = db.query(models.Monument).filter(models.Monument.id == monument_id).first()
+    if monument is None:
+        raise HTTPException(status_code=404, detail="Monument not found")
+    monument.latitude = payload.latitude
+    monument.longitude = payload.longitude
+    db.commit()
+    db.refresh(monument)
+    return monument

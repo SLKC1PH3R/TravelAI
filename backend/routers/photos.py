@@ -25,6 +25,27 @@ def list_photos(monument_id: uuid.UUID, db: Session = Depends(get_db)):
     return db.query(models.Photo).filter(models.Photo.monument_id == monument_id).all()
 
 
+@router.post("/monument/{monument_id}", response_model=schemas.PhotoOut)
+def add_photo(monument_id: uuid.UUID, payload: schemas.PhotoUpload, db: Session = Depends(get_db)):
+    monument = db.query(models.Monument).filter(models.Monument.id == monument_id).first()
+    if monument is None:
+        raise HTTPException(status_code=404, detail="Monument not found")
+    trip = db.query(models.Trip).filter(models.Trip.id == monument.trip_id).first()
+    user = db.query(models.User).filter(models.User.id == trip.user_id).first()
+
+    filename, thumbnail_filename = storage.save_photo(user.anonymous_uuid, payload.image_base64)
+    photo = models.Photo(
+        monument_id=monument.id,
+        filename=filename,
+        thumbnail_filename=thumbnail_filename,
+        stored=True,
+    )
+    db.add(photo)
+    db.commit()
+    db.refresh(photo)
+    return photo
+
+
 @router.get("/{photo_id}/file")
 def get_photo_file(photo_id: uuid.UUID, db: Session = Depends(get_db)):
     photo = db.query(models.Photo).filter(models.Photo.id == photo_id).first()
