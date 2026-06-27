@@ -43,8 +43,8 @@ class TripOut(BaseModel):
 
     id: uuid.UUID
     user_id: uuid.UUID
-    country: str
-    city: str
+    country: str | None
+    city: str | None
     started_at: datetime
     ended_at: datetime | None
     title: str | None
@@ -83,3 +83,12 @@ class FavoriteUpdate(BaseModel):
 
 class ConsentUpdate(BaseModel):
     photo_consent: bool
+
+
+class TripMergeRequest(BaseModel):
+    uuid: str
+    title: str
+    start_date: datetime
+    end_date: datetime
+    country: str | None = None
+    city: str | None = None

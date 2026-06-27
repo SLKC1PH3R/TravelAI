@@ -37,7 +37,7 @@ function TripsContent() {
             className="block rounded-xl border border-slate-200 bg-white p-5 hover:bg-slate-50"
           >
             <h2 className="text-lg font-semibold">
-              {trip.city}, {trip.country}
+              {trip.title || [trip.city, trip.country].filter(Boolean).join(", ") || "Voyage"}
             </h2>
             <p className="text-sm text-slate-500">
               {new Date(trip.started_at).toLocaleDateString("fr-FR")} - {trip.monuments.length} monument(s)

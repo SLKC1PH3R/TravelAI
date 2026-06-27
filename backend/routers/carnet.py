@@ -44,7 +44,8 @@ def generate_carnet(trip_id: uuid.UUID, db: Session = Depends(get_db)):
     styles = getSampleStyleSheet()
     story = []
 
-    story.append(Paragraph(f"Carnet de voyage - {trip.city}, {trip.country}", styles["Title"]))
+    trip_label = trip.title or ", ".join(filter(None, [trip.city, trip.country])) or "Voyage"
+    story.append(Paragraph(f"Carnet de voyage - {trip_label}", styles["Title"]))
     dates = trip.started_at.strftime("%d/%m/%Y")
     if trip.ended_at:
         dates += f" - {trip.ended_at.strftime('%d/%m/%Y')}"
@@ -101,7 +102,7 @@ def generate_carnet(trip_id: uuid.UUID, db: Session = Depends(get_db)):
     doc.build(story)
     buffer.seek(0)
 
-    filename = f"carnet-{trip.city}-{trip.id}.pdf"
+    filename = f"carnet-{trip.city or trip.title or trip.id}-{trip.id}.pdf"
     return StreamingResponse(
         buffer,
         media_type="application/pdf",

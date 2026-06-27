@@ -31,8 +31,8 @@ export type Monument = {
 export type Trip = {
   id: string;
   user_id: string;
-  country: string;
-  city: string;
+  country: string | null;
+  city: string | null;
   started_at: string;
   ended_at: string | null;
   title: string | null;
@@ -72,6 +72,27 @@ export function setFavorite(monumentId: string, isFavorite: boolean): Promise<Mo
 export function askFollowup(monumentId: string, question: string): Promise<Conversation> {
   return request(`/conversations/monument/${monumentId}?question=${encodeURIComponent(question)}`, {
     method: "POST",
+  });
+}
+
+export function mergeTrips(params: {
+  uuid: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  country?: string;
+  city?: string;
+}): Promise<Trip> {
+  return request(`/trips/merge`, {
+    method: "POST",
+    body: JSON.stringify({
+      uuid: params.uuid,
+      title: params.title,
+      start_date: params.startDate,
+      end_date: params.endDate,
+      country: params.country || null,
+      city: params.city || null,
+    }),
   });
 }
 

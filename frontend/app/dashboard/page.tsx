@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { fetchTrips, type Trip } from "@/lib/api";
+import { fetchTrips, mergeTrips, type Trip } from "@/lib/api";
 import StatsCards from "@/components/StatsCards";
 import TravelBooklet from "@/components/TravelBooklet";
 
@@ -25,14 +25,47 @@ function DashboardContent() {
   const [uuid, setUuid] = useState(initialUuid);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(false);
+  const [merging, setMerging] = useState(false);
+  const [mergeError, setMergeError] = useState<string | null>(null);
 
-  useEffect(() => {
+  function reloadTrips() {
     if (!uuid) return;
     setLoading(true);
-    fetchTrips(uuid)
+    return fetchTrips(uuid)
       .then(setTrips)
       .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    reloadTrips();
   }, [uuid]);
+
+  async function handleMerge(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setMergeError(null);
+    const form = new FormData(e.currentTarget);
+    const startDate = form.get("startDate") as string;
+    const endDate = form.get("endDate") as string;
+    const title = form.get("title") as string;
+    const country = (form.get("country") as string) || undefined;
+
+    setMerging(true);
+    try {
+      await mergeTrips({
+        uuid,
+        title,
+        startDate: new Date(`${startDate}T00:00:00`).toISOString(),
+        endDate: new Date(`${endDate}T23:59:59`).toISOString(),
+        country,
+      });
+      await reloadTrips();
+      e.currentTarget.reset();
+    } catch (err) {
+      setMergeError(err instanceof Error ? err.message : "Erreur lors du regroupement");
+    } finally {
+      setMerging(false);
+    }
+  }
 
   const allMonuments = useMemo(() => trips.flatMap((t) => t.monuments), [trips]);
   const countriesCount = useMemo(() => new Set(trips.map((t) => t.country)).size, [trips]);
@@ -84,6 +117,43 @@ function DashboardContent() {
         </div>
       </div>
 
+      <div className="mt-10 rounded-xl border border-slate-200 bg-white p-5">
+        <h2 className="text-xl font-semibold">Regrouper mes voyages</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Choisis une plage de dates pour reunir tous les monuments visites pendant cette periode dans un seul
+          carnet (ex : du 26 au 30 juin en France).
+        </p>
+        <form onSubmit={handleMerge} className="mt-4 grid gap-3 sm:grid-cols-2">
+          <input
+            name="title"
+            required
+            placeholder="Titre du voyage (ex: Road trip France)"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm sm:col-span-2"
+          />
+          <input
+            name="country"
+            placeholder="Pays (optionnel, ex: France)"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm sm:col-span-2"
+          />
+          <label className="flex flex-col text-xs text-slate-500">
+            Du
+            <input name="startDate" type="date" required className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="flex flex-col text-xs text-slate-500">
+            Au
+            <input name="endDate" type="date" required className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <button
+            type="submit"
+            disabled={merging}
+            className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 sm:col-span-2"
+          >
+            {merging ? "Regroupement..." : "Regrouper en un carnet"}
+          </button>
+          {mergeError && <p className="text-sm text-red-600 sm:col-span-2">{mergeError}</p>}
+        </form>
+      </div>
+
       <div className="mt-10 space-y-8">
         <h2 className="text-xl font-semibold">Mes voyages</h2>
         {trips.map((trip) => (
@@ -91,7 +161,7 @@ function DashboardContent() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-semibold">
-                  {trip.city}, {trip.country}
+                  {trip.title || [trip.city, trip.country].filter(Boolean).join(", ") || "Voyage"}
                 </h3>
                 <p className="text-sm text-slate-500">
                   {new Date(trip.started_at).toLocaleDateString("fr-FR")}
