@@ -10,8 +10,8 @@ import { useEffect, useState, Fragment } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { downloadCarnet, fetchTrips, mergeTrips, photoUrl, type Monument, type Trip } from '@/lib/api'
-import { flagFor } from '@/lib/geo'
-import { DASHBOARD_CHROME_CSS, DashboardSidebar, DashboardTopNav, GhostIcon, fmtShort, tripLabel } from '@/components/DashboardChrome'
+import Flag from '@/components/Flag'
+import { DASHBOARD_CHROME_CSS, DashboardSidebar, DashboardTopNav, GhostIcon, MobileTripBar, fmtShort, tripLabel } from '@/components/DashboardChrome'
 
 /* ===== Embedded CSS (page-specific only ; chrome partage dans DashboardChrome.tsx) ===== */
 const CSS = `
@@ -67,7 +67,11 @@ export default function TravelAIDashboard() {
     return fetchTrips(uuid)
       .then((data) => {
         setTrips(data)
-        setSelectedTripId((current) => current && data.some((t) => t.id === current) ? current : data[0]?.id ?? null)
+        setSelectedTripId((current) => {
+          const requested = searchParams.get('trip')
+          if (requested && data.some((t) => t.id === requested)) return requested
+          return current && data.some((t) => t.id === current) ? current : data[0]?.id ?? null
+        })
       })
       .finally(() => setLoading(false))
   }
@@ -203,6 +207,17 @@ export default function TravelAIDashboard() {
         {/* ===== MAIN ===== */}
         <main className="ta-main-pad" style={{ flex: 1, minWidth: 0, overflowY: 'auto', background: '#F4F3F1' }}>
 
+          <MobileTripBar
+            uuid={uuid}
+            trips={trips}
+            selectedTripId={selectedTripId}
+            onSelectTrip={setSelectedTripId}
+            downloading={downloading}
+            onDownload={handleDownload}
+            showMerge={showMerge}
+            onToggleMerge={() => setShowMerge(!showMerge)}
+          />
+
           {/* HERO */}
           <div className="ta-hero" style={{ position: 'relative', height: 340, overflow: 'hidden', background: '#111' }}>
             {(() => {
@@ -222,7 +237,7 @@ export default function TravelAIDashboard() {
 
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '28px 36px', zIndex: 10 }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', border: '0.5px solid rgba(255,255,255,0.28)', borderRadius: 100, padding: '5px 14px', marginBottom: 12 }}>
-                <span style={{ fontSize: 14, lineHeight: 1 }}>{flagFor(selectedTrip.country)}</span>
+                <Flag country={selectedTrip.country} size={14} />
                 <span style={{ fontSize: 11.5, fontWeight: 600, color: '#fff', letterSpacing: '0.04em' }}>{selectedTrip.country || 'Voyage'}</span>
               </div>
               <h1 className="ta-hero-title" style={{ fontSize: 34, fontWeight: 700, color: '#fff', letterSpacing: '-1px', lineHeight: 1.1, marginBottom: 8 }}>{tripLabel(selectedTrip)}</h1>

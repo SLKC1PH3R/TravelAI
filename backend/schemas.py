@@ -119,3 +119,15 @@ class MonumentAdminUpdate(BaseModel):
     visited_at: datetime | None = None
     trivia_question: str | None = None
     trivia_answer: str | None = None
+
+
+class MonumentCreate(BaseModel):
+    trip_id: uuid.UUID
+    name: str
+    latitude: float
+    longitude: float
+    description: str | None = None
+    visited_at: datetime
+    is_favorite: bool = False
+    trivia_question: str | None = None
+    trivia_answer: str | None = None

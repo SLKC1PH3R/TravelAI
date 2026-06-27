@@ -73,6 +73,40 @@ export function flagFor(country: string | null | undefined): string {
   return FLAGS[country.trim()] || "🏳️";
 }
 
+const ISO_CODES: Record<string, string> = {
+  France: "fr",
+  Italie: "it",
+  Italy: "it",
+  "Etats-Unis": "us",
+  "États-Unis": "us",
+  USA: "us",
+  Inde: "in",
+  India: "in",
+  Thailande: "th",
+  Thaïlande: "th",
+  Thailand: "th",
+  Mexique: "mx",
+  Mexico: "mx",
+  Chili: "cl",
+  Chile: "cl",
+  Grece: "gr",
+  Grèce: "gr",
+  Greece: "gr",
+  Japon: "jp",
+  Japan: "jp",
+  Espagne: "es",
+  Spain: "es",
+  "Royaume-Uni": "gb",
+  "United Kingdom": "gb",
+  Allemagne: "de",
+  Germany: "de",
+};
+
+export function isoFor(country: string | null | undefined): string | null {
+  if (!country) return null;
+  return ISO_CODES[country.trim()] || null;
+}
+
 export function continentFor(country: string | null | undefined): string {
   if (!country) return "Autre";
   return CONTINENTS[country.trim()] || "Autre";

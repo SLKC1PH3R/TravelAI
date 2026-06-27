@@ -11,8 +11,9 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { downloadCarnet, fetchTrips, type Monument, type Trip } from '@/lib/api'
-import { ALL_CONTINENTS, continentFor, flagFor, haversineKm, PARIS, TOTAL_COUNTRIES_IN_WORLD } from '@/lib/geo'
-import { DASHBOARD_CHROME_CSS, DashboardSidebar, DashboardTopNav, tripLabel } from '@/components/DashboardChrome'
+import { ALL_CONTINENTS, continentFor, haversineKm, PARIS, TOTAL_COUNTRIES_IN_WORLD } from '@/lib/geo'
+import Flag from '@/components/Flag'
+import { DASHBOARD_CHROME_CSS, DashboardSidebar, DashboardTopNav, MobileTripBar, tripLabel } from '@/components/DashboardChrome'
 
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
 
@@ -115,6 +116,10 @@ export default function TravelAIStats() {
     } finally {
       setDownloading(false)
     }
+  }
+
+  function goToTrip(tripId: string) {
+    router.push(`/dashboard?uuid=${encodeURIComponent(uuid)}&trip=${tripId}`)
   }
 
   const stats = useMemo(() => {
@@ -230,7 +235,7 @@ export default function TravelAIStats() {
           uuid={uuid}
           trips={trips}
           selectedTripId={selectedTripId}
-          onSelectTrip={setSelectedTripId}
+          onSelectTrip={goToTrip}
           downloading={downloading}
           onDownload={handleDownload}
           showMerge={false}
@@ -238,6 +243,16 @@ export default function TravelAIStats() {
         />
 
         <main className="ta-main-pad" style={{ flex: 1, minWidth: 0, overflowY: 'auto', background: '#F4F3F1' }}>
+        <MobileTripBar
+          uuid={uuid}
+          trips={trips}
+          selectedTripId={selectedTripId}
+          onSelectTrip={goToTrip}
+          downloading={downloading}
+          onDownload={handleDownload}
+          showMerge={false}
+          onToggleMerge={() => router.push(`/dashboard?uuid=${encodeURIComponent(uuid)}&merge=1`)}
+        />
         <div style={{ maxWidth: 1080, margin: '0 auto', padding: '32px 28px 64px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
           <h1 style={{ fontSize: 30, fontWeight: 700, letterSpacing: '-0.8px' }}>Mes statistiques</h1>
@@ -258,8 +273,8 @@ export default function TravelAIStats() {
           <div className="ta-stat-card" style={{ position: 'relative', overflow: 'hidden', background: '#0D0D0D', borderRadius: 18, padding: 22 }}>
             <div style={{ fontSize: 44, fontWeight: 700, letterSpacing: '-1.5px', color: '#fff' }}>{stats.countries.size}</div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginTop: 2, marginBottom: 16 }}>pays explores</div>
-            <div style={{ display: 'inline-flex', gap: 5, background: 'rgba(255,255,255,0.1)', borderRadius: 100, padding: '6px 12px', fontSize: 16 }}>
-              {Array.from(stats.countries.keys()).map((c) => <span key={c}>{flagFor(c)}</span>)}
+            <div style={{ display: 'inline-flex', gap: 5, background: 'rgba(255,255,255,0.1)', borderRadius: 100, padding: '6px 12px' }}>
+              {Array.from(stats.countries.keys()).map((c) => <Flag key={c} country={c} size={16} />)}
             </div>
           </div>
 
@@ -287,7 +302,9 @@ export default function TravelAIStats() {
                       <span style={{ width: 7, height: 7, borderRadius: '50%', background: visited ? '#FFFC00' : '#E5E5E3', border: visited ? '1px solid #0D0D0D' : 'none', flexShrink: 0 }} />
                       <span style={{ fontSize: 12.5, fontWeight: visited ? 700 : 500, color: visited ? '#0D0D0D' : '#C0C0C0' }}>{continent}</span>
                     </div>
-                    <span style={{ fontSize: 13 }}>{visited ? countriesInContinent.map((c) => flagFor(c)).join(' ') : ''}</span>
+                    <span style={{ display: 'inline-flex', gap: 4 }}>
+                      {visited ? countriesInContinent.map((c) => <Flag key={c} country={c} size={13} />) : null}
+                    </span>
                   </div>
                 )
               })}
@@ -321,7 +338,7 @@ export default function TravelAIStats() {
                   .sort((a, b) => b[1].length - a[1].length)
                   .map(([country, monuments]) => (
                     <div key={country} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#FAFAF8', borderRadius: 12, padding: '10px 14px' }}>
-                      <span style={{ fontSize: 24 }}>{flagFor(country)}</span>
+                      <Flag country={country} size={24} />
                       <div>
                         <div style={{ fontSize: 13.5, fontWeight: 700 }}>{country}</div>
                         <div style={{ fontSize: 11, color: '#8A8A8A' }}>{monuments.length} monument(s)</div>
@@ -344,7 +361,8 @@ export default function TravelAIStats() {
                   const city = key.split('|')[0]
                   return (
                     <span key={key} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 100, padding: '6px 13px', fontSize: 12.5, fontWeight: 500 }}>
-                      <span>{flagFor(info.country)}</span>{city}
+                      <Flag country={info.country} size={14} />
+                      {city}
                       <span style={{ color: '#B0B0B0' }}>· {info.count}</span>
                     </span>
                   )

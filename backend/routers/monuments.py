@@ -10,6 +10,29 @@ from database import get_db
 router = APIRouter(prefix="/monuments", tags=["monuments"])
 
 
+@router.post("", response_model=schemas.MonumentOut)
+def create_monument(payload: schemas.MonumentCreate, db: Session = Depends(get_db)):
+    trip = db.query(models.Trip).filter(models.Trip.id == payload.trip_id).first()
+    if trip is None:
+        raise HTTPException(status_code=404, detail="Trip not found")
+
+    monument = models.Monument(
+        trip_id=payload.trip_id,
+        name=payload.name,
+        latitude=payload.latitude,
+        longitude=payload.longitude,
+        description=payload.description,
+        visited_at=payload.visited_at,
+        is_favorite=payload.is_favorite,
+        trivia_question=payload.trivia_question,
+        trivia_answer=payload.trivia_answer,
+    )
+    db.add(monument)
+    db.commit()
+    db.refresh(monument)
+    return monument
+
+
 @router.get("/{monument_id}", response_model=schemas.MonumentOut)
 def get_monument(monument_id: uuid.UUID, db: Session = Depends(get_db)):
     monument = (

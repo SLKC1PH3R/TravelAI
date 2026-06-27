@@ -9,7 +9,7 @@
 
 import Link from 'next/link'
 import { type Trip } from '@/lib/api'
-import { flagFor } from '@/lib/geo'
+import Flag from '@/components/Flag'
 
 export const DASHBOARD_CHROME_CSS = `
   .ta-nav-pill { transition: color 0.15s, background 0.15s; }
@@ -18,10 +18,13 @@ export const DASHBOARD_CHROME_CSS = `
   .ta-trip-item:hover { background: #FFFBDF !important; }
   .ta-sidebar-btn:hover { opacity: 0.85; }
   .ta-sidebar-btn:disabled { opacity: 0.5; cursor: default; }
+  .ta-mobile-trips { display: none; }
+  .ta-mobile-chip { transition: background 0.15s; }
 
   @media (max-width: 1024px) {
     .ta-sidebar { display: none !important; }
     .ta-main-pad { padding: 20px !important; }
+    .ta-mobile-trips { display: flex !important; }
   }
 `
 
@@ -123,7 +126,7 @@ export function DashboardSidebar({ uuid, trips, selectedTripId, onSelectTrip, do
           return (
             <div key={t.id} className="ta-trip-item" onClick={() => onSelectTrip(t.id)} style={{ borderRadius: 10, padding: '11px 12px', marginBottom: 4, background: selected ? '#FFFBE0' : 'transparent', border: selected ? '0.5px solid rgba(255,220,0,0.45)' : '0.5px solid transparent' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
-                <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0, marginTop: 1 }}>{flagFor(t.country)}</span>
+                <Flag country={t.country} size={18} />
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: selected ? 700 : 500, color: '#0D0D0D', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tripLabel(t)}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 4 }}>
@@ -149,5 +152,63 @@ export function DashboardSidebar({ uuid, trips, selectedTripId, onSelectTrip, do
         </button>
       </div>
     </aside>
+  )
+}
+
+/**
+ * Barre de voyages pour mobile/tablette : remplace la sidebar (cachee sous
+ * 1024px) par une rangee horizontale scrollable, pour pouvoir changer de
+ * voyage sans la sidebar.
+ */
+export function MobileTripBar({ trips, selectedTripId, onSelectTrip, downloading, onDownload, onToggleMerge }: SidebarProps) {
+  return (
+    <div className="ta-mobile-trips" style={{ alignItems: 'center', gap: 8, background: '#fff', borderBottom: '0.5px solid rgba(0,0,0,0.07)', padding: '10px 12px' }}>
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', flex: 1, WebkitOverflowScrolling: 'touch' }}>
+        {trips.map((t) => {
+          const selected = t.id === selectedTripId
+          return (
+            <button
+              key={t.id}
+              className="ta-mobile-chip"
+              onClick={() => onSelectTrip(t.id)}
+              style={{
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                background: selected ? '#FFFC00' : '#F7F7F7',
+                border: selected ? '1px solid #0D0D0D' : '0.5px solid rgba(0,0,0,0.1)',
+                borderRadius: 100,
+                padding: '7px 13px',
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: '#0D0D0D',
+                whiteSpace: 'nowrap',
+                cursor: 'pointer',
+              }}
+            >
+              <Flag country={t.country} size={13} />
+              {tripLabel(t)}
+            </button>
+          )
+        })}
+      </div>
+      <button
+        className="ta-sidebar-btn"
+        disabled={downloading}
+        onClick={onDownload}
+        aria-label="Telecharger le carnet PDF"
+        style={{ flexShrink: 0, width: 36, height: 36, borderRadius: '50%', background: '#FFFC00', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
+      </button>
+      <button
+        onClick={onToggleMerge}
+        aria-label="Fusionner des voyages"
+        style={{ flexShrink: 0, width: 36, height: 36, borderRadius: '50%', background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 18, lineHeight: 1, color: '#0D0D0D' }}
+      >
+        +
+      </button>
+    </div>
   )
 }
