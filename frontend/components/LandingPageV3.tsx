@@ -2,7 +2,7 @@
  * TravelAI — Landing Page v3 (dark / noise texture / elastic hero)
  *
  * Design system :
- *  - Fond quasi noir (#080808) avec texture de bruit fixe en overlay
+ *  - Fond quasi noir (#121314) avec texture de bruit fixe en overlay
  *  - Jaune Snapchat (#FFFC00) comme unique accent, jamais dilue
  *  - Space Grotesk pour les titres, Inter pour le corps de texte
  *  - Nav transparente -> frosted glass au scroll
@@ -29,7 +29,7 @@ const NOISE_SVG =
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
-  .ta-v3-root { font-family: 'Inter', sans-serif; background: #080808; color: #F5F5F3; overflow-x: hidden; -webkit-font-smoothing: antialiased; position: relative; }
+  .ta-v3-root { font-family: 'Inter', sans-serif; background: #121314; color: #F5F5F3; overflow-x: hidden; -webkit-font-smoothing: antialiased; position: relative; }
   .ta-v3-root *, .ta-v3-root *::before, .ta-v3-root *::after { box-sizing: border-box; margin: 0; padding: 0; }
   .ta-v3-root h1, .ta-v3-root h2, .ta-v3-root h3 { font-family: 'Space Grotesk', sans-serif; }
   html { scroll-behavior: smooth; }
@@ -349,7 +349,7 @@ export default function LandingPageV3() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 44 }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 {['linear-gradient(135deg,#a8d8ea,#6fb3cf)', 'linear-gradient(135deg,#ffd3a5,#fd9853)', 'linear-gradient(135deg,#c8f7c5,#4caf50)'].map((bg, i) => (
-                  <div key={i} style={{ width: 32, height: 32, borderRadius: '50%', border: '2.5px solid #080808', background: bg, marginRight: i < 2 ? -9 : 0, zIndex: 3 - i, position: 'relative' }} />
+                  <div key={i} style={{ width: 32, height: 32, borderRadius: '50%', border: '2.5px solid #121314', background: bg, marginRight: i < 2 ? -9 : 0, zIndex: 3 - i, position: 'relative' }} />
                 ))}
               </div>
               <div>
@@ -424,7 +424,7 @@ export default function LandingPageV3() {
             <Fragment key={n}>
               <div data-v3-fade="" data-delay={i * 150} style={{ flex: 1, maxWidth: 320, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0 32px' }}>
                 <div style={{ width: 72, height: 72, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, position: 'relative' }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, position: 'absolute', top: -2, right: -2, background: '#080808', color: '#fff', width: 20, height: 20, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.15)' }}>{n}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, position: 'absolute', top: -2, right: -2, background: '#121314', color: '#fff', width: 20, height: 20, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.15)' }}>{n}</span>
                   <svg width="28" height="28" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke={filled ? 'none' : '#0D0D0D'} strokeWidth={filled ? undefined : 2} strokeLinecap={filled ? undefined : 'round'} strokeLinejoin={filled ? undefined : 'round'}>
                     {icon}
                   </svg>
@@ -434,7 +434,7 @@ export default function LandingPageV3() {
               </div>
               {i < STEPS.length - 1 && (
                 <div className="ta-v3-step-connector" style={{ flexShrink: 0, width: 120, height: 1, background: 'linear-gradient(90deg,rgba(255,255,255,0.14),rgba(255,255,255,0.04))', marginTop: 36, position: 'relative' }}>
-                  <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 7, height: 7, borderRadius: '50%', background: '#FFFC00', border: '1.5px solid #080808' }} />
+                  <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 7, height: 7, borderRadius: '50%', background: '#FFFC00', border: '1.5px solid #121314' }} />
                 </div>
               )}
             </Fragment>
