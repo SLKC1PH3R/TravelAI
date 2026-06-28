@@ -20,6 +20,7 @@
 
 import { useEffect, useRef, useState, Fragment } from 'react'
 import Link from 'next/link'
+import CircularGallery, { type GalleryItem } from '@/components/CircularGallery'
 
 const DEMO_URL = 'https://travelai.digitalstack.cloud/dashboard/stats?uuid=test-uuid-eiffel-001'
 
@@ -193,6 +194,31 @@ const DEMO_ITEMS = [
   },
 ]
 
+// Monuments insolites — en attente des photos reelles (placeholders en degrade).
+// Remplacer `gradient` par `image: '/xxx.jpg'` une fois les photos ajoutees dans /public.
+const INSOLITE_MONUMENTS: GalleryItem[] = [
+  { name: 'Salar de Uyuni', location: 'Bolivie', gradient: 'linear-gradient(135deg,#dfe9f3,#7f8c9e)' },
+  { name: "Porte de l'Enfer", location: 'Darvaza, Turkmenistan', gradient: 'linear-gradient(135deg,#ff7e5f,#8b0000)' },
+  { name: 'Cappadoce', location: 'Turquie', gradient: 'linear-gradient(135deg,#f6d365,#fda085)' },
+  { name: 'Zhangjiajie', location: 'Chine', gradient: 'linear-gradient(135deg,#43cea2,#185a9d)' },
+  { name: 'Hang Son Doong', location: 'Vietnam', gradient: 'linear-gradient(135deg,#2c3e50,#4ca1af)' },
+  { name: 'Eglises de Lalibela', location: 'Ethiopie', gradient: 'linear-gradient(135deg,#8e2de2,#4a00e0)' },
+  { name: 'Lignes de Nazca', location: 'Perou', gradient: 'linear-gradient(135deg,#d4a373,#774936)' },
+  { name: 'Wave Rock', location: 'Australie', gradient: 'linear-gradient(135deg,#3a6073,#16222a)' },
+  { name: 'Trolltunga', location: 'Norvege', gradient: 'linear-gradient(135deg,#5f72bd,#9b23ea)' },
+  { name: 'Grottes de Marbre', location: 'Patagonie, Chili', gradient: 'linear-gradient(135deg,#48c6ef,#6f86d6)' },
+  { name: 'La Maison qui Penche', location: 'Sopot, Pologne', gradient: 'linear-gradient(135deg,#ee9ca7,#ffdde1)' },
+  { name: 'Maison Dansante', location: 'Prague, Tchequie', gradient: 'linear-gradient(135deg,#bdc3c7,#2c3e50)' },
+  { name: "Trulli d'Alberobello", location: 'Italie', gradient: 'linear-gradient(135deg,#e0c3fc,#8ec5fc)' },
+  { name: 'Henderson Waves', location: 'Singapour', gradient: 'linear-gradient(135deg,#0f2027,#2c5364)' },
+  { name: 'Spomeniks', location: 'Ex-Yougoslavie', gradient: 'linear-gradient(135deg,#636363,#a2ab58)' },
+  { name: 'Antelope Canyon', location: 'Arizona, USA', gradient: 'linear-gradient(135deg,#ff9966,#ff5e62)' },
+  { name: 'Bouddha couche du Wat Pho', location: 'Bangkok, Thailande', gradient: 'linear-gradient(135deg,#f7971e,#ffd200)' },
+  { name: 'Hobbiton', location: 'Nouvelle-Zelande', gradient: 'linear-gradient(135deg,#56ab2f,#a8e063)' },
+  { name: 'Cabazon Dinosaurs', location: 'Californie, USA', gradient: 'linear-gradient(135deg,#cb356b,#bd3f32)' },
+  { name: 'Bagan', location: 'Myanmar', gradient: 'linear-gradient(135deg,#fbc2eb,#a6c1ee)' },
+]
+
 const FEATURES = [
   {
     icon: <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></>,
@@ -264,7 +290,7 @@ function NavBar() {
     if (!nav) return
     const onScroll = () => {
       const scrolled = window.scrollY > 40
-      nav.style.background = scrolled ? 'rgba(8,8,8,0.75)' : 'transparent'
+      nav.style.background = scrolled ? 'rgba(18,19,20,0.75)' : 'transparent'
       nav.style.backdropFilter = scrolled ? 'blur(14px)' : 'blur(0px)'
       nav.style.borderColor = scrolled ? 'rgba(255,255,255,0.08)' : 'transparent'
     }
@@ -554,6 +580,14 @@ export default function LandingPageV3() {
             <div ref={statRating} style={{ fontSize: 56, fontWeight: 700, color: '#FFFC00', letterSpacing: '-2.5px', fontFamily: "'Space Grotesk', sans-serif" }}>0</div>
             <div style={{ fontSize: 13.5, color: 'rgba(245,245,243,0.5)', marginTop: 8 }}>note utilisateurs</div>
           </div>
+        </div>
+
+        <div data-v3-fade="" data-delay="150" style={{ marginTop: 80 }}>
+          <div style={{ textAlign: 'center', marginBottom: 12 }}>
+            <h3 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.8px' }}>Monuments insolites a decouvrir</h3>
+            <p style={{ fontSize: 13.5, color: 'rgba(245,245,243,0.5)', marginTop: 8 }}>Glisse pour faire pivoter la galerie</p>
+          </div>
+          <CircularGallery items={INSOLITE_MONUMENTS} />
         </div>
       </section>
 
