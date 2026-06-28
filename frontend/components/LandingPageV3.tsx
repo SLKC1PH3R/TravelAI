@@ -197,15 +197,15 @@ const DEMO_ITEMS = [
 // Monuments insolites — en attente des photos reelles (placeholders en degrade).
 // Remplacer `gradient` par `image: '/xxx.jpg'` une fois les photos ajoutees dans /public.
 const INSOLITE_MONUMENTS: GalleryItem[] = [
-  { name: 'Salar de Uyuni', location: 'Bolivie', gradient: 'linear-gradient(135deg,#dfe9f3,#7f8c9e)' },
-  { name: "Porte de l'Enfer", location: 'Darvaza, Turkmenistan', gradient: 'linear-gradient(135deg,#ff7e5f,#8b0000)' },
-  { name: 'Cappadoce', location: 'Turquie', gradient: 'linear-gradient(135deg,#f6d365,#fda085)' },
-  { name: 'Zhangjiajie', location: 'Chine', gradient: 'linear-gradient(135deg,#43cea2,#185a9d)' },
+  { name: 'Salar de Uyuni', location: 'Bolivie', image: '/salar-de-uyuni.jpg' },
+  { name: "Porte de l'Enfer", location: 'Darvaza, Turkmenistan', image: '/porte-de-lenfer.jpg' },
+  { name: 'Cappadoce', location: 'Turquie', image: '/cappadoce.jpg' },
+  { name: 'Zhangjiajie', location: 'Chine', image: '/zhangjiajie.jpg' },
   { name: 'Hang Son Doong', location: 'Vietnam', gradient: 'linear-gradient(135deg,#2c3e50,#4ca1af)' },
   { name: 'Eglises de Lalibela', location: 'Ethiopie', gradient: 'linear-gradient(135deg,#8e2de2,#4a00e0)' },
   { name: 'Lignes de Nazca', location: 'Perou', gradient: 'linear-gradient(135deg,#d4a373,#774936)' },
   { name: 'Wave Rock', location: 'Australie', gradient: 'linear-gradient(135deg,#3a6073,#16222a)' },
-  { name: 'Trolltunga', location: 'Norvege', gradient: 'linear-gradient(135deg,#5f72bd,#9b23ea)' },
+  { name: 'Trolltunga', location: 'Norvege', image: '/trolltunga.jpg' },
   { name: 'Grottes de Marbre', location: 'Patagonie, Chili', gradient: 'linear-gradient(135deg,#48c6ef,#6f86d6)' },
   { name: 'La Maison qui Penche', location: 'Sopot, Pologne', gradient: 'linear-gradient(135deg,#ee9ca7,#ffdde1)' },
   { name: 'Maison Dansante', location: 'Prague, Tchequie', gradient: 'linear-gradient(135deg,#bdc3c7,#2c3e50)' },
