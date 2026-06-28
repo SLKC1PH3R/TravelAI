@@ -461,9 +461,9 @@ export default function LandingPage() {
             </div>
 
             <h1 style={{ fontSize: 78, fontWeight: 700, lineHeight: 1.0, letterSpacing: '-3px', color: '#0D0D0D', marginBottom: 28 }}>
-              Vise.<br />Demande.<br />
+              Point.<br />Ask.<br />
               <span style={{ background: '#FFFC00', padding: '2px 10px', borderRadius: 8, display: 'inline-block', marginTop: 4 }}>
-                Souviens-toi.
+                Remember.
               </span>
             </h1>
 
