@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { downloadCarnet, fetchTrips, type Monument, type Trip } from '@/lib/api'
 import { ALL_CONTINENTS, continentFor, haversineKm, PARIS, TOTAL_COUNTRIES_IN_WORLD } from '@/lib/geo'
 import Flag from '@/components/Flag'
@@ -87,7 +88,14 @@ function QuizCard({ monument }: { monument: Monument }) {
 export default function TravelAIStats() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { data: session } = useSession()
   const uuid = searchParams.get('uuid') || ''
+
+  useEffect(() => {
+    if (!uuid && session?.user?.anonymousUuid) {
+      router.replace(`/dashboard/stats?uuid=${encodeURIComponent(session.user.anonymousUuid)}`)
+    }
+  }, [uuid, session, router])
 
   const [trips, setTrips] = useState<Trip[]>([])
   const [loading, setLoading] = useState(false)
@@ -209,7 +217,7 @@ export default function TravelAIStats() {
     return (
       <div className="ta-stats-root" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#6B6B6B' }}>
         <style>{CSS}</style>
-        Connecte ton compte pour voir tes statistiques.
+        Chargement...
       </div>
     )
   }
@@ -233,6 +241,8 @@ export default function TravelAIStats() {
       <div style={{ display: 'flex', paddingTop: 60, minHeight: '100vh' }}>
         <DashboardSidebar
           uuid={uuid}
+          email={session?.user?.email ?? null}
+          avatarUrl={session?.user?.image ?? null}
           trips={trips}
           selectedTripId={selectedTripId}
           onSelectTrip={goToTrip}

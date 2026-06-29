@@ -114,6 +114,33 @@ export async function downloadCarnet(tripId: string, filename: string): Promise<
   URL.revokeObjectURL(url);
 }
 
+export type OnboardingUser = {
+  id: string;
+  email: string | null;
+  name: string | null;
+  anonymous_uuid: string;
+  snap_pseudo: string | null;
+};
+
+export function submitOnboarding(params: {
+  email: string;
+  name?: string | null;
+  avatarUrl?: string | null;
+  login: string;
+  pseudo: string;
+}): Promise<OnboardingUser> {
+  return request(`/users/onboarding`, {
+    method: "POST",
+    body: JSON.stringify({
+      email: params.email,
+      name: params.name || null,
+      avatar_url: params.avatarUrl || null,
+      login: params.login,
+      pseudo: params.pseudo,
+    }),
+  });
+}
+
 export function photoUrl(photoId: string): string {
   return `${API_URL}/photos/${photoId}/file`;
 }

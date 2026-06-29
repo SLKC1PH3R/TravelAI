@@ -66,6 +66,22 @@ class UserOut(BaseModel):
     anonymous_uuid: str
     created_at: datetime
     photo_consent: bool
+    avatar_url: str | None
+    snap_pseudo: str | None
+
+
+class GoogleLinkRequest(BaseModel):
+    email: str
+    name: str | None = None
+    avatar_url: str | None = None
+
+
+class OnboardingRequest(BaseModel):
+    email: str
+    name: str | None = None
+    avatar_url: str | None = None
+    login: str
+    pseudo: str
 
 
 class AnalyzeRequest(BaseModel):

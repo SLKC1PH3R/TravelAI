@@ -8,6 +8,7 @@
 
 import { useEffect, useState, Fragment } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { downloadCarnet, fetchTrips, mergeTrips, photoUrl, type Monument, type Trip } from '@/lib/api'
 import Flag from '@/components/Flag'
@@ -48,7 +49,14 @@ function monumentCoverUrl(m: Monument): string | null {
 export default function TravelAIDashboard() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { data: session } = useSession()
   const uuid = searchParams.get('uuid') || ''
+
+  useEffect(() => {
+    if (!uuid && session?.user?.anonymousUuid) {
+      router.replace(`/dashboard?uuid=${encodeURIComponent(session.user.anonymousUuid)}`)
+    }
+  }, [uuid, session, router])
 
   const [trips, setTrips] = useState<Trip[]>([])
   const [loading, setLoading] = useState(false)
@@ -141,24 +149,32 @@ export default function TravelAIDashboard() {
   }
 
   if (!uuid) {
+    if (session?.user && !session.user.anonymousUuid) {
+      return (
+        <div className="ta-dash-root" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <style>{CSS}</style>
+          <form
+            style={{ background: '#fff', borderRadius: 16, padding: 32, boxShadow: '0 4px 24px rgba(0,0,0,0.08)', width: 360 }}
+            onSubmit={(e) => {
+              e.preventDefault()
+              const value = new FormData(e.currentTarget).get('uuid') as string
+              router.push(`/dashboard?uuid=${encodeURIComponent(value)}`)
+            }}
+          >
+            <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Connecte ton compte Lens</h1>
+            <p style={{ fontSize: 13, color: '#6B6B6B', marginBottom: 16, lineHeight: 1.5 }}>
+              Entre l&apos;UUID anonyme genere par la Lens Snapchat pour retrouver tes voyages.
+            </p>
+            <input name="uuid" required style={{ width: '100%', padding: '10px 14px', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 10, fontSize: 14, marginBottom: 12 }} />
+            <button type="submit" style={{ width: '100%', background: '#FFFC00', border: 'none', borderRadius: 10, padding: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Valider</button>
+          </form>
+        </div>
+      )
+    }
     return (
-      <div className="ta-dash-root" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="ta-dash-root" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#6B6B6B' }}>
         <style>{CSS}</style>
-        <form
-          style={{ background: '#fff', borderRadius: 16, padding: 32, boxShadow: '0 4px 24px rgba(0,0,0,0.08)', width: 360 }}
-          onSubmit={(e) => {
-            e.preventDefault()
-            const value = new FormData(e.currentTarget).get('uuid') as string
-            router.push(`/dashboard?uuid=${encodeURIComponent(value)}`)
-          }}
-        >
-          <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Connecte ton compte Lens</h1>
-          <p style={{ fontSize: 13, color: '#6B6B6B', marginBottom: 16, lineHeight: 1.5 }}>
-            Entre l&apos;UUID anonyme genere par la Lens Snapchat pour retrouver tes voyages.
-          </p>
-          <input name="uuid" required style={{ width: '100%', padding: '10px 14px', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 10, fontSize: 14, marginBottom: 12 }} />
-          <button type="submit" style={{ width: '100%', background: '#FFFC00', border: 'none', borderRadius: 10, padding: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Valider</button>
-        </form>
+        Chargement...
       </div>
     )
   }
@@ -195,6 +211,8 @@ export default function TravelAIDashboard() {
 
         <DashboardSidebar
           uuid={uuid}
+          email={session?.user?.email ?? null}
+          avatarUrl={session?.user?.image ?? null}
           trips={trips}
           selectedTripId={selectedTripId}
           onSelectTrip={setSelectedTripId}

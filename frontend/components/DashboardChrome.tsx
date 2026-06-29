@@ -82,6 +82,8 @@ export function DashboardTopNav({ uuid, active }: TopNavProps) {
 
 type SidebarProps = {
   uuid: string
+  email?: string | null
+  avatarUrl?: string | null
   trips: Trip[]
   selectedTripId: string | null
   onSelectTrip: (id: string) => void
@@ -91,7 +93,7 @@ type SidebarProps = {
   onToggleMerge: () => void
 }
 
-export function DashboardSidebar({ uuid, trips, selectedTripId, onSelectTrip, downloading, onDownload, showMerge, onToggleMerge }: SidebarProps) {
+export function DashboardSidebar({ uuid, email, avatarUrl, trips, selectedTripId, onSelectTrip, downloading, onDownload, showMerge, onToggleMerge }: SidebarProps) {
   const totalMonuments = trips.reduce((s, t) => s + t.monuments.length, 0)
   const totalConversations = trips.reduce(
     (s, t) => s + t.monuments.reduce((ms, m) => ms + m.conversations.length, 0),
@@ -103,9 +105,15 @@ export function DashboardSidebar({ uuid, trips, selectedTripId, onSelectTrip, do
     <aside className="ta-sidebar" style={{ width: 272, flexShrink: 0, background: '#fff', borderRight: '0.5px solid rgba(0,0,0,0.06)', position: 'sticky', top: 60, height: 'calc(100vh - 60px)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '24px 20px 20px', borderBottom: '0.5px solid rgba(0,0,0,0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-          <div style={{ width: 42, height: 42, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, color: '#0D0D0D', flexShrink: 0, border: '2px solid #0D0D0D' }}>YA</div>
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, border: '2px solid #0D0D0D', objectFit: 'cover' }} />
+          ) : (
+            <div style={{ width: 42, height: 42, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, color: '#0D0D0D', flexShrink: 0, border: '2px solid #0D0D0D' }}>
+              {(email || 'YA').slice(0, 2).toUpperCase()}
+            </div>
+          )}
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0D0D0D' }}>Voyageur Anonyme</div>
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0D0D0D', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email || 'Voyageur Anonyme'}</div>
             <div style={{ fontSize: 10.5, color: '#6B6B6B', fontFamily: 'monospace', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{uuid}</div>
           </div>
         </div>

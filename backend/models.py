@@ -17,6 +17,8 @@ class User(Base):
     anonymous_uuid: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     photo_consent: Mapped[bool] = mapped_column(Boolean, default=False)
+    avatar_url: Mapped[str | None] = mapped_column(String, nullable=True)
+    snap_pseudo: Mapped[str | None] = mapped_column(String, nullable=True)
 
     trips: Mapped[list["Trip"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 

@@ -2,6 +2,8 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Google({
@@ -32,4 +34,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
   },
   trustHost: true,
+  callbacks: {
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === "update" && session?.anonymousUuid) {
+        token.anonymousUuid = session.anonymousUuid as string;
+        return token;
+      }
+      if (trigger === "signIn" && (user?.email || token.email)) {
+        try {
+          const res = await fetch(
+            `${API_URL}/users/by-email?email=${encodeURIComponent((user?.email || token.email) as string)}`
+          );
+          token.anonymousUuid = res.ok ? (await res.json()).anonymous_uuid : undefined;
+        } catch {
+          token.anonymousUuid = undefined;
+        }
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.anonymousUuid = token.anonymousUuid as string | undefined;
+      return session;
+    },
+  },
 });
