@@ -123,6 +123,32 @@ export type OnboardingUser = {
   is_admin: boolean;
 };
 
+export type UserProfile = {
+  id: string;
+  email: string | null;
+  name: string | null;
+  anonymous_uuid: string;
+  avatar_url: string | null;
+  snap_pseudo: string | null;
+  location: string | null;
+  is_admin: boolean;
+  is_locked: boolean;
+};
+
+export function fetchProfile(email: string): Promise<UserProfile> {
+  return request(`/users/by-email?email=${encodeURIComponent(email)}`);
+}
+
+export function updateProfile(
+  email: string,
+  payload: { name?: string; snap_pseudo?: string; avatar_url?: string; location?: string }
+): Promise<UserProfile> {
+  return request(`/users/profile?email=${encodeURIComponent(email)}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
 export function submitOnboarding(params: {
   email: string;
   name?: string | null;

@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+import models
 from config import settings
-from database import Base, engine
+from database import Base, SessionLocal, engine
 from routers import admin, analyze, carnet, conversations, monuments, photos, trips, users
 
 app = FastAPI(title="TravelAI API")
@@ -25,9 +26,32 @@ app.include_router(carnet.router)
 app.include_router(admin.router)
 
 
+def seed_demo_user() -> None:
+    db = SessionLocal()
+    try:
+        existing = db.query(models.User).filter(models.User.email == settings.demo_email).first()
+        if existing is not None:
+            return
+        db.add(
+            models.User(
+                email=settings.demo_email,
+                name=settings.demo_name,
+                anonymous_uuid=settings.demo_login,
+                avatar_url=settings.demo_avatar_url,
+                snap_pseudo=settings.demo_pseudo,
+                is_admin=False,
+                is_locked=True,
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+
 @app.on_event("startup")
 def on_startup() -> None:
     Base.metadata.create_all(bind=engine)
+    seed_demo_user()
 
 
 @app.get("/health")

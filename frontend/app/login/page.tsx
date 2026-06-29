@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { DEMO_EMAIL } from "@/lib/demo";
 
 const CSS = `
   .ta-login-root { background: #F4F3F1; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; -webkit-font-smoothing: antialiased; }
@@ -70,6 +71,25 @@ function LoginContent() {
         >
           <GoogleIcon />
           Se connecter avec Google
+        </button>
+
+        <button
+          type="button"
+          onClick={() => signIn("email", { email: DEMO_EMAIL, callbackUrl: "/dashboard/stats" })}
+          style={{
+            width: "100%",
+            background: "#F7F7F7",
+            border: "0.5px solid rgba(0,0,0,0.1)",
+            borderRadius: 10,
+            padding: "11px 18px",
+            fontSize: 13.5,
+            fontWeight: 600,
+            color: "#0D0D0D",
+            cursor: "pointer",
+            marginTop: 10,
+          }}
+        >
+          Voir une demo
         </button>
 
         <p style={{ fontSize: 11.5, color: "#B0B0B0", textAlign: "center", marginTop: 24, lineHeight: 1.5 }}>

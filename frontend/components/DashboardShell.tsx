@@ -10,7 +10,7 @@ function ShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { uuid, trips, selectedTripId, selectTrip, downloading, handleDownload, showMerge, toggleMerge } = useDashboard();
-  const active = pathname === "/dashboard/stats" ? "profil" : "voyages";
+  const active = pathname === "/dashboard/stats" ? "profil" : pathname === "/dashboard" ? "voyages" : undefined;
 
   return (
     <div style={{ background: "#F4F3F1", minHeight: "100vh" }}>

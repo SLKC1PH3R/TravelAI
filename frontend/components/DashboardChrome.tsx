@@ -62,7 +62,7 @@ function AccountMenu({ uuid }: { uuid: string }) {
 
   const user = session?.user
   const initials = (user?.name || user?.email || '?').slice(0, 2).toUpperCase()
-  const profileHref = `/dashboard/stats?uuid=${encodeURIComponent(uuid)}`
+  const profileHref = `/dashboard/profile?uuid=${encodeURIComponent(uuid)}`
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
@@ -118,7 +118,7 @@ function AccountMenu({ uuid }: { uuid: string }) {
 
 type TopNavProps = {
   uuid: string
-  active: 'profil' | 'voyages'
+  active?: 'profil' | 'voyages'
   isAdmin?: boolean
 }
 
@@ -134,9 +134,9 @@ export function DashboardTopNav({ uuid, active, isAdmin }: TopNavProps) {
       </Link>
       <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#F3F3F3', borderRadius: 9, padding: 3 }}>
         {active === 'profil' ? (
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#0D0D0D', padding: '6px 14px', borderRadius: 7, background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>Mon profil</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#0D0D0D', padding: '6px 14px', borderRadius: 7, background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>Mes statistiques</span>
         ) : (
-          <Link href={`/dashboard/stats?uuid=${q}`} className="ta-nav-pill" style={{ fontSize: 13, fontWeight: 500, color: '#6B6B6B', textDecoration: 'none', padding: '6px 14px', borderRadius: 7 }}>Mon profil</Link>
+          <Link href={`/dashboard/stats?uuid=${q}`} className="ta-nav-pill" style={{ fontSize: 13, fontWeight: 500, color: '#6B6B6B', textDecoration: 'none', padding: '6px 14px', borderRadius: 7 }}>Mes statistiques</Link>
         )}
         {active === 'voyages' ? (
           <span style={{ fontSize: 13, fontWeight: 600, color: '#0D0D0D', padding: '6px 14px', borderRadius: 7, background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>Mes voyages</span>
