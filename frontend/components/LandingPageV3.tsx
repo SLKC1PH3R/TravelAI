@@ -20,7 +20,8 @@
 
 import { useEffect, useRef, useState, Fragment } from 'react'
 import Link from 'next/link'
-import CircularGallery, { type GalleryItem } from '@/components/CircularGallery'
+import { CircularGallery, type GalleryItem as CircularGalleryItem } from '@/components/ui/circular-gallery'
+import { type GalleryItem } from '@/components/CircularGallery'
 
 const DEMO_URL = 'https://travelai.digitalstack.cloud/dashboard/stats?uuid=test-uuid-eiffel-001'
 
@@ -585,9 +586,17 @@ export default function LandingPageV3() {
         <div data-v3-fade="" data-delay="150" style={{ marginTop: 80 }}>
           <div style={{ textAlign: 'center', marginBottom: 12 }}>
             <h3 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.8px' }}>Monuments insolites a decouvrir</h3>
-            <p style={{ fontSize: 13.5, color: 'rgba(245,245,243,0.5)', marginTop: 8 }}>Glisse pour faire pivoter la galerie</p>
+            <p style={{ fontSize: 13.5, color: 'rgba(245,245,243,0.5)', marginTop: 8 }}>Fais glisser pour faire pivoter la galerie</p>
           </div>
-          <CircularGallery items={INSOLITE_MONUMENTS} />
+          <CircularGallery
+            items={INSOLITE_MONUMENTS.filter((m) => m.image).map(
+              (m): CircularGalleryItem => ({
+                common: m.name,
+                binomial: m.location,
+                photo: { url: m.image as string, text: m.name },
+              })
+            )}
+          />
         </div>
       </section>
 

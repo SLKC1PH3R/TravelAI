@@ -14,8 +14,17 @@
 import { useEffect, useRef, useState, Fragment } from 'react'
 import Link from 'next/link'
 import { QRCodeSVG } from 'qrcode.react'
+import { CircularGallery, type GalleryItem as CircularGalleryItem } from '@/components/ui/circular-gallery'
 
 const SNAPCODE_PLACEHOLDER = 'https://www.snapchat.com/unlock/?type=SNAPCODE&uuid=travelai-lens-placeholder'
+
+const INSOLITE_MONUMENTS: CircularGalleryItem[] = [
+  { common: 'Salar de Uyuni', binomial: 'Bolivie', photo: { url: '/salar-de-uyuni.jpg', text: 'Salar de Uyuni' } },
+  { common: "Porte de l'Enfer", binomial: 'Darvaza, Turkmenistan', photo: { url: '/porte-de-lenfer.jpg', text: "Porte de l'Enfer" } },
+  { common: 'Cappadoce', binomial: 'Turquie', photo: { url: '/cappadoce.jpg', text: 'Cappadoce' } },
+  { common: 'Zhangjiajie', binomial: 'Chine', photo: { url: '/zhangjiajie.jpg', text: 'Zhangjiajie' } },
+  { common: 'Trolltunga', binomial: 'Norvege', photo: { url: '/trolltunga.jpg', text: 'Trolltunga' } },
+]
 
 /* ===== Embedded CSS (keyframes, hover states, responsive) ===== */
 const CSS = `
@@ -725,6 +734,19 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ===== GALERIE MONUMENTS INSOLITES ===== */}
+      <section style={{ background: '#FAFAFA', padding: '110px 80px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
+        <div style={{ maxWidth: 1160, margin: '0 auto' }}>
+          <div data-fade="" style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h2 style={{ fontSize: 42, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-1.5px' }}>
+              Monuments insolites a decouvrir
+            </h2>
+            <p style={{ fontSize: 15, color: '#6B6B6B', marginTop: 10 }}>Fais glisser pour faire pivoter la galerie</p>
+          </div>
+          <CircularGallery items={INSOLITE_MONUMENTS} />
         </div>
       </section>
 
