@@ -68,6 +68,7 @@ class UserOut(BaseModel):
     photo_consent: bool
     avatar_url: str | None
     snap_pseudo: str | None
+    is_admin: bool
 
 
 class GoogleLinkRequest(BaseModel):
@@ -82,6 +83,16 @@ class OnboardingRequest(BaseModel):
     avatar_url: str | None = None
     login: str
     pseudo: str
+
+
+class AdminUserOut(UserOut):
+    trips_count: int
+
+
+class AdminUserUpdate(BaseModel):
+    anonymous_uuid: str | None = None
+    snap_pseudo: str | None = None
+    is_admin: bool | None = None
 
 
 class AnalyzeRequest(BaseModel):

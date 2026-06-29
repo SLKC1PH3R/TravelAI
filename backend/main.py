@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import settings
 from database import Base, engine
-from routers import analyze, carnet, conversations, monuments, photos, trips, users
+from routers import admin, analyze, carnet, conversations, monuments, photos, trips, users
 
 app = FastAPI(title="TravelAI API")
 
@@ -22,6 +22,7 @@ app.include_router(monuments.router)
 app.include_router(photos.router)
 app.include_router(conversations.router)
 app.include_router(carnet.router)
+app.include_router(admin.router)
 
 
 @app.on_event("startup")

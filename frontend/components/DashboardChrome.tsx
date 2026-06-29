@@ -48,9 +48,10 @@ export function tripLabel(t: Trip): string {
 type TopNavProps = {
   uuid: string
   active: 'profil' | 'voyages'
+  isAdmin?: boolean
 }
 
-export function DashboardTopNav({ uuid, active }: TopNavProps) {
+export function DashboardTopNav({ uuid, active, isAdmin }: TopNavProps) {
   const q = encodeURIComponent(uuid)
   return (
     <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', background: 'rgba(255,255,255,0.97)', borderBottom: '0.5px solid rgba(0,0,0,0.07)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
@@ -72,10 +73,17 @@ export function DashboardTopNav({ uuid, active }: TopNavProps) {
           <Link href={`/dashboard?uuid=${q}`} className="ta-nav-pill" style={{ fontSize: 13, fontWeight: 500, color: '#6B6B6B', textDecoration: 'none', padding: '6px 14px', borderRadius: 7 }}>Mes voyages</Link>
         )}
       </div>
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#F7F7F7', color: '#0D0D0D', padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 700 }}>
-        <GhostIcon size={13} />
-        Compte demo
-      </span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {isAdmin && (
+          <Link href="/dashboard/admin" className="ta-nav-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#0D0D0D', color: '#FFFC00', padding: '9px 14px', borderRadius: 9, fontSize: 12.5, fontWeight: 700, textDecoration: 'none' }}>
+            ⚙ Admin
+          </Link>
+        )}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#F7F7F7', color: '#0D0D0D', padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 700 }}>
+          <GhostIcon size={13} />
+          Compte demo
+        </span>
+      </div>
     </nav>
   )
 }

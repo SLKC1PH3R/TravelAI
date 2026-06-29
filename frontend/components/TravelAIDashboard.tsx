@@ -204,7 +204,7 @@ export default function TravelAIDashboard() {
       <style>{DASHBOARD_CHROME_CSS}</style>
       <style>{CSS}</style>
 
-      <DashboardTopNav uuid={uuid} active="voyages" />
+      <DashboardTopNav uuid={uuid} active="voyages" isAdmin={session?.user?.isAdmin} />
 
       {/* ===== LAYOUT ===== */}
       <div style={{ display: 'flex', paddingTop: 60, minHeight: '100vh' }}>

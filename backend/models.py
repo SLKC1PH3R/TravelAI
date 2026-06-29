@@ -19,6 +19,7 @@ class User(Base):
     photo_consent: Mapped[bool] = mapped_column(Boolean, default=False)
     avatar_url: Mapped[str | None] = mapped_column(String, nullable=True)
     snap_pseudo: Mapped[str | None] = mapped_column(String, nullable=True)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
 
     trips: Mapped[list["Trip"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 

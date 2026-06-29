@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     data_dir: str = "/data/users"
     cors_origins_raw: str = Field(default="http://localhost:3000", alias="CORS_ORIGINS")
+    admin_email: str = "jeremy.pradel92@gmail.com"
 
     @property
     def cors_origins(self) -> list[str]:

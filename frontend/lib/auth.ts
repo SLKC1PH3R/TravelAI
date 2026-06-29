@@ -45,15 +45,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const res = await fetch(
             `${API_URL}/users/by-email?email=${encodeURIComponent((user?.email || token.email) as string)}`
           );
-          token.anonymousUuid = res.ok ? (await res.json()).anonymous_uuid : undefined;
+          if (res.ok) {
+            const data = await res.json();
+            token.anonymousUuid = data.anonymous_uuid;
+            token.isAdmin = Boolean(data.is_admin);
+          } else {
+            token.anonymousUuid = undefined;
+            token.isAdmin = false;
+          }
         } catch {
           token.anonymousUuid = undefined;
+          token.isAdmin = false;
         }
       }
       return token;
     },
     async session({ session, token }) {
       session.user.anonymousUuid = token.anonymousUuid as string | undefined;
+      session.user.isAdmin = Boolean(token.isAdmin);
       return session;
     },
   },

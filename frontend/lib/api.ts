@@ -141,6 +141,41 @@ export function submitOnboarding(params: {
   });
 }
 
+export type AdminUser = {
+  id: string;
+  email: string | null;
+  name: string | null;
+  anonymous_uuid: string;
+  created_at: string;
+  photo_consent: boolean;
+  avatar_url: string | null;
+  snap_pseudo: string | null;
+  is_admin: boolean;
+  trips_count: number;
+};
+
+export function fetchAdminUsers(requesterEmail: string): Promise<AdminUser[]> {
+  return request(`/admin/users?email=${encodeURIComponent(requesterEmail)}`);
+}
+
+export function updateAdminUser(
+  userId: string,
+  requesterEmail: string,
+  payload: { anonymous_uuid?: string; snap_pseudo?: string; is_admin?: boolean }
+): Promise<AdminUser> {
+  return request(`/admin/users/${userId}?email=${encodeURIComponent(requesterEmail)}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteAdminUser(userId: string, requesterEmail: string): Promise<void> {
+  const res = await fetch(`${API_URL}/admin/users/${userId}?email=${encodeURIComponent(requesterEmail)}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`);
+}
+
 export function photoUrl(photoId: string): string {
   return `${API_URL}/photos/${photoId}/file`;
 }

@@ -236,7 +236,7 @@ export default function TravelAIStats() {
       <style>{DASHBOARD_CHROME_CSS}</style>
       <style>{CSS}</style>
 
-      <DashboardTopNav uuid={uuid} active="profil" />
+      <DashboardTopNav uuid={uuid} active="profil" isAdmin={session?.user?.isAdmin} />
 
       <div style={{ display: 'flex', paddingTop: 60, minHeight: '100vh' }}>
         <DashboardSidebar
