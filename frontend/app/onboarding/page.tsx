@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { submitOnboarding } from "@/lib/api";
+import SplashScreen from "@/components/SplashScreen";
 
 const CSS = `
   .ta-onb-root { background: #F4F3F1; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; -webkit-font-smoothing: antialiased; }
@@ -23,12 +24,22 @@ export default function OnboardingPage() {
   const [pseudo, setPseudo] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSplash(false), 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (session?.user?.anonymousUuid) {
       router.replace(`/dashboard/stats?uuid=${encodeURIComponent(session.user.anonymousUuid)}`);
     }
   }, [session, router]);
+
+  if (showSplash) {
+    return <SplashScreen />;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
