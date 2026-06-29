@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { submitOnboarding } from "@/lib/api";
+import { DEMO_AVATAR, DEMO_EMAIL, DEMO_LOGIN, DEMO_NAME, DEMO_PSEUDO } from "@/lib/demo";
 import SplashScreen from "@/components/SplashScreen";
 
 const CSS = `
@@ -15,6 +16,11 @@ const CSS = `
   .ta-onb-submit { transition: transform .18s ease, box-shadow .18s ease; }
   .ta-onb-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
   .ta-onb-submit:disabled { opacity: 0.5; cursor: default; transform: none; box-shadow: none; }
+  .ta-onb-input:disabled { background: #F0F0EE; color: #6B6B6B; cursor: not-allowed; }
+  .ta-onb-input[readonly] { background: #F5F5F3; color: #0D0D0D; cursor: default; }
+
+  @keyframes ta-onb-hint-fade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+  .ta-onb-hint-popup { animation: ta-onb-hint-fade 0.35s ease forwards; }
 
   .ta-onb-flex { display: flex; align-items: center; justify-content: center; gap: 0; width: 100%; max-width: 900px; }
 
@@ -73,16 +79,20 @@ function GoogleBadgeIcon() {
   );
 }
 
-function GoogleProfileCard() {
+function GoogleProfileCard({ demoMode = false }: { demoMode?: boolean }) {
   const { data: session } = useSession();
   const user = session?.user;
-  const initials = (user?.name || user?.email || "?").slice(0, 2).toUpperCase();
+
+  const name  = demoMode ? DEMO_NAME  : (user?.name  || "Compte Google");
+  const email = demoMode ? DEMO_EMAIL : (user?.email || "");
+  const image = demoMode ? DEMO_AVATAR : user?.image;
+  const initials = name.slice(0, 2).toUpperCase();
 
   return (
     <div className="ta-onb-card" style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
       <div style={{ position: "relative", marginBottom: 16 }}>
-        {user?.image ? (
-          <img src={user.image} alt="" style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", border: "3px solid #fff", boxShadow: "0 0 0 1px rgba(0,0,0,0.08)" }} />
+        {image ? (
+          <img src={image} alt="" style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", border: "3px solid #fff", boxShadow: "0 0 0 1px rgba(0,0,0,0.08)" }} />
         ) : (
           <div style={{ width: 72, height: 72, borderRadius: "50%", background: "#FFFC00", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#0D0D0D" }}>
             {initials}
@@ -93,8 +103,8 @@ function GoogleProfileCard() {
         </div>
       </div>
 
-      <div style={{ fontSize: 16.5, fontWeight: 700, color: "#0D0D0D", letterSpacing: "-0.3px" }}>{user?.name || "Compte Google"}</div>
-      <div style={{ fontSize: 12.5, color: "#8A8A8A", marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{user?.email}</div>
+      <div style={{ fontSize: 16.5, fontWeight: 700, color: "#0D0D0D", letterSpacing: "-0.3px" }}>{name}</div>
+      <div style={{ fontSize: 12.5, color: "#8A8A8A", marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{email}</div>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 7, marginTop: 22, background: "#EAF7EE", border: "1px solid #BFE6CC", borderRadius: 10, padding: "10px 14px", width: "100%" }}>
         <CheckBadge />
@@ -115,14 +125,19 @@ function FlowConnector() {
   );
 }
 
-export default function OnboardingPage() {
+function OnboardingPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, update } = useSession();
   const [login, setLogin] = useState("");
   const [pseudo, setPseudo] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSplash, setShowSplash] = useState(true);
+  const [showHint, setShowHint] = useState(false);
+
+  const isDemoMode = searchParams.get("demo") === "1";
+  const isDemo = session?.user?.email === DEMO_EMAIL || isDemoMode;
 
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 1200);
@@ -130,10 +145,20 @@ export default function OnboardingPage() {
   }, []);
 
   useEffect(() => {
-    if (session?.user?.anonymousUuid) {
+    if (session?.user?.anonymousUuid && !isDemo) {
       router.replace(`/dashboard/stats?uuid=${encodeURIComponent(session.user.anonymousUuid)}`);
     }
-  }, [session, router]);
+  }, [session, isDemo, router]);
+
+  useEffect(() => {
+    if (showSplash || !isDemo) return;
+    const timer = setTimeout(() => {
+      setLogin(DEMO_LOGIN);
+      setPseudo(DEMO_PSEUDO);
+      setShowHint(true);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [showSplash, isDemo]);
 
   if (showSplash) {
     return <SplashScreen />;
@@ -141,6 +166,24 @@ export default function OnboardingPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    if (isDemoMode) {
+      setSubmitting(true);
+      router.push(`/dashboard/stats?uuid=${encodeURIComponent(DEMO_LOGIN)}`);
+      return;
+    }
+
+    if (isDemo) {
+      setSubmitting(true);
+      try {
+        await update({ anonymousUuid: DEMO_LOGIN, isAdmin: false });
+        router.push(`/dashboard/stats?uuid=${encodeURIComponent(DEMO_LOGIN)}`);
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
     if (!session?.user?.email || !login.trim() || !pseudo.trim()) return;
     setSubmitting(true);
     setError(null);
@@ -176,7 +219,7 @@ export default function OnboardingPage() {
         </Link>
 
         <div className="ta-onb-flex">
-          <GoogleProfileCard />
+          <GoogleProfileCard demoMode={isDemoMode} />
 
           <FlowConnector />
 
@@ -195,7 +238,8 @@ export default function OnboardingPage() {
               <input
                 className="ta-onb-input"
                 value={login}
-                onChange={(e) => setLogin(e.target.value)}
+                onChange={isDemo ? undefined : (e) => setLogin(e.target.value)}
+                readOnly={isDemo}
                 placeholder="ex: test-uuid-eiffel-001"
                 required
                 style={{ marginBottom: 16 }}
@@ -207,7 +251,8 @@ export default function OnboardingPage() {
               <input
                 className="ta-onb-input"
                 value={pseudo}
-                onChange={(e) => setPseudo(e.target.value)}
+                onChange={isDemo ? undefined : (e) => setPseudo(e.target.value)}
+                readOnly={isDemo}
                 placeholder="ex: Jeremy"
                 required
                 style={{ marginBottom: 20 }}
@@ -233,10 +278,48 @@ export default function OnboardingPage() {
               >
                 {submitting ? "Enregistrement..." : "Valider"}
               </button>
+
+              {showHint && (
+                <div
+                  className="ta-onb-hint-popup"
+                  style={{
+                    marginTop: 10,
+                    position: "relative",
+                    background: "#0D0D0D",
+                    color: "#fff",
+                    borderRadius: 10,
+                    padding: "11px 16px",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    textAlign: "center",
+                  }}
+                >
+                  <div style={{
+                    position: "absolute",
+                    top: -7,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: 0,
+                    height: 0,
+                    borderLeft: "7px solid transparent",
+                    borderRight: "7px solid transparent",
+                    borderBottom: "7px solid #0D0D0D",
+                  }} />
+                  Appuie sur Valider pour continuer !
+                </div>
+              )}
             </form>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={<SplashScreen />}>
+      <OnboardingPageInner />
+    </Suspense>
   );
 }

@@ -481,7 +481,7 @@ export default function LandingPage() {
             </p>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-              <a href="https://travelai.digitalstack.cloud/dashboard/stats?uuid=test-uuid-eiffel-001" className="ta-btn-primary">
+              <a href="/onboarding?demo=1" className="ta-btn-primary">
                 <GhostIcon size={17} />
                 Voir le compte Demo
               </a>
@@ -802,10 +802,10 @@ export default function LandingPage() {
           <p data-fade="" data-delay="200" style={{ fontSize: 17, color: '#6B6B6B', lineHeight: 1.6, marginBottom: 44 }}>
             Disponible via la Lens Snapchat. Pas d&apos;application a telecharger. Ouvre, vise, decouvre.
           </p>
-          <button data-fade="" data-delay="300" type="button" onClick={() => setShowSnapcode((v) => !v)} className="ta-btn-cta">
+          <a data-fade="" data-delay="300" href="https://travelai.digitalstack.cloud/login" className="ta-btn-cta" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
             <GhostIcon size={20} />
             Ouvrir TravelAI sur Snapchat
-          </button>
+          </a>
           <div data-fade="" data-delay="400" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, opacity: 0.45 }}>
             <GhostIcon size={16} color="#0D0D0D" />
             <span style={{ fontSize: 12.5, color: '#0D0D0D', fontWeight: 500 }}>Propulse par la technologie Lens de Snapchat</span>

@@ -11,11 +11,11 @@ class Settings(BaseSettings):
     cors_origins_raw: str = Field(default="http://localhost:3000", alias="CORS_ORIGINS")
     admin_email: str = "jeremy.pradel92@gmail.com"
 
-    # Compte de demonstration : doit correspondre a DEMO_EMAIL dans frontend/lib/auth.ts
-    demo_email: str = "demo.voyageur@travelai.app"
-    demo_login: str = "demo-john-around-the-world"
-    demo_name: str = "Voyageur TravelAI"
-    demo_pseudo: str = "John_around_the_world"
+    # Compte de demonstration : doit correspondre a frontend/lib/demo.ts
+    demo_email: str = "John_the_traveler@gmail.com"
+    demo_login: str = "John_around_the_world"
+    demo_name: str = "John"
+    demo_pseudo: str = "John"
     demo_avatar_url: str = "/voyageur.jpg"
 
     @property
