@@ -120,6 +120,7 @@ export type OnboardingUser = {
   name: string | null;
   anonymous_uuid: string;
   snap_pseudo: string | null;
+  is_admin: boolean;
 };
 
 export function submitOnboarding(params: {

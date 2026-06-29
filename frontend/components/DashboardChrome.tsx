@@ -7,7 +7,9 @@
 
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
 import { type Trip } from '@/lib/api'
 import Flag from '@/components/Flag'
 
@@ -45,6 +47,75 @@ export function tripLabel(t: Trip): string {
   return t.title || [t.city, t.country].filter(Boolean).join(', ') || 'Voyage'
 }
 
+function AccountMenu({ uuid }: { uuid: string }) {
+  const { data: session } = useSession()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [])
+
+  const user = session?.user
+  const initials = (user?.name || user?.email || '?').slice(0, 2).toUpperCase()
+  const profileHref = `/dashboard/stats?uuid=${encodeURIComponent(uuid)}`
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 9, padding: '5px 12px 5px 5px', cursor: 'pointer' }}
+      >
+        {user?.image ? (
+          <img src={user.image} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
+        ) : (
+          <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#0D0D0D' }}>{initials}</div>
+        )}
+        <span style={{ fontSize: 13, fontWeight: 600, color: '#0D0D0D', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {user?.name || user?.email || 'Mon compte'}
+        </span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}>
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: 240, background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 14, boxShadow: '0 12px 36px rgba(0,0,0,0.14)', overflow: 'hidden', zIndex: 1100 }}>
+          <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '0.5px solid rgba(0,0,0,0.06)' }}>
+            {user?.image ? (
+              <img src={user.image} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
+            ) : (
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#0D0D0D' }}>{initials}</div>
+            )}
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#0D0D0D', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name || 'Mon compte'}</div>
+              <div style={{ fontSize: 11.5, color: '#8A8A8A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</div>
+            </div>
+          </div>
+          <Link
+            href={profileHref}
+            onClick={() => setOpen(false)}
+            className="ta-nav-pill"
+            style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '11px 16px', fontSize: 13, fontWeight: 500, color: '#0D0D0D', textDecoration: 'none' }}
+          >
+            Mon profil
+          </Link>
+          <button
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '11px 16px', fontSize: 13, fontWeight: 500, color: '#D02828', background: 'none', border: 'none', borderTop: '0.5px solid rgba(0,0,0,0.06)', cursor: 'pointer', textAlign: 'left' }}
+          >
+            Se deconnecter
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 type TopNavProps = {
   uuid: string
   active: 'profil' | 'voyages'
@@ -55,7 +126,7 @@ export function DashboardTopNav({ uuid, active, isAdmin }: TopNavProps) {
   const q = encodeURIComponent(uuid)
   return (
     <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', background: 'rgba(255,255,255,0.97)', borderBottom: '0.5px solid rgba(0,0,0,0.07)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
-      <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}>
+      <Link href={`/dashboard?uuid=${q}`} style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}>
         <div style={{ width: 28, height: 28, background: '#FFFC00', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="4" fill="#0D0D0D" /><path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" /></svg>
         </div>
@@ -79,10 +150,7 @@ export function DashboardTopNav({ uuid, active, isAdmin }: TopNavProps) {
             ⚙ Admin
           </Link>
         )}
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#F7F7F7', color: '#0D0D0D', padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 700 }}>
-          <GhostIcon size={13} />
-          Compte demo
-        </span>
+        <AccountMenu uuid={uuid} />
       </div>
     </nav>
   )

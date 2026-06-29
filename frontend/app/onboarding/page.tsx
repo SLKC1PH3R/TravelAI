@@ -152,7 +152,7 @@ export default function OnboardingPage() {
         login: login.trim(),
         pseudo: pseudo.trim(),
       });
-      await update({ anonymousUuid: user.anonymous_uuid });
+      await update({ anonymousUuid: user.anonymous_uuid, isAdmin: user.is_admin });
       router.push(`/dashboard/stats?uuid=${encodeURIComponent(user.anonymous_uuid)}`);
     } catch {
       setError("Impossible d'enregistrer ton profil. Verifie ton identifiant Snapchat et reessaie.");

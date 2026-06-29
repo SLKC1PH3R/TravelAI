@@ -1,7 +1,8 @@
 /**
  * TravelAI — Statistiques de voyage
  *
- * Stats calculees a partir des donnees reelles (fetchTrips), pas de mock.
+ * Contenu de la vue "Mon profil" : la nav/sidebar partagees vivent dans
+ * DashboardShell (cf. app/dashboard/(main)/layout.tsx), seul ce <main> change.
  */
 
 'use client'
@@ -9,12 +10,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { downloadCarnet, fetchTrips, type Monument, type Trip } from '@/lib/api'
+import { type Monument } from '@/lib/api'
 import { ALL_CONTINENTS, continentFor, haversineKm, PARIS, TOTAL_COUNTRIES_IN_WORLD } from '@/lib/geo'
 import Flag from '@/components/Flag'
-import { DASHBOARD_CHROME_CSS, DashboardSidebar, DashboardTopNav, MobileTripBar, tripLabel } from '@/components/DashboardChrome'
+import { useDashboard } from '@/contexts/DashboardContext'
 
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
 
@@ -54,10 +55,6 @@ function useCountUp(target: number, durationMs = 900) {
   return value
 }
 
-function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-}
-
 function fmtMonthYear(d: string) {
   return new Date(d).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
 }
@@ -87,9 +84,8 @@ function QuizCard({ monument }: { monument: Monument }) {
 
 export default function TravelAIStats() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { data: session } = useSession()
-  const uuid = searchParams.get('uuid') || ''
+  const { uuid, trips, loading } = useDashboard()
 
   useEffect(() => {
     if (!uuid && session?.user?.anonymousUuid) {
@@ -97,38 +93,7 @@ export default function TravelAIStats() {
     }
   }, [uuid, session, router])
 
-  const [trips, setTrips] = useState<Trip[]>([])
-  const [loading, setLoading] = useState(false)
-  const [selectedTripId, setSelectedTripId] = useState<string | null>(null)
-  const [downloading, setDownloading] = useState(false)
-
-  useEffect(() => {
-    if (!uuid) return
-    setLoading(true)
-    fetchTrips(uuid)
-      .then((data) => {
-        setTrips(data)
-        setSelectedTripId((current) => (current && data.some((t) => t.id === current) ? current : data[0]?.id ?? null))
-      })
-      .finally(() => setLoading(false))
-  }, [uuid])
-
   const allMonuments = useMemo(() => trips.flatMap((t) => t.monuments), [trips])
-
-  async function handleDownload() {
-    const trip = trips.find((t) => t.id === selectedTripId)
-    if (!trip) return
-    setDownloading(true)
-    try {
-      await downloadCarnet(trip.id, `carnet-${tripLabel(trip)}`)
-    } finally {
-      setDownloading(false)
-    }
-  }
-
-  function goToTrip(tripId: string) {
-    router.push(`/dashboard?uuid=${encodeURIComponent(uuid)}&trip=${tripId}`)
-  }
 
   const stats = useMemo(() => {
     const voyages = trips.length
@@ -215,7 +180,7 @@ export default function TravelAIStats() {
 
   if (!uuid) {
     return (
-      <div className="ta-stats-root" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#6B6B6B' }}>
+      <div className="ta-stats-root" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#6B6B6B' }}>
         <style>{CSS}</style>
         Chargement...
       </div>
@@ -224,7 +189,7 @@ export default function TravelAIStats() {
 
   if (loading && trips.length === 0) {
     return (
-      <div className="ta-stats-root" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#6B6B6B' }}>
+      <div className="ta-stats-root" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#6B6B6B' }}>
         <style>{CSS}</style>
         Chargement...
       </div>
@@ -233,37 +198,9 @@ export default function TravelAIStats() {
 
   return (
     <div className="ta-stats-root">
-      <style>{DASHBOARD_CHROME_CSS}</style>
       <style>{CSS}</style>
 
-      <DashboardTopNav uuid={uuid} active="profil" isAdmin={session?.user?.isAdmin} />
-
-      <div style={{ display: 'flex', paddingTop: 60, minHeight: '100vh' }}>
-        <DashboardSidebar
-          uuid={uuid}
-          email={session?.user?.email ?? null}
-          avatarUrl={session?.user?.image ?? null}
-          trips={trips}
-          selectedTripId={selectedTripId}
-          onSelectTrip={goToTrip}
-          downloading={downloading}
-          onDownload={handleDownload}
-          showMerge={false}
-          onToggleMerge={() => router.push(`/dashboard?uuid=${encodeURIComponent(uuid)}&merge=1`)}
-        />
-
-        <main className="ta-main-pad" style={{ flex: 1, minWidth: 0, overflowY: 'auto', background: '#F4F3F1' }}>
-        <MobileTripBar
-          uuid={uuid}
-          trips={trips}
-          selectedTripId={selectedTripId}
-          onSelectTrip={goToTrip}
-          downloading={downloading}
-          onDownload={handleDownload}
-          showMerge={false}
-          onToggleMerge={() => router.push(`/dashboard?uuid=${encodeURIComponent(uuid)}&merge=1`)}
-        />
-        <div style={{ maxWidth: 1080, margin: '0 auto', padding: '32px 28px 64px' }}>
+      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '32px 28px 64px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
           <h1 style={{ fontSize: 30, fontWeight: 700, letterSpacing: '-0.8px' }}>Mes statistiques</h1>
           <span style={{ background: '#FFFC00', borderRadius: 100, padding: '3px 11px', fontSize: 12, fontWeight: 700, color: '#0D0D0D' }}>
@@ -453,8 +390,6 @@ export default function TravelAIStats() {
             </div>
           </div>
         )}
-        </div>
-        </main>
       </div>
     </div>
   )

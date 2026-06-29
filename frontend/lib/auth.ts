@@ -36,8 +36,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   callbacks: {
     async jwt({ token, user, trigger, session }) {
-      if (trigger === "update" && session?.anonymousUuid) {
-        token.anonymousUuid = session.anonymousUuid as string;
+      if (trigger === "update" && session) {
+        if (session.anonymousUuid) token.anonymousUuid = session.anonymousUuid as string;
+        if (typeof session.isAdmin === "boolean") token.isAdmin = session.isAdmin;
         return token;
       }
       if (trigger === "signIn" && (user?.email || token.email)) {
