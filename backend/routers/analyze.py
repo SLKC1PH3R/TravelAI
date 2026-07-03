@@ -97,13 +97,24 @@ def analyze(payload: schemas.AnalyzeRequest, db: Session = Depends(get_db)):
         description = result.get("description")
         anecdote = result.get("anecdote")
         answer = result.get("answer", "")
-        # Fallback: use description if Gemini left answer empty
+        if not answer:
+            answer = description or ""
+        trivia_question = result.get("trivia_question")
+        trivia_answer = result.get("trivia_answer")
+    elif payload.latitude and payload.longitude:
+        result = gemini_client.analyze_by_gps(payload.latitude, payload.longitude, payload.question)
+        name = result.get("name", name)
+        country = result.get("country", country)
+        city = result.get("city", city)
+        description = result.get("description")
+        anecdote = result.get("anecdote")
+        answer = result.get("answer", "")
         if not answer:
             answer = description or ""
         trivia_question = result.get("trivia_question")
         trivia_answer = result.get("trivia_answer")
     else:
-        answer = "Aucune image fournie, je n'ai pas pu identifier de monument."
+        answer = "Aucune image ni position GPS fournie."
 
     trip = get_or_create_trip(db, user, country, city)
 

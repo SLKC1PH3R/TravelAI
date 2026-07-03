@@ -56,6 +56,24 @@ def analyze_image(image_base64: str, question: str) -> dict:
     return _extract_json(response.text)
 
 
+GPS_PROMPT = """Tu es un guide touristique expert.
+Un utilisateur se trouve aux coordonnees GPS : latitude {lat}, longitude {lng}.
+Identifie le monument ou lieu touristique le plus connu a proximite de ces coordonnees.
+Reponds uniquement en JSON valide, sans markdown, au format :
+{{"name": "...", "country": "...", "city": "...", "description": "...", "anecdote": "...",
+"answer": "description concise du monument en 2 phrases en francais", "trivia_question": "...", "trivia_answer": "..."}}
+
+Question de l'utilisateur : {question}
+"""
+
+
+def analyze_by_gps(lat: float, lng: float, question: str) -> dict:
+    model = genai.GenerativeModel(MODEL_NAME)
+    prompt = GPS_PROMPT.format(lat=lat, lng=lng, question=question)
+    response = model.generate_content(prompt)
+    return _extract_json(response.text)
+
+
 def ask_followup(monument_name: str, city: str, country: str, description: str, question: str) -> str:
     model = genai.GenerativeModel(MODEL_NAME)
     prompt = TEXT_PROMPT.format(
