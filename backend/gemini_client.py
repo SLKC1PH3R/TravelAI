@@ -13,10 +13,18 @@ genai.configure(api_key=settings.gemini_api_key)
 MODEL_NAME = "gemini-2.5-flash"
 
 VISION_PROMPT = """Tu es un guide touristique expert. Analyse cette image.
-Si c'est un monument, donne : nom, pays, ville, description courte (3 phrases),
-anecdote historique, et une question de quiz courte (avec sa reponse courte) pour
-tester la culture generale d'un visiteur sur ce monument (ex: annee de construction,
-architecte, hauteur...). Reponds uniquement en JSON valide, sans markdown, au format :
+Si c'est un monument, fournis les informations suivantes :
+- name : nom du monument
+- country : pays
+- city : ville
+- description : description courte du monument (3 phrases)
+- anecdote : une anecdote historique interessante
+- answer : reponds directement a la question de l'utilisateur de facon concise en francais
+  (si la question est generique comme "identifie ce monument", resume la description en 2 phrases)
+- trivia_question : une question de quiz sur ce monument (annee de construction, architecte, hauteur...)
+- trivia_answer : la reponse courte a cette question de quiz
+
+Reponds uniquement en JSON valide, sans markdown, au format :
 {{"name": "...", "country": "...", "city": "...", "description": "...", "anecdote": "...",
 "answer": "...", "trivia_question": "...", "trivia_answer": "..."}}
 

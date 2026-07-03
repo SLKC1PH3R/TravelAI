@@ -52,6 +52,32 @@ def get_or_create_trip(db: Session, user: models.User, country: str, city: str) 
 def analyze(payload: schemas.AnalyzeRequest, db: Session = Depends(get_db)):
     user = get_or_create_user(db, payload.uuid)
 
+    # Follow-up on an existing monument (no new image, monument_id known)
+    if payload.monument_id and not payload.image_base64:
+        monument = db.query(models.Monument).filter(models.Monument.id == payload.monument_id).first()
+        if monument is not None:
+            trip = db.query(models.Trip).filter(models.Trip.id == monument.trip_id).first()
+            answer = gemini_client.ask_followup(
+                monument_name=monument.name,
+                city=trip.city if trip else "Inconnu",
+                country=trip.country if trip else "Inconnu",
+                description=monument.description or "",
+                question=payload.question,
+            )
+            conversation = models.Conversation(
+                monument_id=monument.id,
+                question=payload.question,
+                answer=answer,
+            )
+            db.add(conversation)
+            db.commit()
+            return schemas.AnalyzeResponse(
+                answer=answer,
+                monument_id=monument.id,
+                trip_id=monument.trip_id,
+                monument_name=monument.name,
+            )
+
     name, country, city, description, anecdote, answer, trivia_question, trivia_answer = (
         "Lieu inconnu",
         "Inconnu",
@@ -71,6 +97,9 @@ def analyze(payload: schemas.AnalyzeRequest, db: Session = Depends(get_db)):
         description = result.get("description")
         anecdote = result.get("anecdote")
         answer = result.get("answer", "")
+        # Fallback: use description if Gemini left answer empty
+        if not answer:
+            answer = description or ""
         trivia_question = result.get("trivia_question")
         trivia_answer = result.get("trivia_answer")
     else:

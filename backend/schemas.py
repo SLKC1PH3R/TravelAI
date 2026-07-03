@@ -110,6 +110,7 @@ class AnalyzeRequest(BaseModel):
     uuid: str
     latitude: float | None = None
     longitude: float | None = None
+    monument_id: uuid.UUID | None = None
 
 
 class AnalyzeResponse(BaseModel):
