@@ -114,7 +114,17 @@ def analyze(payload: schemas.AnalyzeRequest, db: Session = Depends(get_db)):
         trivia_question = result.get("trivia_question")
         trivia_answer = result.get("trivia_answer")
     else:
-        answer = "Aucune image ni position GPS fournie."
+        result = gemini_client.analyze_by_text(payload.question)
+        name = result.get("name", name)
+        country = result.get("country", country)
+        city = result.get("city", city)
+        description = result.get("description")
+        anecdote = result.get("anecdote")
+        answer = result.get("answer", "")
+        if not answer:
+            answer = description or ""
+        trivia_question = result.get("trivia_question")
+        trivia_answer = result.get("trivia_answer")
 
     trip = get_or_create_trip(db, user, country, city)
 

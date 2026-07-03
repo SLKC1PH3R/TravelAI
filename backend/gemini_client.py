@@ -67,6 +67,24 @@ Question de l'utilisateur : {question}
 """
 
 
+TEXT_ONLY_PROMPT = """Tu es un guide touristique expert.
+L'utilisateur pose une question sur un monument ou lieu touristique.
+Identifie le monument mentionne dans la question et reponds directement.
+Si aucun monument n'est mentionne, reponds de facon generique sur les monuments.
+Reponds uniquement en JSON valide, sans markdown, au format :
+{{"name": "...", "country": "...", "city": "...", "description": "...", "anecdote": "...",
+"answer": "reponse concise en francais", "trivia_question": "...", "trivia_answer": "..."}}
+
+Question : {question}
+"""
+
+
+def analyze_by_text(question: str) -> dict:
+    model = genai.GenerativeModel(MODEL_NAME)
+    response = model.generate_content(TEXT_ONLY_PROMPT.format(question=question))
+    return _extract_json(response.text)
+
+
 def analyze_by_gps(lat: float, lng: float, question: str) -> dict:
     model = genai.GenerativeModel(MODEL_NAME)
     prompt = GPS_PROMPT.format(lat=lat, lng=lng, question=question)
