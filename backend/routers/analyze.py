@@ -1,8 +1,11 @@
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
+
+import json
 
 import gemini_client
 import models
@@ -49,7 +52,12 @@ def get_or_create_trip(db: Session, user: models.User, country: str, city: str) 
 
 
 @router.post("", response_model=schemas.AnalyzeResponse)
-def analyze(payload: schemas.AnalyzeRequest, db: Session = Depends(get_db)):
+async def analyze(request: Request, db: Session = Depends(get_db)):
+    body_bytes = await request.body()
+    try:
+        payload = schemas.AnalyzeRequest(**json.loads(body_bytes))
+    except Exception as e:
+        return JSONResponse(status_code=422, content={"detail": str(e)})
     user = get_or_create_user(db, payload.uuid)
 
     # Follow-up on an existing monument (no new image, monument_id known)
