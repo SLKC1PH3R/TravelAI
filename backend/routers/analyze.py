@@ -54,9 +54,13 @@ def get_or_create_trip(db: Session, user: models.User, country: str, city: str) 
 @router.post("", response_model=schemas.AnalyzeResponse)
 async def analyze(request: Request, db: Session = Depends(get_db)):
     body_bytes = await request.body()
+    import logging
+    logger = logging.getLogger("analyze")
+    logger.warning(f"SNAP_DEBUG headers={dict(request.headers)} body={body_bytes[:300]}")
     try:
         payload = schemas.AnalyzeRequest(**json.loads(body_bytes))
     except Exception as e:
+        logger.warning(f"SNAP_DEBUG parse_error={e} body={body_bytes[:300]}")
         return JSONResponse(status_code=422, content={"detail": str(e)})
     user = get_or_create_user(db, payload.uuid)
 
