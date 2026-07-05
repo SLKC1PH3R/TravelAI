@@ -57,3 +57,15 @@ def on_startup() -> None:
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+@app.api_route("/debug", methods=["GET", "POST", "PUT", "DELETE"])
+async def debug_endpoint(request: Request) -> dict:
+    from fastapi import Request as R
+    body = await request.body()
+    import logging
+    logging.getLogger("debug").warning(
+        f"DEBUG method={request.method} path={request.url.path} "
+        f"headers={dict(request.headers)} body={body[:500]}"
+    )
+    return {"received": True, "method": request.method, "body": body.decode(errors="replace")[:200]}
