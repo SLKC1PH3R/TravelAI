@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 import models
@@ -61,7 +61,6 @@ def health() -> dict:
 
 @app.api_route("/debug", methods=["GET", "POST", "PUT", "DELETE"])
 async def debug_endpoint(request: Request) -> dict:
-    from fastapi import Request as R
     body = await request.body()
     import logging
     logging.getLogger("debug").warning(
