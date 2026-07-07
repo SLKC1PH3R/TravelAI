@@ -38,7 +38,7 @@ export function NavBar({ items, className }: NavBarProps) {
         className,
       )}
     >
-      <div className="flex items-center gap-2 bg-background border border-border py-1.5 px-1.5 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+      <div className="flex items-center gap-1 bg-background border border-border py-1 px-1 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
         {items.map((item) => {
           const Icon = item.icon
           const isActive = activeTab === item.name
@@ -49,7 +49,7 @@ export function NavBar({ items, className }: NavBarProps) {
               href={item.url}
               onClick={() => setActiveTab(item.name)}
               className={cn(
-                "relative cursor-pointer text-[14px] font-semibold px-5 py-2.5 rounded-full transition-colors whitespace-nowrap",
+                "relative cursor-pointer text-[13px] font-semibold px-5 py-[5px] rounded-full transition-colors whitespace-nowrap",
                 "text-foreground/70 hover:text-primary",
                 isActive && "text-primary",
               )}
