@@ -300,8 +300,8 @@ export default function LandingPageV2() {
       {/* ===== NAV ===== */}
       <nav ref={navRef} style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 48px', transition: 'background 0.35s,box-shadow 0.35s,border-color 0.35s', borderBottom: '1px solid transparent', backdropFilter: 'blur(0px)', WebkitBackdropFilter: 'blur(0px)' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}>
-          <div style={{ width: 30, height: 30, background: '#FFFC00', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="4" fill="#0D0D0D" /><path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" /></svg>
+          <div style={{ width: 30, height: 30, borderRadius: 8, overflow: 'hidden' }}>
+            <img src="/voyageur.jpg" alt="TravelAI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <span data-nav-logo="" style={{ fontSize: 17, fontWeight: 700, color: '#fff', letterSpacing: '-0.4px', transition: 'color 0.3s' }}>TravelAI</span>
         </Link>
@@ -660,8 +660,8 @@ export default function LandingPageV2() {
         <div style={{ maxWidth: 1160, margin: '0 auto' }}>
           <div className="ta-footer-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40 }}>
             <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}>
-              <div style={{ width: 28, height: 28, background: '#FFFC00', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="4" fill="#0D0D0D" /><path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" /></svg>
+              <div style={{ width: 28, height: 28, borderRadius: 7, overflow: 'hidden' }}>
+                <img src="/voyageur.jpg" alt="TravelAI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <span style={{ fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '-0.4px' }}>TravelAI</span>
             </Link>

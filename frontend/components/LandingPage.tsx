@@ -433,11 +433,8 @@ export default function LandingPage() {
         }}
       >
         <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}>
-          <div style={{ width: 30, height: 30, background: '#FFFC00', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-              <circle cx="8" cy="6" r="4" fill="#0D0D0D" />
-              <path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" />
-            </svg>
+          <div style={{ width: 30, height: 30, borderRadius: 8, overflow: 'hidden' }}>
+            <img src="/voyageur.jpg" alt="TravelAI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <span style={{ fontSize: 17, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.4px' }}>TravelAI</span>
         </a>
@@ -818,11 +815,8 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1160, margin: '0 auto' }}>
           <div className="ta-footer-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40 }}>
             <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}>
-              <div style={{ width: 28, height: 28, background: '#FFFC00', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-                  <circle cx="8" cy="6" r="4" fill="#0D0D0D" />
-                  <path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" />
-                </svg>
+              <div style={{ width: 28, height: 28, borderRadius: 7, overflow: 'hidden' }}>
+                <img src="/voyageur.jpg" alt="TravelAI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <span style={{ fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '-0.4px' }}>TravelAI</span>
             </a>

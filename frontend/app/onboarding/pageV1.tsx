@@ -209,11 +209,8 @@ function OnboardingPageInner() {
       <style>{CSS}</style>
       <div style={{ width: "100%", maxWidth: 900, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none", marginBottom: 32 }}>
-          <div style={{ width: 30, height: 30, background: "#FFFC00", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-              <circle cx="8" cy="6" r="4" fill="#0D0D0D" />
-              <path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" />
-            </svg>
+          <div style={{ width: 30, height: 30, borderRadius: 8, overflow: "hidden" }}>
+            <img src="/voyageur.jpg" alt="TravelAI" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
           <span style={{ fontSize: 18, fontWeight: 700, color: "#0D0D0D", letterSpacing: "-0.4px" }}>TravelAI</span>
         </Link>

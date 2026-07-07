@@ -303,8 +303,8 @@ function NavBar() {
   return (
     <nav ref={navRef} style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 48px', borderBottom: '1px solid transparent', transition: 'background 0.35s, border-color 0.35s, backdrop-filter 0.35s' }}>
       <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}>
-        <div style={{ width: 30, height: 30, background: '#FFFC00', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="4" fill="#0D0D0D" /><path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" /></svg>
+        <div style={{ width: 30, height: 30, borderRadius: 8, overflow: 'hidden' }}>
+          <img src="/voyageur.jpg" alt="TravelAI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         <span style={{ fontSize: 17, fontWeight: 700, color: '#F5F5F3', letterSpacing: '-0.4px', fontFamily: "'Space Grotesk', sans-serif" }}>TravelAI</span>
       </Link>

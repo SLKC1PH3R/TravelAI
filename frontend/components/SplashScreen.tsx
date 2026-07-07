@@ -12,11 +12,8 @@ export default function SplashScreen() {
     <div style={{ position: "fixed", inset: 0, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 }}>
       <style>{SPLASH_CSS}</style>
 
-      <div style={{ width: 64, height: 64, background: "#FFFC00", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", animation: "ta-splash-pulse 1.1s ease-in-out infinite" }}>
-        <svg width="30" height="30" viewBox="0 0 16 16" fill="none">
-          <circle cx="8" cy="6" r="4" fill="#0D0D0D" />
-          <path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" />
-        </svg>
+      <div style={{ width: 64, height: 64, borderRadius: 16, overflow: "hidden", animation: "ta-splash-pulse 1.1s ease-in-out infinite" }}>
+        <img src="/voyageur.jpg" alt="TravelAI" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
 
       <div style={{ position: "absolute", bottom: 28, left: 0, right: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>

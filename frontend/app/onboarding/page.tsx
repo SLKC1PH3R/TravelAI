@@ -237,7 +237,7 @@ function OnboardingPageInner() {
       <div style={{ width: "100%", maxWidth: 900, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none", marginBottom: 32 }}>
           <Image
-            src="/voyageur.jpg"
+            src="/snapchat.png"
             alt="TravelAI"
             width={30}
             height={30}
@@ -258,7 +258,7 @@ function OnboardingPageInner() {
               <div className="ta-onb-card ta-onb-face">
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
                   <Image
-                    src="/voyageur.jpg"
+                    src="/snapchat.png"
                     alt="TravelAI"
                     width={56}
                     height={56}
