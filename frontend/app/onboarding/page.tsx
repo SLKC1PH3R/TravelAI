@@ -4,7 +4,7 @@ import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { submitOnboarding } from "@/lib/api";
 import { DEMO_AVATAR, DEMO_EMAIL, DEMO_LOGIN, DEMO_NAME, DEMO_PSEUDO } from "@/lib/demo";
 import SplashScreen from "@/components/SplashScreen";
@@ -219,7 +219,7 @@ function OnboardingPageInner() {
 
     if (isDemoMode) {
       setSubmitting(true);
-      router.push(`/dashboard/stats?uuid=${encodeURIComponent(DEMO_LOGIN)}`);
+      await signIn("email", { email: DEMO_EMAIL, callbackUrl: `/dashboard/stats?uuid=${encodeURIComponent(DEMO_LOGIN)}` });
       return;
     }
 
