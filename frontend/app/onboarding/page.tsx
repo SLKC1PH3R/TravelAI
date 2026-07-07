@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -46,9 +46,8 @@ const CSS = `
   }
 
   .ta-onb-flip-scene { width: 340px; flex-shrink: 0; perspective: 1400px; }
-  .ta-onb-flip-card { position: relative; width: 100%; min-height: 392px; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(.4,.2,.2,1), min-height 0.3s ease; }
+  .ta-onb-flip-card { position: relative; width: 100%; min-height: 392px; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(.4,.2,.2,1), height 0.3s ease; }
   .ta-onb-flip-card.is-flipped { transform: rotateY(180deg); }
-  .ta-onb-flip-card.has-error { min-height: 448px; }
 
   .ta-onb-error-box {
     display: flex; align-items: flex-start; gap: 8px;
@@ -165,6 +164,9 @@ function OnboardingPageInner() {
   const [showHint, setShowHint] = useState(false);
   const [showPseudo, setShowPseudo] = useState(false);
   const [pseudoRetried, setPseudoRetried] = useState(false);
+  const [cardHeight, setCardHeight] = useState<number | null>(null);
+  const loginFaceRef = useRef<HTMLDivElement>(null);
+  const pseudoFaceRef = useRef<HTMLDivElement>(null);
 
   const isDemoMode = searchParams.get("demo") === "1";
   const isDemo = session?.user?.email === DEMO_EMAIL || isDemoMode;
@@ -189,6 +191,12 @@ function OnboardingPageInner() {
     }, 1000);
     return () => clearTimeout(timer);
   }, [showSplash, isDemo]);
+
+  useLayoutEffect(() => {
+    const activeFace = step === "pseudo" ? pseudoFaceRef.current : loginFaceRef.current;
+    if (!activeFace) return;
+    setCardHeight(activeFace.scrollHeight);
+  }, [step, error, showHint]);
 
   if (showSplash) {
     return <SplashScreen />;
@@ -277,10 +285,13 @@ function OnboardingPageInner() {
           <FlowConnector />
 
           <div className="ta-onb-flip-scene">
-            <div className={`ta-onb-flip-card${step === "pseudo" ? " is-flipped" : ""}${error ? " has-error" : ""}`}>
+            <div
+              className={`ta-onb-flip-card${step === "pseudo" ? " is-flipped" : ""}`}
+              style={cardHeight ? { height: cardHeight } : undefined}
+            >
 
               {/* Face 1 : identifiant Snapchat */}
-              <div className="ta-onb-card ta-onb-face">
+              <div className="ta-onb-card ta-onb-face" ref={loginFaceRef}>
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
                   <Image
                     src="/snapchat.png"
@@ -363,7 +374,7 @@ function OnboardingPageInner() {
               </div>
 
               {/* Face 2 : pseudo */}
-              <div className="ta-onb-card ta-onb-face ta-onb-face-back">
+              <div className="ta-onb-card ta-onb-face ta-onb-face-back" ref={pseudoFaceRef}>
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
                   <Image
                     src="/snapchat.png"
