@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -45,7 +46,7 @@ const CSS = `
   }
 
   .ta-onb-flip-scene { width: 340px; flex-shrink: 0; perspective: 1400px; }
-  .ta-onb-flip-card { position: relative; width: 100%; min-height: 316px; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(.4,.2,.2,1); }
+  .ta-onb-flip-card { position: relative; width: 100%; min-height: 392px; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(.4,.2,.2,1); }
   .ta-onb-flip-card.is-flipped { transform: rotateY(180deg); }
   .ta-onb-face { position: absolute; inset: 0; backface-visibility: hidden; margin: 0; }
   .ta-onb-face-back { transform: rotateY(180deg); }
@@ -235,12 +236,13 @@ function OnboardingPageInner() {
       <style>{CSS}</style>
       <div style={{ width: "100%", maxWidth: 900, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none", marginBottom: 32 }}>
-          <div style={{ width: 30, height: 30, background: "#FFFC00", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-              <circle cx="8" cy="6" r="4" fill="#0D0D0D" />
-              <path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#0D0D0D" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </div>
+          <Image
+            src="/voyageur.jpg"
+            alt="TravelAI"
+            width={30}
+            height={30}
+            style={{ borderRadius: 8, objectFit: "cover" }}
+          />
           <span style={{ fontSize: 18, fontWeight: 700, color: "#0D0D0D", letterSpacing: "-0.4px" }}>TravelAI</span>
         </Link>
 
@@ -254,6 +256,15 @@ function OnboardingPageInner() {
 
               {/* Face 1 : identifiant Snapchat */}
               <div className="ta-onb-card ta-onb-face">
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                  <Image
+                    src="/voyageur.jpg"
+                    alt="TravelAI"
+                    width={56}
+                    height={56}
+                    style={{ borderRadius: 16, objectFit: "cover", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }}
+                  />
+                </div>
                 <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0D0D0D", textAlign: "center", marginBottom: 8, letterSpacing: "-0.4px" }}>
                   Connecte ta Lens
                 </h1>
@@ -328,6 +339,15 @@ function OnboardingPageInner() {
 
               {/* Face 2 : pseudo */}
               <div className="ta-onb-card ta-onb-face ta-onb-face-back">
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                  <Image
+                    src="/voyageur.jpg"
+                    alt="TravelAI"
+                    width={56}
+                    height={56}
+                    style={{ borderRadius: 16, objectFit: "cover", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }}
+                  />
+                </div>
                 <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0D0D0D", textAlign: "center", marginBottom: 8, letterSpacing: "-0.4px" }}>
                   Choisis ton pseudo
                 </h1>
