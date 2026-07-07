@@ -44,18 +44,9 @@ const CSS = `
     100% { left: 100%; opacity: 0; }
   }
 
-  .ta-onb-flip-scene { width: 340px; flex-shrink: 0; perspective: 1400px; }
-  .ta-onb-flip-card { position: relative; width: 100%; min-height: 316px; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(.4,.2,.2,1); }
-  .ta-onb-flip-card.is-flipped { transform: rotateY(180deg); }
-  .ta-onb-face { position: absolute; inset: 0; backface-visibility: hidden; margin: 0; }
-  .ta-onb-face-back { transform: rotateY(180deg); }
-  .ta-onb-account-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
-  .ta-onb-account-row p { margin: 0; font-size: 13px; font-weight: 600; color: #0D0D0D; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .ta-onb-account-row a { font-size: 12px; color: #8A8A8A; text-decoration: underline; cursor: pointer; flex-shrink: 0; }
-
   @media (max-width: 860px) {
     .ta-onb-flex { flex-direction: column; }
-    .ta-onb-card, .ta-onb-flip-scene { width: 100%; max-width: 380px; }
+    .ta-onb-card { width: 100%; max-width: 380px; }
     .ta-onb-connector { transform: rotate(90deg); margin: -2px 0; }
   }
 `;
@@ -134,13 +125,10 @@ function FlowConnector() {
   );
 }
 
-type OnboardingStep = "login" | "pseudo";
-
 function OnboardingPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, update } = useSession();
-  const [step, setStep] = useState<OnboardingStep>("login");
   const [login, setLogin] = useState("");
   const [pseudo, setPseudo] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -174,18 +162,6 @@ function OnboardingPageInner() {
 
   if (showSplash) {
     return <SplashScreen />;
-  }
-
-  function handleNextStep(e: React.FormEvent) {
-    e.preventDefault();
-    if (!login.trim()) return;
-    setShowHint(false);
-    setStep("pseudo");
-  }
-
-  function handleBackStep() {
-    setShowHint(false);
-    setStep("login");
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -228,8 +204,6 @@ function OnboardingPageInner() {
     }
   }
 
-  const hintText = step === "login" ? "Appuie sur Suivant pour continuer !" : "Appuie sur Valider pour continuer !";
-
   return (
     <div className="ta-onb-root">
       <style>{CSS}</style>
@@ -249,165 +223,92 @@ function OnboardingPageInner() {
 
           <FlowConnector />
 
-          <div className="ta-onb-flip-scene">
-            <div className={`ta-onb-flip-card${step === "pseudo" ? " is-flipped" : ""}`}>
+          <div className="ta-onb-card">
+            <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0D0D0D", textAlign: "center", marginBottom: 8, letterSpacing: "-0.4px" }}>
+              Connecte ta Lens
+            </h1>
+            <p style={{ fontSize: 13, color: "#6B6B6B", textAlign: "center", marginBottom: 24, lineHeight: 1.5 }}>
+              Indique l&apos;identifiant Snapchat affiche dans la Lens, et choisis un pseudo. On ne te redemandera plus.
+            </p>
 
-              {/* Face 1 : identifiant Snapchat */}
-              <div className="ta-onb-card ta-onb-face">
-                <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0D0D0D", textAlign: "center", marginBottom: 8, letterSpacing: "-0.4px" }}>
-                  Connecte ta Lens
-                </h1>
-                <p style={{ fontSize: 13, color: "#6B6B6B", textAlign: "center", marginBottom: 24, lineHeight: 1.5 }}>
-                  Indique l&apos;identifiant Snapchat affiche dans la Lens pour continuer.
-                </p>
+            <form onSubmit={handleSubmit}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Identifiant Snapchat (login)
+              </label>
+              <input
+                className="ta-onb-input"
+                value={login}
+                onChange={isDemo ? undefined : (e) => setLogin(e.target.value)}
+                readOnly={isDemo}
+                placeholder="ex: test-uuid-eiffel-001"
+                required
+                style={{ marginBottom: 16 }}
+              />
 
-                <form onSubmit={handleNextStep}>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                    Identifiant Snapchat (login)
-                  </label>
-                  <input
-                    className="ta-onb-input"
-                    value={login}
-                    onChange={isDemo ? undefined : (e) => setLogin(e.target.value)}
-                    readOnly={isDemo}
-                    placeholder="ex: test-uuid-eiffel-001"
-                    required
-                    style={{ marginBottom: 20 }}
-                  />
+              <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Pseudo
+              </label>
+              <input
+                className="ta-onb-input"
+                value={pseudo}
+                onChange={isDemo ? undefined : (e) => setPseudo(e.target.value)}
+                readOnly={isDemo}
+                placeholder="ex: Jeremy"
+                required
+                style={{ marginBottom: 20 }}
+              />
 
-                  <button
-                    type="submit"
-                    disabled={!login.trim()}
-                    className="ta-onb-submit"
-                    style={{
-                      width: "100%",
-                      background: "#FFFC00",
-                      border: "none",
-                      borderRadius: 10,
-                      padding: 13,
-                      fontSize: 14,
-                      fontWeight: 700,
-                      color: "#0D0D0D",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Suivant
-                  </button>
+              {error && <p style={{ fontSize: 12.5, color: "#D02828", marginBottom: 14, lineHeight: 1.5 }}>{error}</p>}
 
-                  {showHint && step === "login" && (
-                    <div
-                      className="ta-onb-hint-popup"
-                      style={{
-                        marginTop: 10,
-                        position: "relative",
-                        background: "#0D0D0D",
-                        color: "#fff",
-                        borderRadius: 10,
-                        padding: "11px 16px",
-                        fontSize: 13,
-                        fontWeight: 600,
-                        textAlign: "center",
-                      }}
-                    >
-                      <div style={{
-                        position: "absolute",
-                        top: -7,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        width: 0,
-                        height: 0,
-                        borderLeft: "7px solid transparent",
-                        borderRight: "7px solid transparent",
-                        borderBottom: "7px solid #0D0D0D",
-                      }} />
-                      {hintText}
-                    </div>
-                  )}
-                </form>
-              </div>
+              <button
+                type="submit"
+                disabled={submitting || !login.trim() || !pseudo.trim()}
+                className="ta-onb-submit"
+                style={{
+                  width: "100%",
+                  background: "#FFFC00",
+                  border: "none",
+                  borderRadius: 10,
+                  padding: 13,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: "#0D0D0D",
+                  cursor: "pointer",
+                }}
+              >
+                {submitting ? "Enregistrement..." : "Valider"}
+              </button>
 
-              {/* Face 2 : pseudo */}
-              <div className="ta-onb-card ta-onb-face ta-onb-face-back">
-                <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0D0D0D", textAlign: "center", marginBottom: 8, letterSpacing: "-0.4px" }}>
-                  Choisis ton pseudo
-                </h1>
-                <p style={{ fontSize: 13, color: "#6B6B6B", textAlign: "center", marginBottom: 18, lineHeight: 1.5 }}>
-                  On ne te redemandera plus.
-                </p>
-
-                <div className="ta-onb-account-row">
-                  <p>{login || "—"}</p>
-                  {!isDemo && <a onClick={handleBackStep}>Modifier</a>}
+              {showHint && (
+                <div
+                  className="ta-onb-hint-popup"
+                  style={{
+                    marginTop: 10,
+                    position: "relative",
+                    background: "#0D0D0D",
+                    color: "#fff",
+                    borderRadius: 10,
+                    padding: "11px 16px",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    textAlign: "center",
+                  }}
+                >
+                  <div style={{
+                    position: "absolute",
+                    top: -7,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: 0,
+                    height: 0,
+                    borderLeft: "7px solid transparent",
+                    borderRight: "7px solid transparent",
+                    borderBottom: "7px solid #0D0D0D",
+                  }} />
+                  Appuie sur Valider pour continuer !
                 </div>
-
-                <form onSubmit={handleSubmit}>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                    Pseudo
-                  </label>
-                  <input
-                    className="ta-onb-input"
-                    value={pseudo}
-                    onChange={isDemo ? undefined : (e) => setPseudo(e.target.value)}
-                    readOnly={isDemo}
-                    placeholder="ex: Jeremy"
-                    required
-                    style={{ marginBottom: 20 }}
-                  />
-
-                  {error && <p style={{ fontSize: 12.5, color: "#D02828", marginBottom: 14, lineHeight: 1.5 }}>{error}</p>}
-
-                  <button
-                    type="submit"
-                    disabled={submitting || !login.trim() || !pseudo.trim()}
-                    className="ta-onb-submit"
-                    style={{
-                      width: "100%",
-                      background: "#FFFC00",
-                      border: "none",
-                      borderRadius: 10,
-                      padding: 13,
-                      fontSize: 14,
-                      fontWeight: 700,
-                      color: "#0D0D0D",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {submitting ? "Enregistrement..." : "Valider"}
-                  </button>
-
-                  {showHint && step === "pseudo" && (
-                    <div
-                      className="ta-onb-hint-popup"
-                      style={{
-                        marginTop: 10,
-                        position: "relative",
-                        background: "#0D0D0D",
-                        color: "#fff",
-                        borderRadius: 10,
-                        padding: "11px 16px",
-                        fontSize: 13,
-                        fontWeight: 600,
-                        textAlign: "center",
-                      }}
-                    >
-                      <div style={{
-                        position: "absolute",
-                        top: -7,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        width: 0,
-                        height: 0,
-                        borderLeft: "7px solid transparent",
-                        borderRight: "7px solid transparent",
-                        borderBottom: "7px solid #0D0D0D",
-                      }} />
-                      {hintText}
-                    </div>
-                  )}
-                </form>
-              </div>
-
-            </div>
+              )}
+            </form>
           </div>
         </div>
       </div>
