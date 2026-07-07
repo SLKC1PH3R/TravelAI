@@ -59,6 +59,11 @@ def health() -> dict:
     return {"status": "ok"}
 
 
+@app.get("/ping")
+def ping() -> dict:
+    return {"ok": True}
+
+
 @app.api_route("/debug", methods=["GET", "POST", "PUT", "DELETE"])
 async def debug_endpoint(request: Request) -> dict:
     body = await request.body()
