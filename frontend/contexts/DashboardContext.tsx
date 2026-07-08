@@ -2,12 +2,13 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { downloadCarnet, fetchTrips, type Trip } from "@/lib/api";
+import { downloadCarnet, fetchMe, fetchTrips, type Trip } from "@/lib/api";
 
 type DashboardContextValue = {
   uuid: string;
   trips: Trip[];
   loading: boolean;
+  firstCarnetExportAt: string | null;
   selectedTripId: string | null;
   setSelectedTripId: (id: string) => void;
   selectTrip: (id: string) => void;
@@ -33,6 +34,14 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [showMerge, setShowMerge] = useState(false);
+  const [firstCarnetExportAt, setFirstCarnetExportAt] = useState<string | null>(null);
+
+  function reloadMe() {
+    if (!uuid) return Promise.resolve();
+    return fetchMe(uuid)
+      .then((me) => setFirstCarnetExportAt(me.first_carnet_export_at))
+      .catch(() => {});
+  }
 
   function reload() {
     if (!uuid) return Promise.resolve();
@@ -52,6 +61,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     reload();
+    reloadMe();
   }, [uuid]);
 
   useEffect(() => {
@@ -70,6 +80,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setDownloading(true);
     try {
       await downloadCarnet(selectedTrip.id, `carnet-${selectedTrip.title || selectedTrip.id}`);
+      await reloadMe();
     } finally {
       setDownloading(false);
     }
@@ -97,6 +108,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         uuid,
         trips,
         loading,
+        firstCarnetExportAt,
         selectedTripId,
         setSelectedTripId,
         selectTrip,

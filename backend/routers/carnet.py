@@ -1,6 +1,7 @@
 import io
 import os
 import uuid
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
@@ -38,6 +39,9 @@ def generate_carnet(trip_id: uuid.UUID, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Trip not found")
 
     user = db.query(models.User).filter(models.User.id == trip.user_id).first()
+    if user is not None and user.first_carnet_export_at is None:
+        user.first_carnet_export_at = datetime.utcnow()
+        db.commit()
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=2 * cm, bottomMargin=2 * cm)

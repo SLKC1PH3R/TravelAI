@@ -40,6 +40,7 @@ class MonumentOut(BaseModel):
     is_favorite: bool
     trivia_question: str | None
     trivia_answer: str | None
+    is_unesco: bool = False
     photos: list[PhotoOut] = []
     conversations: list[ConversationOut] = []
 
@@ -71,6 +72,7 @@ class UserOut(BaseModel):
     location: str | None
     is_admin: bool
     is_locked: bool
+    first_carnet_export_at: datetime | None = None
 
 
 class GoogleLinkRequest(BaseModel):
@@ -156,6 +158,7 @@ class MonumentAdminUpdate(BaseModel):
     visited_at: datetime | None = None
     trivia_question: str | None = None
     trivia_answer: str | None = None
+    is_unesco: bool | None = None
 
 
 class MonumentCreate(BaseModel):
@@ -168,3 +171,4 @@ class MonumentCreate(BaseModel):
     is_favorite: bool = False
     trivia_question: str | None = None
     trivia_answer: str | None = None
+    is_unesco: bool = False

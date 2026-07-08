@@ -1,4 +1,5 @@
 "use client"
+
 import React, { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
@@ -10,6 +11,7 @@ interface NavItem {
   url: string
   icon: LucideIcon
 }
+
 interface NavBarProps {
   items: NavItem[]
   className?: string
@@ -23,6 +25,7 @@ export function NavBar({ items, className }: NavBarProps) {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768)
     }
+
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
@@ -35,19 +38,18 @@ export function NavBar({ items, className }: NavBarProps) {
         className,
       )}
     >
-      {/* Conteneur : padding vertical réduit pour ne pas dépasser la hauteur du bouton CTA */}
-      <div className="flex items-center gap-3 bg-background/5 border border-border backdrop-blur-lg py-0.5 px-1 rounded-full shadow-lg">
+      <div className="flex items-center gap-3 bg-background/5 border border-border backdrop-blur-lg py-1 px-1 rounded-full shadow-lg">
         {items.map((item) => {
           const Icon = item.icon
           const isActive = activeTab === item.name
+
           return (
             <Link
               key={item.name}
               href={item.url}
               onClick={() => setActiveTab(item.name)}
               className={cn(
-                // hauteur fixe 38px = hauteur du bouton .ta-nav-cta (padding 10px 20px + font 13px)
-                "relative cursor-pointer inline-flex items-center justify-center h-[38px] text-sm font-semibold px-6 rounded-full transition-colors leading-none",
+                "relative cursor-pointer text-sm font-semibold px-6 py-2 rounded-full transition-colors",
                 "text-foreground/80 hover:text-primary",
                 isActive && "bg-muted text-primary",
               )}

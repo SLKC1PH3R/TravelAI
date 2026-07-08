@@ -90,7 +90,7 @@ async def analyze(request: Request, db: Session = Depends(get_db)):
                 monument_name=monument.name,
             )
 
-    name, country, city, description, anecdote, answer, trivia_question, trivia_answer = (
+    name, country, city, description, anecdote, answer, trivia_question, trivia_answer, is_unesco = (
         "Lieu inconnu",
         "Inconnu",
         "Inconnu",
@@ -99,44 +99,27 @@ async def analyze(request: Request, db: Session = Depends(get_db)):
         "",
         None,
         None,
+        False,
     )
 
     if payload.image_base64:
         result = gemini_client.analyze_image(payload.image_base64, payload.question)
-        name = result.get("name", name)
-        country = result.get("country", country)
-        city = result.get("city", city)
-        description = result.get("description")
-        anecdote = result.get("anecdote")
-        answer = result.get("answer", "")
-        if not answer:
-            answer = description or ""
-        trivia_question = result.get("trivia_question")
-        trivia_answer = result.get("trivia_answer")
     elif payload.latitude and payload.longitude:
         result = gemini_client.analyze_by_gps(payload.latitude, payload.longitude, payload.question)
-        name = result.get("name", name)
-        country = result.get("country", country)
-        city = result.get("city", city)
-        description = result.get("description")
-        anecdote = result.get("anecdote")
-        answer = result.get("answer", "")
-        if not answer:
-            answer = description or ""
-        trivia_question = result.get("trivia_question")
-        trivia_answer = result.get("trivia_answer")
     else:
         result = gemini_client.analyze_by_text(payload.question)
-        name = result.get("name", name)
-        country = result.get("country", country)
-        city = result.get("city", city)
-        description = result.get("description")
-        anecdote = result.get("anecdote")
-        answer = result.get("answer", "")
-        if not answer:
-            answer = description or ""
-        trivia_question = result.get("trivia_question")
-        trivia_answer = result.get("trivia_answer")
+
+    name = result.get("name", name)
+    country = result.get("country", country)
+    city = result.get("city", city)
+    description = result.get("description")
+    anecdote = result.get("anecdote")
+    answer = result.get("answer", "")
+    if not answer:
+        answer = description or ""
+    trivia_question = result.get("trivia_question")
+    trivia_answer = result.get("trivia_answer")
+    is_unesco = bool(result.get("is_unesco", False))
 
     trip = get_or_create_trip(db, user, country, city)
 
@@ -152,6 +135,7 @@ async def analyze(request: Request, db: Session = Depends(get_db)):
         description=full_description,
         trivia_question=trivia_question,
         trivia_answer=trivia_answer,
+        is_unesco=is_unesco,
     )
     db.add(monument)
     db.commit()

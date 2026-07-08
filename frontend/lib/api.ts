@@ -26,6 +26,7 @@ export type Monument = {
   is_favorite: boolean;
   trivia_question: string | null;
   trivia_answer: string | null;
+  is_unesco: boolean;
   photos: Photo[];
   conversations: Conversation[];
 };
@@ -133,10 +134,15 @@ export type UserProfile = {
   location: string | null;
   is_admin: boolean;
   is_locked: boolean;
+  first_carnet_export_at: string | null;
 };
 
 export function fetchProfile(email: string): Promise<UserProfile> {
   return request(`/users/by-email?email=${encodeURIComponent(email)}`);
+}
+
+export function fetchMe(uuid: string): Promise<UserProfile> {
+  return request(`/users/me?uuid=${encodeURIComponent(uuid)}`);
 }
 
 export function updateProfile(

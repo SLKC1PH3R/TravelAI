@@ -14,7 +14,9 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { type Monument } from '@/lib/api'
 import { ALL_CONTINENTS, continentFor, haversineKm, PARIS, TOTAL_COUNTRIES_IN_WORLD } from '@/lib/geo'
+import { computeBadges } from '@/lib/badges'
 import Flag from '@/components/Flag'
+import BadgesSection from '@/components/BadgesSection'
 import { useDashboard } from '@/contexts/DashboardContext'
 
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
@@ -85,7 +87,7 @@ function QuizCard({ monument }: { monument: Monument }) {
 export default function TravelAIStats() {
   const router = useRouter()
   const { data: session } = useSession()
-  const { uuid, trips, loading } = useDashboard()
+  const { uuid, trips, loading, firstCarnetExportAt } = useDashboard()
 
   useEffect(() => {
     if (!uuid && session?.user?.anonymousUuid) {
@@ -177,6 +179,10 @@ export default function TravelAIStats() {
 
   const worldPercent = stats.countries.size > 0 ? Math.round((stats.countries.size / TOTAL_COUNTRIES_IN_WORLD) * 1000) / 10 : 0
   const quizMonuments = allMonuments.filter((m) => m.trivia_question && m.trivia_answer)
+  const badges = useMemo(
+    () => computeBadges(trips, allMonuments, firstCarnetExportAt),
+    [trips, allMonuments, firstCarnetExportAt]
+  )
 
   if (!uuid) {
     return (
@@ -344,6 +350,9 @@ export default function TravelAIStats() {
             ))}
           </div>
         </div>
+
+        {/* DEFIS ET BADGES */}
+        <BadgesSection badges={badges} />
 
         {/* ENDROIT LE PLUS ELOIGNE */}
         <div style={{ background: '#fff', borderRadius: 18, border: '0.5px solid rgba(0,0,0,0.07)', padding: 22, marginBottom: 20 }}>

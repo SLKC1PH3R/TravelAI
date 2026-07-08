@@ -199,6 +199,7 @@ export default function LandingPage() {
   const navRef = useRef<HTMLElement>(null)
   const [showSnapcode, setShowSnapcode] = useState(false)
   const [activeDemoIndex, setActiveDemoIndex] = useState(0)
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0)
 
   useEffect(() => {
     const nav = navRef.current
@@ -351,6 +352,59 @@ export default function LandingPage() {
     },
   ]
 
+  /* -- Carnet de voyage : points clefs -- */
+  const journalPoints = [
+    {
+      icon: (
+        <>
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14z" />
+          <polyline points="17 21 17 13 7 13 7 21" />
+          <polyline points="7 3 7 8 15 8" />
+        </>
+      ),
+      title: 'Sauvegarde automatique',
+      desc: "Chaque photo et chaque question posee a l'IA est rangee par voyage, sans action de ta part.",
+    },
+    {
+      icon: (
+        <>
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5" />
+          <line x1="12" y1="16.5" x2="12.01" y2="16.5" />
+        </>
+      ),
+      title: 'Quiz de fin de visite',
+      desc: 'Un mini-quiz genere apres chaque decouverte, pour retenir ce qui compte vraiment.',
+    },
+    {
+      icon: (
+        <>
+          <path d="M12 2l2.4 6.9L22 9l-5.6 4.9L18 22l-6-4-6 4 1.6-8.1L2 9l7.6-.1z" />
+        </>
+      ),
+      title: 'Infos et anecdotes en evidence',
+      desc: 'Dates cles, chiffres marquants et anecdotes surprenantes remontees automatiquement.',
+    },
+    {
+      icon: (
+        <>
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </>
+      ),
+      title: 'Export PDF en un tap',
+      desc: "Transforme n'importe quel voyage en carnet illustre a imprimer ou a partager.",
+    },
+  ]
+
+  /* -- Carnet de voyage : apercu dashboard -- */
+  const tripsMockup = [
+    { city: 'Rome, Italie', flag: '🇮🇹', monuments: 14, photos: 32, quiz: 92, color: '#FFE8D6' },
+    { city: 'Kyoto, Japon', flag: '🇯🇵', monuments: 9, photos: 21, quiz: 87, color: '#DCEEFF' },
+    { city: 'Paris, France', flag: '🇫🇷', monuments: 6, photos: 15, quiz: 95, color: '#FFF3B0' },
+  ]
+
   /* -- Testimonial data -- */
   const testimonials = [
     {
@@ -367,6 +421,112 @@ export default function LandingPage() {
       quote: '"Utilise pendant une semaine au Japon. Chaque temple, chaque sanctuaire — TravelAI les connaissait tous. Pas besoin de wifi, pas de saisie, juste viser et decouvrir. Un vrai changement de jeu."',
       name: 'Yuki N.', role: 'Nomade digitale · Tokyo, JP',
       avatar: 'linear-gradient(135deg,#a8d8ea,#6fb3cf)', delay: 300,
+    },
+  ]
+
+  /* -- FAQ data -- */
+  const faqItems = [
+    {
+      q: 'Mes photos sont-elles privees ou visibles par d\'autres ?',
+      a: "Tes photos et ton carnet de voyage sont prives par defaut. Seul ce que tu choisis explicitement de partager (en snap ou en story) est envoye a tes amis — voir notre Politique de confidentialite pour le detail complet.",
+    },
+    {
+      q: 'Est-ce que je peux retrouver mes voyages meme sans Snapchat ouvert ?',
+      a: "Oui. Connecte-toi avec ton compte Google sur travelai.digitalstack.cloud pour retrouver ton carnet de voyage, ton historique et tes quiz, meme sans avoir Snapchat ouvert.",
+    },
+    {
+      q: 'Le PDF est-il vraiment gratuit ?',
+      a: "Oui. La generation et le telechargement de ton carnet de voyage PDF sont entierement gratuits, sans limite de temps ni carte bancaire requise.",
+    },
+    {
+      q: 'Ca fonctionne dans quelles langues / quels pays ?',
+      a: "TravelAI est disponible en francais et en anglais pour le moment, et identifie des monuments dans plus de 150 pays. D'autres langues arriveront prochainement selon la demande.",
+    },
+  ]
+
+  /* -- Pour qui ? -- */
+  const audienceProfiles = [
+    {
+      icon: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>,
+      title: 'Voyageur solo',
+      desc: "Explore a ton rythme sans avoir a chercher un guide ou une brochure — ton IA repond a chaque question, meme a 2h du matin.",
+    },
+    {
+      icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>,
+      title: 'Famille',
+      desc: "Transforme la visite en jeu : les enfants scannent, decouvrent et repondent au quiz — sans ecran qui les enferme.",
+    },
+    {
+      icon: <><rect x="2" y="6" width="14" height="12" rx="2" /><path d="M22 8.5v7l-6-3.5z" /></>,
+      title: 'Createur de contenu voyage',
+      desc: "Repars avec des anecdotes verifiees, des faits precis et un carnet illustre pret a nourrir tes prochains posts.",
+    },
+  ]
+
+  /* -- Defis et badges -- */
+  const badgesMockup = [
+    {
+      icon: <><path d="M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12z" /><path d="M8.5 13.5 7 22l5-3 5 3-1.5-8.5" /></>,
+      name: '10 monuments UNESCO',
+      desc: 'Decouvre 10 sites classes au patrimoine mondial.',
+      locked: false,
+    },
+    {
+      icon: <><path d="M2 12h4l3-9 4 18 3-9h6" /></>,
+      name: "Explorateur de l'Asie",
+      desc: 'Scanne un monument dans 5 pays asiatiques differents.',
+      locked: false,
+    },
+    {
+      icon: <><path d="M13 2 3 14h7l-1 8 10-12h-7z" /></>,
+      name: 'Serie de 5 jours',
+      desc: '5 jours consecutifs avec au moins une decouverte.',
+      locked: true,
+    },
+    {
+      icon: <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></>,
+      name: 'Premier carnet complete',
+      desc: 'Exporte ton tout premier carnet de voyage en PDF.',
+      locked: true,
+    },
+  ]
+
+  /* -- Roadmap -- */
+  const roadmapItems = [
+    { title: 'Traduction en temps reel', desc: "Pose tes questions dans ta langue, ou l'IA te repond directement traduit.", eta: 'Prochainement' },
+    { title: 'Realite augmentee historique', desc: "Superpose une reconstitution du monument a differentes epoques, directement dans la camera.", eta: 'A l\'etude' },
+    { title: 'Mode multi-lens', desc: 'Compare plusieurs monuments similaires vus pendant ton voyage en un seul recap.', eta: 'A l\'etude' },
+  ]
+
+  /* -- Comparatif audioguide -- */
+  const audioguideComparison = [
+    {
+      label: 'Audioguide classique',
+      price: '~8€ / site',
+      points: ['Un seul monument a la fois', 'A rendre en fin de visite', 'Contenu fige, pas de questions'],
+      highlight: false,
+    },
+    {
+      label: 'TravelAI',
+      price: 'Inclus, gratuit',
+      points: ['Tous les monuments, partout', 'Reste dans ton carnet a vie', 'Reponds a toutes tes questions'],
+      highlight: true,
+    },
+  ]
+
+  /* -- Confiance : tes photos t'appartiennent -- */
+  const trustPoints = [
+    {
+      q: 'Ou sont stockees tes photos ?',
+      a: 'Sur des serveurs securises, uniquement le temps necessaire pour generer ton carnet de voyage.',
+    },
+    {
+      q: 'Servent-elles a autre chose ?',
+      a: "Non. Elles ne sont utilisees que pour l'identification du monument et ton carnet — jamais revendues ni utilisees a des fins publicitaires.",
+    },
+    {
+      q: 'Comment les supprimer ?',
+      a: 'A tout moment, en nous ecrivant : suppression de tes photos et de tes donnees sous un mois maximum.',
     },
   ]
 
@@ -590,6 +750,33 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ===== POUR QUI ? ===== */}
+      <section id="pour-qui" style={{ background: '#FAFAFA', padding: '100px 80px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
+        <div style={{ maxWidth: 1160, margin: '0 auto' }}>
+          <div data-fade="" style={{ textAlign: 'center', marginBottom: 56 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 100, padding: '5px 14px', marginBottom: 18 }}>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: '#6B6B6B', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Pour qui ?</span>
+            </div>
+            <h2 style={{ fontSize: 42, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-1.5px', lineHeight: 1.1 }}>
+              Fait pour chaque facon de voyager
+            </h2>
+          </div>
+
+          <div className="ta-features-grid" style={{ display: 'flex', gap: 24 }}>
+            {audienceProfiles.map(({ icon, title, desc }, i) => (
+              <div key={title} data-fade="" data-delay={i * 100} className="ta-feature-card" style={{ flex: 1, background: '#fff', borderRadius: 16, border: '0.5px solid rgba(0,0,0,0.08)', padding: '36px 32px' }}>
+                <div className="ta-icon-box" style={{ width: 48, height: 48, borderRadius: 12, background: '#F7F7F7', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">{icon}</svg>
+                </div>
+                <div style={{ width: 32, height: 2, background: '#FFFC00', borderRadius: 2, marginBottom: 20 }} />
+                <h3 style={{ fontSize: 19, fontWeight: 700, color: '#0D0D0D', marginBottom: 12, letterSpacing: '-0.5px' }}>{title}</h3>
+                <p style={{ fontSize: 15, lineHeight: 1.65, color: '#6B6B6B' }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ===== HOW IT WORKS ===== */}
       <section id="how" style={{ background: '#fff', padding: '110px 80px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
         <div style={{ maxWidth: 1160, margin: '0 auto' }}>
@@ -620,6 +807,20 @@ export default function LandingPage() {
                 )}
               </Fragment>
             ))}
+          </div>
+
+          <div
+            data-fade=""
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+              marginTop: 56, background: '#FAFAFA', border: '0.5px solid rgba(0,0,0,0.08)',
+              borderRadius: 100, padding: '14px 28px', maxWidth: 620, marginLeft: 'auto', marginRight: 'auto',
+            }}
+          >
+            <GhostIcon size={18} />
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#0D0D0D', textAlign: 'center', lineHeight: 1.5 }}>
+              Tu as deja Snapchat ouvert pour immortaliser ton voyage. Autant qu&apos;il t&apos;en apprenne plus.
+            </p>
           </div>
         </div>
       </section>
@@ -716,6 +917,194 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ===== CARNET DE VOYAGE ===== */}
+      <section id="carnet" style={{ background: '#fff', padding: '110px 80px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
+        <div style={{ maxWidth: 1180, margin: '0 auto' }}>
+          <div data-fade="" style={{ textAlign: 'center', marginBottom: 64 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 100, padding: '5px 14px', marginBottom: 18 }}>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: '#6B6B6B', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Ton journal de voyage</span>
+            </div>
+            <h2 style={{ fontSize: 52, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-2px', lineHeight: 1.05, marginBottom: 18 }}>
+              Chaque voyage devient<br />un souvenir organise
+            </h2>
+            <p style={{ fontSize: 17, color: '#6B6B6B', lineHeight: 1.6, maxWidth: 560, margin: '0 auto' }}>
+              TravelAI ne s&apos;arrete pas au scan. Tout ce que tu decouvres pendant ton voyage est range et
+              organise automatiquement, pret a etre revisite ou partage.
+            </p>
+          </div>
+
+          <div className="ta-demo-inner" style={{ display: 'flex', gap: 56, alignItems: 'center' }}>
+            {/* Points clefs */}
+            <div style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', gap: 28 }}>
+              {journalPoints.map(({ icon, title, desc }, i) => (
+                <div key={title} data-fade="" data-delay={i * 100} style={{ display: 'flex', gap: 18, alignItems: 'flex-start' }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: '#F7F7F7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">{icon}</svg>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: 16.5, fontWeight: 700, color: '#0D0D0D', marginBottom: 5, letterSpacing: '-0.3px' }}>{title}</h3>
+                    <p style={{ fontSize: 14, lineHeight: 1.6, color: '#6B6B6B', margin: 0 }}>{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Apercu dashboard */}
+            <div data-fade="" style={{ flex: '1.1 1 0%', background: '#FAFAFA', borderRadius: 20, border: '0.5px solid rgba(0,0,0,0.07)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', padding: 24 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.3px' }}>Mes voyages</span>
+                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#6B6B6B', background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 100, padding: '4px 10px' }}>3 carnets</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {tripsMockup.map(({ city, flag, monuments, photos, quiz, color }) => (
+                  <div key={city} style={{ background: '#fff', borderRadius: 14, border: '0.5px solid rgba(0,0,0,0.07)', padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
+                      {flag}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 14.5, fontWeight: 700, color: '#0D0D0D', marginBottom: 4 }}>{city}</div>
+                      <div style={{ fontSize: 12, color: '#6B6B6B' }}>{monuments} monuments · {photos} photos</div>
+                    </div>
+                    <div style={{ textAlign: 'center', flexShrink: 0 }}>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: '#0D0D0D' }}>{quiz}%</div>
+                      <div style={{ fontSize: 10, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Quiz</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== PARTAGE ===== */}
+      <section id="partage" style={{ background: '#FAFAFA', padding: '110px 80px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
+        <div style={{ maxWidth: 1180, margin: '0 auto' }}>
+          <div className="ta-demo-inner" style={{ display: 'flex', gap: 56, alignItems: 'center' }}>
+            {/* Texte */}
+            <div style={{ flex: '1 1 0%' }}>
+              <div data-fade="" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 100, padding: '5px 14px', marginBottom: 18 }}>
+                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#6B6B6B', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Sans quitter Snapchat</span>
+              </div>
+              <h2 data-fade="" data-delay="100" style={{ fontSize: 46, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-1.8px', lineHeight: 1.1, marginBottom: 18 }}>
+                Decouvre, puis partage<br />en un swipe
+              </h2>
+              <p data-fade="" data-delay="200" style={{ fontSize: 16, color: '#6B6B6B', lineHeight: 1.65, maxWidth: 460 }}>
+                Envoie directement la fiche du monument — photo et anecdote de l&apos;IA incluses — a tes amis en
+                snap ou en story, sans sortir de l&apos;application. Ton voyage devient une histoire a partager,
+                en temps reel.
+              </p>
+            </div>
+
+            {/* Mockup envoi Snap */}
+            <div data-fade="" data-delay="300" style={{ flex: '1 1 0%', display: 'flex', justifyContent: 'center' }}>
+              <div style={{ width: 320, background: '#fff', borderRadius: 20, border: '0.5px solid rgba(0,0,0,0.07)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+                <div style={{ position: 'relative' }}>
+                  <img src="/6.png" alt="Notre-Dame de Paris" style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} />
+                  <div style={{ position: 'absolute', bottom: 12, left: 12, right: 12, background: 'rgba(13,13,13,0.75)', backdropFilter: 'blur(6px)', borderRadius: 12, padding: '10px 14px' }}>
+                    <p style={{ margin: 0, fontSize: 12, color: '#fff', lineHeight: 1.5 }}>
+                      &quot;Construite des 1163, ses tours jumelles dominent l&apos;ile de la Cite depuis plus de 800 ans.&quot;
+                    </p>
+                  </div>
+                </div>
+                <div style={{ padding: 18 }}>
+                  <div style={{ fontSize: 11.5, fontWeight: 600, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>Envoyer a</div>
+                  <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
+                    {['#ffd3a5,#fd9853', '#c8f7c5,#4caf50', '#a8d8ea,#6fb3cf', '#e0c3fc,#8ec5fc'].map((g, i) => (
+                      <div key={i} style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg,${g})`, border: '2px solid #fff', boxShadow: '0 0 0 1px rgba(0,0,0,0.06)' }} />
+                    ))}
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#6B6B6B' }}>+8</div>
+                  </div>
+                  <button type="button" style={{ width: '100%', background: '#FFFC00', border: 'none', borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700, color: '#0D0D0D', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <GhostIcon size={16} />
+                    Envoyer en Snap
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== DEFIS ET BADGES ===== */}
+      <section id="badges" style={{ background: '#fff', padding: '110px 80px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
+        <div style={{ maxWidth: 1160, margin: '0 auto' }}>
+          <div data-fade="" style={{ textAlign: 'center', marginBottom: 56 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 100, padding: '5px 14px', marginBottom: 18 }}>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: '#6B6B6B', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Defis</span>
+            </div>
+            <h2 style={{ fontSize: 42, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-1.5px', lineHeight: 1.1, marginBottom: 14 }}>
+              Debloque des badges a chaque decouverte
+            </h2>
+            <p style={{ fontSize: 16, color: '#6B6B6B', lineHeight: 1.6, maxWidth: 520, margin: '0 auto' }}>
+              Chaque monument scanne te rapproche d&apos;un nouvel objectif. Un but au-dela du simple scan.
+            </p>
+          </div>
+
+          <div className="ta-features-grid" style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+            {badgesMockup.map(({ icon, name, desc, locked }, i) => (
+              <div
+                key={name}
+                data-fade="" data-delay={i * 100}
+                style={{
+                  flex: '1 1 240px', background: locked ? '#FAFAFA' : '#fff', borderRadius: 16,
+                  border: '0.5px solid rgba(0,0,0,0.08)', padding: '28px 24px', textAlign: 'center',
+                  opacity: locked ? 0.55 : 1,
+                }}
+              >
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: locked ? '#EFEFEF' : '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">{icon}</svg>
+                </div>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0D0D0D', marginBottom: 8, letterSpacing: '-0.3px' }}>{name}</h3>
+                <p style={{ fontSize: 13, lineHeight: 1.55, color: '#6B6B6B', margin: 0 }}>{desc}</p>
+                {locked && (
+                  <div style={{ marginTop: 14, display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10.5, fontWeight: 600, color: '#8A8A8A', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth={2}><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                    A debloquer
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== ROADMAP ===== */}
+      <section id="roadmap" style={{ background: '#0D0D0D', padding: '110px 80px' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+          <div data-fade="" style={{ textAlign: 'center', marginBottom: 56 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.08)', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: 100, padding: '5px 14px', marginBottom: 18 }}>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Bientot</span>
+            </div>
+            <h2 style={{ fontSize: 42, fontWeight: 700, color: '#fff', letterSpacing: '-1.5px', lineHeight: 1.1 }}>
+              Ce qu&apos;on prepare pour toi
+            </h2>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {roadmapItems.map(({ title, desc, eta }, i) => (
+              <div
+                key={title}
+                data-fade="" data-delay={i * 100}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 20, background: 'rgba(255,255,255,0.04)',
+                  border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '22px 26px',
+                }}
+              >
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 13, fontWeight: 700, color: '#0D0D0D' }}>
+                  {i + 1}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4, letterSpacing: '-0.3px' }}>{title}</h3>
+                  <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.55)', margin: 0, lineHeight: 1.5 }}>{desc}</p>
+                </div>
+                <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 600, color: '#FFFC00', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{eta}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ===== FEATURES ===== */}
       <section id="features" style={{ background: '#fff', padding: '110px 80px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
         <div style={{ maxWidth: 1160, margin: '0 auto' }}>
@@ -795,6 +1184,125 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ===== CONFIANCE / TES PHOTOS T'APPARTIENNENT ===== */}
+      <section style={{ background: '#fff', padding: '90px 80px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+          <div data-fade="" style={{ textAlign: 'center', marginBottom: 48 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 100, padding: '5px 14px', marginBottom: 18 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth={2}><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: '#6B6B6B', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Confiance</span>
+            </div>
+            <h2 style={{ fontSize: 38, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-1.3px', lineHeight: 1.1 }}>
+              Tes photos t&apos;appartiennent
+            </h2>
+          </div>
+
+          <div className="ta-features-grid" style={{ display: 'flex', gap: 20 }}>
+            {trustPoints.map(({ q, a }, i) => (
+              <div key={q} data-fade="" data-delay={i * 100} style={{ flex: 1, background: '#FAFAFA', borderRadius: 16, border: '0.5px solid rgba(0,0,0,0.07)', padding: '28px 26px' }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0D0D0D', marginBottom: 10, letterSpacing: '-0.3px' }}>{q}</h3>
+                <p style={{ fontSize: 13.5, lineHeight: 1.6, color: '#6B6B6B', margin: 0 }}>{a}</p>
+              </div>
+            ))}
+          </div>
+
+          <div data-fade="" style={{ textAlign: 'center', marginTop: 32 }}>
+            <Link href="/confidentialite" style={{ fontSize: 13.5, fontWeight: 600, color: '#0D0D0D', textDecoration: 'underline' }}>
+              Lire notre politique de confidentialite complete
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== FAQ ===== */}
+      <section id="faq" style={{ background: '#FAFAFA', padding: '110px 80px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
+        <div style={{ maxWidth: 780, margin: '0 auto' }}>
+          <div data-fade="" style={{ textAlign: 'center', marginBottom: 56 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 100, padding: '5px 14px', marginBottom: 18 }}>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: '#6B6B6B', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Questions frequentes</span>
+            </div>
+            <h2 style={{ fontSize: 42, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-1.5px', lineHeight: 1.05 }}>
+              Tout ce que tu te demandes
+            </h2>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {faqItems.map(({ q, a }, i) => {
+              const isOpen = openFaqIndex === i
+              return (
+                <div
+                  key={q}
+                  data-fade=""
+                  style={{ background: '#fff', borderRadius: 14, border: '0.5px solid rgba(0,0,0,0.08)', overflow: 'hidden' }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqIndex(isOpen ? null : i)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      gap: 16, padding: '20px 24px', background: 'none', border: 'none', cursor: 'pointer',
+                      textAlign: 'left', fontSize: 16, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.3px',
+                    }}
+                  >
+                    {q}
+                    <svg
+                      width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round"
+                      style={{ flexShrink: 0, transition: 'transform .25s ease', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+                  {isOpen && (
+                    <p style={{ margin: 0, padding: '0 24px 22px', fontSize: 14.5, lineHeight: 1.65, color: '#6B6B6B' }}>
+                      {a}
+                    </p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== COMPARATIF AUDIOGUIDE ===== */}
+      <section style={{ background: '#FAFAFA', padding: '100px 80px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <div data-fade="" style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h2 style={{ fontSize: 38, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-1.3px', lineHeight: 1.1 }}>
+              Pourquoi payer un audioguide ?
+            </h2>
+          </div>
+
+          <div className="ta-demo-inner" style={{ display: 'flex', gap: 20 }}>
+            {audioguideComparison.map(({ label, price, points, highlight }) => (
+              <div
+                key={label}
+                data-fade=""
+                style={{
+                  flex: 1, borderRadius: 18, padding: '32px 28px',
+                  background: highlight ? '#0D0D0D' : '#fff',
+                  border: highlight ? 'none' : '0.5px solid rgba(0,0,0,0.08)',
+                  boxShadow: highlight ? '0 8px 32px rgba(0,0,0,0.18)' : 'none',
+                }}
+              >
+                <div style={{ fontSize: 13.5, fontWeight: 600, color: highlight ? 'rgba(255,255,255,0.6)' : '#6B6B6B', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
+                <div style={{ fontSize: 30, fontWeight: 700, color: highlight ? '#FFFC00' : '#0D0D0D', letterSpacing: '-1px', marginBottom: 22 }}>{price}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {points.map((pt) => (
+                    <div key={pt} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={highlight ? '#FFFC00' : '#0D0D0D'} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <span style={{ fontSize: 14, color: highlight ? 'rgba(255,255,255,0.9)' : '#0D0D0D' }}>{pt}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ===== CTA ===== */}
       <section style={{ background: '#fff', padding: '120px 80px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
         <div style={{ maxWidth: 700, margin: '0 auto', textAlign: 'center' }}>
@@ -831,8 +1339,12 @@ export default function LandingPage() {
             </a>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 36 }}>
-              {['Confidentialite', 'Conditions', 'Contact'].map((l) => (
-                <a key={l} href="#" className="ta-footer-link" style={{ fontSize: 13.5 }}>{l}</a>
+              {[
+                { label: 'Confidentialite', href: '/confidentialite' },
+                { label: 'Conditions', href: '/conditions' },
+                { label: 'Contact', href: '/contact' },
+              ].map(({ label, href }) => (
+                <Link key={label} href={href} className="ta-footer-link" style={{ fontSize: 13.5 }}>{label}</Link>
               ))}
             </div>
 

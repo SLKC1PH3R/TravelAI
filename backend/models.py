@@ -22,6 +22,7 @@ class User(Base):
     location: Mapped[str | None] = mapped_column(String, nullable=True)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     is_locked: Mapped[bool] = mapped_column(Boolean, default=False)
+    first_carnet_export_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     trips: Mapped[list["Trip"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
@@ -54,6 +55,7 @@ class Monument(Base):
     is_favorite: Mapped[bool] = mapped_column(Boolean, default=False)
     trivia_question: Mapped[str | None] = mapped_column(Text, nullable=True)
     trivia_answer: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_unesco: Mapped[bool] = mapped_column(Boolean, default=False)
 
     trip: Mapped["Trip"] = relationship(back_populates="monuments")
     photos: Mapped[list["Photo"]] = relationship(back_populates="monument", cascade="all, delete-orphan")

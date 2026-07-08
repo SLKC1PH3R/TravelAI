@@ -23,10 +23,11 @@ Si c'est un monument, fournis les informations suivantes :
   (si la question est generique comme "identifie ce monument", resume la description en 2 phrases)
 - trivia_question : une question de quiz sur ce monument (annee de construction, architecte, hauteur...)
 - trivia_answer : la reponse courte a cette question de quiz
+- is_unesco : true si ce monument ou site est inscrit au patrimoine mondial de l'UNESCO, false sinon
 
 Reponds uniquement en JSON valide, sans markdown, au format :
 {{"name": "...", "country": "...", "city": "...", "description": "...", "anecdote": "...",
-"answer": "...", "trivia_question": "...", "trivia_answer": "..."}}
+"answer": "...", "trivia_question": "...", "trivia_answer": "...", "is_unesco": false}}
 
 Question de l'utilisateur : {question}
 """
@@ -61,7 +62,8 @@ Un utilisateur se trouve aux coordonnees GPS : latitude {lat}, longitude {lng}.
 Identifie le monument ou lieu touristique le plus connu a proximite de ces coordonnees.
 Reponds uniquement en JSON valide, sans markdown, au format :
 {{"name": "...", "country": "...", "city": "...", "description": "...", "anecdote": "...",
-"answer": "description concise du monument en 2 phrases en francais", "trivia_question": "...", "trivia_answer": "..."}}
+"answer": "description concise du monument en 2 phrases en francais", "trivia_question": "...", "trivia_answer": "...",
+"is_unesco": false}}
 
 Question de l'utilisateur : {question}
 """
@@ -73,7 +75,7 @@ Identifie le monument mentionne dans la question et reponds directement.
 Si aucun monument n'est mentionne, reponds de facon generique sur les monuments.
 Reponds uniquement en JSON valide, sans markdown, au format :
 {{"name": "...", "country": "...", "city": "...", "description": "...", "anecdote": "...",
-"answer": "reponse concise en francais", "trivia_question": "...", "trivia_answer": "..."}}
+"answer": "reponse concise en francais", "trivia_question": "...", "trivia_answer": "...", "is_unesco": false}}
 
 Question : {question}
 """
