@@ -41,8 +41,7 @@ export function NavBar({ items, className }: NavBarProps) {
       <div className="flex items-center gap-2 bg-background border border-border py-2 px-2 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
         {items.map((item) => {
           const Icon = item.icon
-          const isActive = activeTab === item.name"relative cursor-pointer text-[13px] font-semibold px-5 py-[5px] rounded-full transition-colors whitespace-nowrap",
-
+          const isActive = activeTab === item.name
           return (
             <Link
               key={item.name}
