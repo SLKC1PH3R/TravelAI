@@ -1064,42 +1064,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ===== ROADMAP ===== */}
-      <section id="roadmap" style={{ background: '#0D0D0D', padding: '110px 80px' }}>
-        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-          <div data-fade="" style={{ textAlign: 'center', marginBottom: 56 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.08)', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: 100, padding: '5px 14px', marginBottom: 18 }}>
-              <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Bientot</span>
-            </div>
-            <h2 style={{ fontSize: 42, fontWeight: 700, color: '#fff', letterSpacing: '-1.5px', lineHeight: 1.1 }}>
-              Ce qu&apos;on prepare pour toi
-            </h2>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {roadmapItems.map(({ title, desc, eta }, i) => (
-              <div
-                key={title}
-                data-fade="" data-delay={i * 100}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 20, background: 'rgba(255,255,255,0.04)',
-                  border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '22px 26px',
-                }}
-              >
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 13, fontWeight: 700, color: '#0D0D0D' }}>
-                  {i + 1}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4, letterSpacing: '-0.3px' }}>{title}</h3>
-                  <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.55)', margin: 0, lineHeight: 1.5 }}>{desc}</p>
-                </div>
-                <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 600, color: '#FFFC00', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{eta}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ===== FEATURES ===== */}
       <section id="features" style={{ background: '#fff', padding: '110px 80px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
         <div style={{ maxWidth: 1160, margin: '0 auto' }}>
@@ -1292,6 +1256,42 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== ROADMAP ===== */}
+      <section id="roadmap" style={{ background: '#0D0D0D', padding: '110px 80px' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+          <div data-fade="" style={{ textAlign: 'center', marginBottom: 56 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.08)', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: 100, padding: '5px 14px', marginBottom: 18 }}>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Bientot</span>
+            </div>
+            <h2 style={{ fontSize: 42, fontWeight: 700, color: '#fff', letterSpacing: '-1.5px', lineHeight: 1.1 }}>
+              Ce qu&apos;on prepare pour toi
+            </h2>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {roadmapItems.map(({ title, desc, eta }, i) => (
+              <div
+                key={title}
+                data-fade="" data-delay={i * 100}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 20, background: 'rgba(255,255,255,0.04)',
+                  border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '22px 26px',
+                }}
+              >
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 13, fontWeight: 700, color: '#0D0D0D' }}>
+                  {i + 1}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4, letterSpacing: '-0.3px' }}>{title}</h3>
+                  <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.55)', margin: 0, lineHeight: 1.5 }}>{desc}</p>
+                </div>
+                <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 600, color: '#FFFC00', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{eta}</span>
               </div>
             ))}
           </div>
