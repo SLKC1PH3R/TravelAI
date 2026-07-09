@@ -1,4 +1,4 @@
-import LandingPage from "@/components/LandingPage";
+import LandingPageGlass from "@/components/LandingPageGlass";
 
 export default function Page() {
   return <LandingPageGlass />;
