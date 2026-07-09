@@ -348,9 +348,9 @@ export default function LandingPageGlass() {
           <a href="#badges" className="tg-nav-link">Badges</a>
           <a href="#faq" className="tg-nav-link">FAQ</a>
         </div>
-        <a href="#demo" className="tg-btn-y" style={{ padding: '9px 18px', borderRadius: 999, fontSize: 13 }}>
+        <a href="/login" className="tg-btn-y" style={{ padding: '9px 18px', borderRadius: 999, fontSize: 13 }}>
           <Ghost size={14} color="#0D0D0D" />
-          Voir la démo
+          Se connecter
         </a>
       </nav>
 
@@ -372,7 +372,7 @@ export default function LandingPageGlass() {
               Pointe ta caméra Snapchat sur n&apos;importe quel monument : ton guide IA l&apos;identifie en moins de 2 secondes, répond à toutes tes questions et garde le souvenir dans ton carnet de voyage.
             </p>
             <div data-fade="" data-delay="240" style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-              <a href="#demo" className="tg-btn-y" style={{ padding: '16px 30px' }}>
+              <a href="/onboarding?demo=1" className="tg-btn-y" style={{ padding: '16px 30px' }}>
                 <Ghost size={16} color="#0D0D0D" />
                 Voir la démo
               </a>
