@@ -599,10 +599,14 @@ export default function LandingPage() {
           <span style={{ fontSize: 17, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.4px' }}>TravelAI</span>
         </a>
 
-        <div className="ta-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 36 }}>
+        <div className="ta-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
           <a href="#how" className="ta-nav-link">Comment ca marche</a>
           <a href="#demo" className="ta-nav-link">Demo</a>
+          <a href="#carnet" className="ta-nav-link">Carnet</a>
+          <a href="#partage" className="ta-nav-link">Partage</a>
+          <a href="#badges" className="ta-nav-link">Badges</a>
           <a href="#features" className="ta-nav-link">Fonctionnalites</a>
+          <a href="#faq" className="ta-nav-link">FAQ</a>
         </div>
 
         <Link href="/login" className="ta-nav-cta">
