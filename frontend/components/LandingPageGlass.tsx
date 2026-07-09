@@ -115,10 +115,14 @@ const TESTIMONIALS = [
 
 const GALLERY = [
   { src: '/salar-de-uyuni.jpg', name: 'Salar de Uyuni', place: 'Bolivie' },
-  { src: null, name: "Porte de l'Enfer", place: 'Darvaza, Turkménistan' },
+  { src: '/porte-de-lenfer.jpg', name: "Porte de l'Enfer", place: 'Darvaza, Turkménistan' },
   { src: '/cappadoce.jpg', name: 'Cappadoce', place: 'Turquie' },
   { src: '/zhangjiajie.jpg', name: 'Zhangjiajie', place: 'Chine' },
   { src: '/trolltunga.jpg', name: 'Trolltunga', place: 'Norvège' },
+  { src: '/chandps.jpg', name: 'Chand Baori', place: 'Rajasthan, Inde' },
+  { src: '/Krzywy_Domek_w_Sopocie.jpg', name: 'La maison tordue', place: 'Sopot, Pologne' },
+  { src: '/monastere.jpg', name: 'Monastères de Grand Météore', place: 'Grèce' },
+  { src: '/Landmannalaugar .jpg', name: 'Landmannalaugar ', place: 'Islande' },
 ]
 
 const TRIPS = [
