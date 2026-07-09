@@ -122,7 +122,7 @@ const GALLERY = [
   { src: '/chandps.jpg', name: 'Chand Baori', place: 'Rajasthan, Inde' },
   { src: '/Krzywy_Domek_w_Sopocie.jpg', name: 'La maison tordue', place: 'Sopot, Pologne' },
   { src: '/monastere.jpg', name: 'Monastères de Grand Météore', place: 'Grèce' },
-  { src: '/Landmannalaugar .jpg', name: 'Landmannalaugar ', place: 'Islande' },
+  { src: '/landmannalaugar.jpg', name: 'Landmannalaugar ', place: 'Islande' },
 ]
 
 const TRIPS = [
@@ -206,26 +206,29 @@ export default function LandingPageGlass() {
     if (!el) return
 
     let isDown = false
+    let paused = false
     let startX = 0
     let startScroll = 0
     let moved = false
 
-    const onDown = (e: MouseEvent) => {
+    const onDown = (e: PointerEvent) => {
       isDown = true
+      paused = true
       moved = false
-      startX = e.pageX
+      startX = e.clientX
       startScroll = el.scrollLeft
+      el.setPointerCapture(e.pointerId)
       el.style.cursor = 'grabbing'
     }
-    const onMove = (e: MouseEvent) => {
+    const onMove = (e: PointerEvent) => {
       if (!isDown) return
-      e.preventDefault()
-      const delta = e.pageX - startX
+      const delta = e.clientX - startX
       if (Math.abs(delta) > 5) moved = true
       el.scrollLeft = startScroll - delta
     }
     const stop = () => {
       isDown = false
+      paused = false
       el.style.cursor = 'grab'
     }
     const onClickCapture = (e: MouseEvent) => {
@@ -235,17 +238,31 @@ export default function LandingPageGlass() {
       }
     }
 
-    el.addEventListener('mousedown', onDown)
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup', stop)
-    el.addEventListener('mouseleave', stop)
+    el.addEventListener('pointerdown', onDown)
+    el.addEventListener('pointermove', onMove)
+    el.addEventListener('pointerup', stop)
+    el.addEventListener('pointercancel', stop)
     el.addEventListener('click', onClickCapture, true)
 
+    /* Defilement automatique en boucle (contenu duplique x2 pour un loop sans coupure) */
+    let frame: number
+    const SPEED = 0.5
+    const tick = () => {
+      if (!paused) {
+        const half = el.scrollWidth / 2
+        el.scrollLeft += SPEED
+        if (el.scrollLeft >= half) el.scrollLeft -= half
+      }
+      frame = requestAnimationFrame(tick)
+    }
+    frame = requestAnimationFrame(tick)
+
     return () => {
-      el.removeEventListener('mousedown', onDown)
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseup', stop)
-      el.removeEventListener('mouseleave', stop)
+      cancelAnimationFrame(frame)
+      el.removeEventListener('pointerdown', onDown)
+      el.removeEventListener('pointermove', onMove)
+      el.removeEventListener('pointerup', stop)
+      el.removeEventListener('pointercancel', stop)
       el.removeEventListener('click', onClickCapture, true)
     }
   }, [])
@@ -729,9 +746,9 @@ export default function LandingPageGlass() {
             <p style={{ fontSize: 15, color: 'rgba(244,243,238,.55)', margin: 0 }}>Fais glisser pour explorer →</p>
           </div>
         </div>
-        <div ref={galleryRef} className="tg-noscroll" style={{ display: 'flex', gap: 20, overflowX: 'auto', scrollSnapType: 'x mandatory', padding: '8px 64px 28px', cursor: 'grab', WebkitOverflowScrolling: 'touch', userSelect: 'none' }}>
-          {GALLERY.map(({ src, name, place }) => (
-            <div key={name} style={{ flex: '0 0 300px', scrollSnapAlign: 'center', borderRadius: 'var(--r)', overflow: 'hidden', position: 'relative', height: 400, background: src ? undefined : 'repeating-linear-gradient(45deg,#26221C 0 14px,#211D18 14px 28px)' }}>
+        <div ref={galleryRef} className="tg-noscroll" style={{ display: 'flex', gap: 20, overflowX: 'auto', padding: '8px 64px 28px', cursor: 'grab', WebkitOverflowScrolling: 'touch', userSelect: 'none' }}>
+          {[...GALLERY, ...GALLERY].map(({ src, name, place }, i) => (
+            <div key={`${name}-${i}`} style={{ flex: '0 0 300px', borderRadius: 'var(--r)', overflow: 'hidden', position: 'relative', height: 400, background: src ? undefined : 'repeating-linear-gradient(45deg,#26221C 0 14px,#211D18 14px 28px)' }}>
               {src ? (
                 <>
                   <img src={src} alt={name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
