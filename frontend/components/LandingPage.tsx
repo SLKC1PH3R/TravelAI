@@ -14,15 +14,7 @@
 import { useEffect, useRef, useState, Fragment } from 'react'
 import Link from 'next/link'
 import { QRCodeSVG } from 'qrcode.react'
-import { Compass, PlayCircle, Sparkles } from 'lucide-react'
 import { CircularGallery, type GalleryItem as CircularGalleryItem } from '@/components/ui/circular-gallery'
-import { NavBar } from '@/components/ui/tubelight-navbar'
-
-const LANDING_NAV_ITEMS = [
-  { name: 'Comment ca marche', url: '#how', icon: Compass },
-  { name: 'Demo', url: '#demo', icon: PlayCircle },
-  { name: 'Fonctionnalites', url: '#features', icon: Sparkles },
-]
 
 const SNAPCODE_PLACEHOLDER = 'https://www.snapchat.com/unlock/?type=SNAPCODE&uuid=travelai-lens-placeholder'
 
@@ -607,11 +599,10 @@ export default function LandingPage() {
           <span style={{ fontSize: 17, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.4px' }}>TravelAI</span>
         </a>
 
-        <div className="ta-nav-links" style={{ display: 'flex', alignItems: 'center' }}>
-          <NavBar
-            items={LANDING_NAV_ITEMS}
-            className="!static !left-auto !top-auto !bottom-auto !translate-x-0 !mb-0 !pt-0 !z-auto"
-          />
+        <div className="ta-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 36 }}>
+          <a href="#how" className="ta-nav-link">Comment ca marche</a>
+          <a href="#demo" className="ta-nav-link">Demo</a>
+          <a href="#features" className="ta-nav-link">Fonctionnalites</a>
         </div>
 
         <Link href="/login" className="ta-nav-cta">
