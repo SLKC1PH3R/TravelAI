@@ -192,9 +192,59 @@ const CSS = `
 
 export default function LandingPageGlass() {
   const rootRef = useRef<HTMLDivElement>(null)
+  const galleryRef = useRef<HTMLDivElement>(null)
   const [activeDemo, setActiveDemo] = useState(0)
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [activeStep, setActiveStep] = useState(0)
+
+  useEffect(() => {
+    const el = galleryRef.current
+    if (!el) return
+
+    let isDown = false
+    let startX = 0
+    let startScroll = 0
+    let moved = false
+
+    const onDown = (e: MouseEvent) => {
+      isDown = true
+      moved = false
+      startX = e.pageX
+      startScroll = el.scrollLeft
+      el.style.cursor = 'grabbing'
+    }
+    const onMove = (e: MouseEvent) => {
+      if (!isDown) return
+      e.preventDefault()
+      const delta = e.pageX - startX
+      if (Math.abs(delta) > 5) moved = true
+      el.scrollLeft = startScroll - delta
+    }
+    const stop = () => {
+      isDown = false
+      el.style.cursor = 'grab'
+    }
+    const onClickCapture = (e: MouseEvent) => {
+      if (moved) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+    }
+
+    el.addEventListener('mousedown', onDown)
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', stop)
+    el.addEventListener('mouseleave', stop)
+    el.addEventListener('click', onClickCapture, true)
+
+    return () => {
+      el.removeEventListener('mousedown', onDown)
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', stop)
+      el.removeEventListener('mouseleave', stop)
+      el.removeEventListener('click', onClickCapture, true)
+    }
+  }, [])
 
   useEffect(() => {
     const root = rootRef.current
@@ -675,7 +725,7 @@ export default function LandingPageGlass() {
             <p style={{ fontSize: 15, color: 'rgba(244,243,238,.55)', margin: 0 }}>Fais glisser pour explorer →</p>
           </div>
         </div>
-        <div className="tg-noscroll" style={{ display: 'flex', gap: 20, overflowX: 'auto', scrollSnapType: 'x mandatory', padding: '8px 64px 28px', cursor: 'grab', WebkitOverflowScrolling: 'touch' }}>
+        <div ref={galleryRef} className="tg-noscroll" style={{ display: 'flex', gap: 20, overflowX: 'auto', scrollSnapType: 'x mandatory', padding: '8px 64px 28px', cursor: 'grab', WebkitOverflowScrolling: 'touch', userSelect: 'none' }}>
           {GALLERY.map(({ src, name, place }) => (
             <div key={name} style={{ flex: '0 0 300px', scrollSnapAlign: 'center', borderRadius: 'var(--r)', overflow: 'hidden', position: 'relative', height: 400, background: src ? undefined : 'repeating-linear-gradient(45deg,#26221C 0 14px,#211D18 14px 28px)' }}>
               {src ? (
