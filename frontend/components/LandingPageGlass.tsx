@@ -122,7 +122,7 @@ const GALLERY = [
   { src: '/chandps.jpg', name: 'Chand Baori', place: 'Rajasthan, Inde' },
   { src: '/Krzywy_Domek_w_Sopocie.jpg', name: 'La maison tordue', place: 'Sopot, Pologne' },
   { src: '/monastere.jpg', name: 'Monastères de Grand Météore', place: 'Grèce' },
-  { src: '/landmannalaugar.jpg', name: 'Landmannalaugar ', place: 'Islande' },
+  { src: '/landman.jpg', name: 'Landmannalaugar ', place: 'Islande' },
 ]
 
 const TRIPS = [
