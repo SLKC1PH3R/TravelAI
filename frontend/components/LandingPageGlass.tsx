@@ -228,14 +228,18 @@ const NAV_GROUPS: { label: string; href?: string; items?: { name: string; href: 
 function NavDropdown({
   group,
   isOpen,
+  onOpen,
   onToggle,
   onClose,
 }: {
   group: { label: string; href?: string; items?: { name: string; href: string }[] }
   isOpen: boolean
+  onOpen: () => void
   onToggle: () => void
   onClose: () => void
 }) {
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   if (!group.items) {
     return (
       <a href={group.href} className="tg-nav-link" style={{ flexShrink: 0 }}>
@@ -244,8 +248,20 @@ function NavDropdown({
     )
   }
 
+  const cancelClose = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+  }
+  const scheduleClose = () => {
+    cancelClose()
+    closeTimer.current = setTimeout(onClose, 150)
+  }
+
   return (
-    <div style={{ position: 'relative', flexShrink: 0 }}>
+    <div
+      style={{ position: 'relative', flexShrink: 0 }}
+      onMouseEnter={() => { cancelClose(); onOpen() }}
+      onMouseLeave={scheduleClose}
+    >
       <button
         type="button"
         onClick={onToggle}
@@ -452,6 +468,7 @@ export default function LandingPageGlass() {
               key={group.label}
               group={group}
               isOpen={openNavGroup === i}
+              onOpen={() => setOpenNavGroup(i)}
               onToggle={() => setOpenNavGroup((v) => (v === i ? null : i))}
               onClose={() => setOpenNavGroup(null)}
             />
