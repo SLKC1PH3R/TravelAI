@@ -163,6 +163,7 @@ const CSS = `
 
   .tg-nav-link{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;transition:color .2s}
   .tg-nav-link:hover{color:var(--ink)}
+  .tg-nav-dd a.tg-nav-link:hover{background:var(--bg2)}
   .tg-btn-y{display:inline-flex;align-items:center;gap:9px;background:var(--y);color:#0D0D0D;border-radius:14px;font-size:15px;font-weight:700;text-decoration:none;transition:all .2s ease;border:none;cursor:pointer}
   .tg-btn-y:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(255,252,0,.5)}
   .tg-btn-ghost{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line);color:var(--ink);background:var(--card);padding:15px 26px;border-radius:14px;font-size:15px;font-weight:600;text-decoration:none;transition:all .2s ease}
@@ -195,12 +196,115 @@ const CSS = `
 
 /* ============================== Composant ============================== */
 
+const NAV_GROUPS: { label: string; href?: string; items?: { name: string; href: string }[] }[] = [
+  {
+    label: 'Produit',
+    items: [
+      { name: 'Comment ça marche', href: '#how' },
+      { name: 'Démo', href: '#demo' },
+      { name: 'Fonctionnalités', href: '#features' },
+      { name: 'Comparatif', href: '#comparatif' },
+    ],
+  },
+  {
+    label: 'Carnet & Badges',
+    items: [
+      { name: 'Carnet', href: '#carnet' },
+      { name: 'Badges', href: '#badges' },
+      { name: 'Galerie', href: '#galerie' },
+    ],
+  },
+  {
+    label: 'Communauté',
+    items: [
+      { name: 'Pour qui ?', href: '#pour-qui' },
+      { name: 'Témoignages', href: '#temoignages' },
+      { name: 'Confiance', href: '#confiance' },
+    ],
+  },
+  { label: 'FAQ', href: '#faq' },
+]
+
+function NavDropdown({
+  group,
+  isOpen,
+  onToggle,
+  onClose,
+}: {
+  group: { label: string; href?: string; items?: { name: string; href: string }[] }
+  isOpen: boolean
+  onToggle: () => void
+  onClose: () => void
+}) {
+  if (!group.items) {
+    return (
+      <a href={group.href} className="tg-nav-link" style={{ flexShrink: 0 }}>
+        {group.label}
+      </a>
+    )
+  }
+
+  return (
+    <div style={{ position: 'relative', flexShrink: 0 }}>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="tg-nav-link"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none',
+          cursor: 'pointer', padding: 0, font: 'inherit', color: isOpen ? 'var(--ink)' : undefined,
+        }}
+      >
+        {group.label}
+        <svg
+          width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round"
+          style={{ transition: 'transform .2s ease', transform: isOpen ? 'rotate(180deg)' : 'none' }}
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+      {isOpen && (
+        <div
+          className="tg-card tg-nav-dd"
+          style={{
+            position: 'absolute', top: 'calc(100% + 14px)', left: '50%', transform: 'translateX(-50%)',
+            display: 'flex', flexDirection: 'column', gap: 2, padding: 8, minWidth: 190, zIndex: 1001,
+          }}
+        >
+          {group.items.map((item) => (
+            <a
+              key={item.name}
+              href={item.href}
+              onClick={onClose}
+              className="tg-nav-link"
+              style={{ padding: '9px 12px', borderRadius: 10, whiteSpace: 'nowrap' }}
+            >
+              {item.name}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function LandingPageGlass() {
   const rootRef = useRef<HTMLDivElement>(null)
   const galleryRef = useRef<HTMLDivElement>(null)
+  const navRef = useRef<HTMLElement>(null)
   const [activeDemo, setActiveDemo] = useState(0)
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [activeStep, setActiveStep] = useState(0)
+  const [openNavGroup, setOpenNavGroup] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (openNavGroup === null) return
+    const onClickOutside = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) setOpenNavGroup(null)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [openNavGroup])
 
   useEffect(() => {
     const el = galleryRef.current
@@ -337,26 +441,21 @@ export default function LandingPageGlass() {
       <style>{CSS}</style>
 
       {/* ===== NAV PILL ===== */}
-      <nav className="tg-card" style={{ position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, display: 'flex', alignItems: 'center', gap: 22, borderRadius: 999, padding: '8px 8px 8px 16px', maxWidth: 'calc(100vw - 32px)', boxShadow: '0 8px 32px rgba(10,10,5,.10)' }}>
+      <nav ref={navRef} className="tg-card" style={{ position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, display: 'flex', alignItems: 'center', gap: 22, borderRadius: 999, padding: '8px 8px 8px 16px', maxWidth: 'calc(100vw - 32px)', boxShadow: '0 8px 32px rgba(10,10,5,.10)' }}>
         <a href="#hero" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
           <img src="/voyageur.jpg" alt="TravelAI" style={{ width: 26, height: 26, borderRadius: 7, objectFit: 'cover', display: 'block' }} />
           <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.4px', color: 'var(--ink)' }}>TravelAI</span>
         </a>
-        <div
-          className="rnavlinks tg-noscroll"
-          style={{ display: 'flex', alignItems: 'center', gap: 16, overflowX: 'auto', whiteSpace: 'nowrap', maxWidth: '52vw' }}
-        >
-          <a href="#pour-qui" className="tg-nav-link">Pour qui ?</a>
-          <a href="#how" className="tg-nav-link">Comment ça marche</a>
-          <a href="#demo" className="tg-nav-link">Démo</a>
-          <a href="#carnet" className="tg-nav-link">Carnet</a>
-          <a href="#badges" className="tg-nav-link">Badges</a>
-          <a href="#features" className="tg-nav-link">Fonctionnalités</a>
-          <a href="#galerie" className="tg-nav-link">Galerie</a>
-          <a href="#temoignages" className="tg-nav-link">Témoignages</a>
-          <a href="#confiance" className="tg-nav-link">Confiance</a>
-          <a href="#comparatif" className="tg-nav-link">Comparatif</a>
-          <a href="#faq" className="tg-nav-link">FAQ</a>
+        <div className="rnavlinks" style={{ display: 'flex', alignItems: 'center', gap: 22 }}>
+          {NAV_GROUPS.map((group, i) => (
+            <NavDropdown
+              key={group.label}
+              group={group}
+              isOpen={openNavGroup === i}
+              onToggle={() => setOpenNavGroup((v) => (v === i ? null : i))}
+              onClose={() => setOpenNavGroup(null)}
+            />
+          ))}
         </div>
         <a href="/login" className="tg-btn-y" style={{ padding: '9px 18px', borderRadius: 999, fontSize: 13, flexShrink: 0, whiteSpace: 'nowrap' }}>
           <Ghost size={14} color="#0D0D0D" />
