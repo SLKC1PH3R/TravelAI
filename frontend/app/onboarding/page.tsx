@@ -193,10 +193,21 @@ function OnboardingPageInner() {
   }, [showSplash, isDemo]);
 
   useLayoutEffect(() => {
-    const activeFace = step === "pseudo" ? pseudoFaceRef.current : loginFaceRef.current;
-    if (!activeFace) return;
-    setCardHeight(activeFace.scrollHeight);
-  }, [step, error, showHint]);
+    const loginEl = loginFaceRef.current;
+    const pseudoEl = pseudoFaceRef.current;
+    if (!loginEl || !pseudoEl) return;
+
+    const update = () => {
+      const activeEl = step === "pseudo" ? pseudoEl : loginEl;
+      setCardHeight(activeEl.scrollHeight);
+    };
+
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(loginEl);
+    observer.observe(pseudoEl);
+    return () => observer.disconnect();
+  }, [step]);
 
   if (showSplash) {
     return <SplashScreen />;

@@ -174,6 +174,7 @@ const CSS = `
   .tg-footer-link{font-size:13px;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s}
   .tg-footer-link:hover{color:rgba(255,255,255,.9)}
   .tg-noscroll::-webkit-scrollbar{display:none}
+  .tg-noscroll{scrollbar-width:none;-ms-overflow-style:none}
 
   [data-fade]{opacity:0;transform:translateY(40px);transition:opacity .85s cubic-bezier(.22,1,.36,1),transform .85s cubic-bezier(.22,1,.36,1)}
   [data-fade].tg-in{opacity:1;transform:translateY(0)}
@@ -341,11 +342,22 @@ export default function LandingPageGlass() {
           <img src="/voyageur.jpg" alt="TravelAI" style={{ width: 26, height: 26, borderRadius: 7, objectFit: 'cover', display: 'block' }} />
           <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.4px', color: 'var(--ink)' }}>TravelAI</span>
         </a>
-        <div className="rnavlinks" style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+        <div
+          className="rnavlinks tg-noscroll"
+          style={{ display: 'flex', alignItems: 'center', gap: 16, overflowX: 'auto', whiteSpace: 'nowrap', maxWidth: '52vw' }}
+        >
+          <a href="#pour-qui" className="tg-nav-link">Pour qui ?</a>
           <a href="#how" className="tg-nav-link">Comment ça marche</a>
           <a href="#demo" className="tg-nav-link">Démo</a>
           <a href="#carnet" className="tg-nav-link">Carnet</a>
+          <a href="#partage" className="tg-nav-link">Partage</a>
           <a href="#badges" className="tg-nav-link">Badges</a>
+          <a href="#roadmap" className="tg-nav-link">Bientôt</a>
+          <a href="#features" className="tg-nav-link">Fonctionnalités</a>
+          <a href="#galerie" className="tg-nav-link">Galerie</a>
+          <a href="#temoignages" className="tg-nav-link">Témoignages</a>
+          <a href="#confiance" className="tg-nav-link">Confiance</a>
+          <a href="#comparatif" className="tg-nav-link">Comparatif</a>
           <a href="#faq" className="tg-nav-link">FAQ</a>
         </div>
         <a href="/login" className="tg-btn-y" style={{ padding: '9px 18px', borderRadius: 999, fontSize: 13 }}>
