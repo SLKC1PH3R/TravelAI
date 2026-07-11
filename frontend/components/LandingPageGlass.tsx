@@ -164,6 +164,7 @@ const CSS = `
   .tg-nav-link{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;transition:color .2s}
   .tg-nav-link:hover{color:var(--ink)}
   .tg-nav-dd a.tg-nav-link:hover{background:var(--bg2)}
+  .tg-nav-dd{background:rgba(255,255,255,.94) !important}
   .tg-btn-y{display:inline-flex;align-items:center;gap:9px;background:var(--y);color:#0D0D0D;border-radius:14px;font-size:15px;font-weight:700;text-decoration:none;transition:all .2s ease;border:none;cursor:pointer}
   .tg-btn-y:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(255,252,0,.5)}
   .tg-btn-ghost{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line);color:var(--ink);background:var(--card);padding:15px 26px;border-radius:14px;font-size:15px;font-weight:600;text-decoration:none;transition:all .2s ease}
