@@ -1026,7 +1026,7 @@ export default function LandingPageGlass() {
             Pas d&apos;app à télécharger, pas d&apos;inscription. Ouvre Snapchat, lance la Lens TravelAI, et ton prochain monument te racontera son histoire.
           </p>
           <div data-fade="" data-delay="240" style={{ display: 'flex', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
-            <a href="#hero" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#0D0D0D', color: '#FFFC00', padding: '18px 38px', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none', transition: 'all .2s ease' }}>
+            <a href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#0D0D0D', color: '#FFFC00', padding: '18px 38px', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none', transition: 'all .2s ease' }}>
               <Ghost size={17} color="#FFFC00" />
               Ouvrir la Lens TravelAI
             </a>
