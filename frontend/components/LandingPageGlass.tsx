@@ -338,7 +338,7 @@ export default function LandingPageGlass() {
 
       {/* ===== NAV PILL ===== */}
       <nav className="tg-card" style={{ position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, display: 'flex', alignItems: 'center', gap: 22, borderRadius: 999, padding: '8px 8px 8px 16px', maxWidth: 'calc(100vw - 32px)', boxShadow: '0 8px 32px rgba(10,10,5,.10)' }}>
-        <a href="#hero" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+        <a href="#hero" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
           <img src="/voyageur.jpg" alt="TravelAI" style={{ width: 26, height: 26, borderRadius: 7, objectFit: 'cover', display: 'block' }} />
           <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.4px', color: 'var(--ink)' }}>TravelAI</span>
         </a>
@@ -358,7 +358,7 @@ export default function LandingPageGlass() {
           <a href="#comparatif" className="tg-nav-link">Comparatif</a>
           <a href="#faq" className="tg-nav-link">FAQ</a>
         </div>
-        <a href="/login" className="tg-btn-y" style={{ padding: '9px 18px', borderRadius: 999, fontSize: 13 }}>
+        <a href="/login" className="tg-btn-y" style={{ padding: '9px 18px', borderRadius: 999, fontSize: 13, flexShrink: 0, whiteSpace: 'nowrap' }}>
           <Ghost size={14} color="#0D0D0D" />
           Se connecter
         </a>
