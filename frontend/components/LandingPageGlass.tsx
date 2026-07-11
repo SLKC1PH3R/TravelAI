@@ -350,9 +350,7 @@ export default function LandingPageGlass() {
           <a href="#how" className="tg-nav-link">Comment ça marche</a>
           <a href="#demo" className="tg-nav-link">Démo</a>
           <a href="#carnet" className="tg-nav-link">Carnet</a>
-          <a href="#partage" className="tg-nav-link">Partage</a>
           <a href="#badges" className="tg-nav-link">Badges</a>
-          <a href="#roadmap" className="tg-nav-link">Bientôt</a>
           <a href="#features" className="tg-nav-link">Fonctionnalités</a>
           <a href="#galerie" className="tg-nav-link">Galerie</a>
           <a href="#temoignages" className="tg-nav-link">Témoignages</a>
