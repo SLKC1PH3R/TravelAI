@@ -12,6 +12,7 @@ type DashboardContextValue = {
   selectedTripId: string | null;
   setSelectedTripId: (id: string) => void;
   selectTrip: (id: string) => void;
+  clearTrip: () => void;
   selectedTrip: Trip | null;
   downloading: boolean;
   handleDownload: () => Promise<void>;
@@ -52,7 +53,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         setSelectedTripId((current) => {
           const requested = searchParams.get("trip");
           if (requested && data.some((t) => t.id === requested)) return requested;
-          return current && data.some((t) => t.id === current) ? current : data[0]?.id ?? null;
+          return current && data.some((t) => t.id === current) ? current : null;
         });
       })
       .finally(() => setLoading(false));
@@ -102,6 +103,13 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  function clearTrip() {
+    setSelectedTripId(null);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("trip");
+    router.replace(`${pathname}?${params.toString()}`);
+  }
+
   return (
     <DashboardCtx.Provider
       value={{
@@ -112,6 +120,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         selectedTripId,
         setSelectedTripId,
         selectTrip,
+        clearTrip,
         selectedTrip,
         downloading,
         handleDownload,

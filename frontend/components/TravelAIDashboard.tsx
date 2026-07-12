@@ -31,7 +31,16 @@ const CSS = `
   .ta-action-btn:hover { background: #FFFC00 !important; color: #0D0D0D !important; border-color: transparent !important; }
   .ta-share-btn:hover { background: rgba(255,255,255,0.25) !important; }
   .ta-share-btn { transition: background 0.15s; }
+  .ta-back-btn:hover { background: rgba(255,255,255,0.25) !important; }
+  .ta-trip-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+  .ta-trip-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.18); }
 
+  @media (max-width: 900px) {
+    .ta-trip-grid { grid-template-columns: repeat(2,1fr) !important; }
+  }
+  @media (max-width: 600px) {
+    .ta-trip-grid { grid-template-columns: 1fr !important; }
+  }
   @media (max-width: 720px) {
     .ta-hero { height: 220px !important; }
     .ta-hero-title { font-size: 24px !important; }
@@ -51,7 +60,7 @@ function monumentCoverUrl(m: Monument): string | null {
 export default function TravelAIDashboard() {
   const router = useRouter()
   const { data: session } = useSession()
-  const { uuid, trips, loading, selectedTrip, selectedTripId, downloading, handleDownload, showMerge, setShowMerge, reload } = useDashboard()
+  const { uuid, trips, loading, selectedTrip, selectedTripId, selectTrip, clearTrip, downloading, handleDownload, showMerge, setShowMerge, reload } = useDashboard()
 
   useEffect(() => {
     if (!uuid && session?.user?.anonymousUuid) {
@@ -162,7 +171,46 @@ export default function TravelAIDashboard() {
     )
   }
 
-  if (!selectedTrip) return null
+  if (!selectedTrip) {
+    return (
+      <div className="ta-dash-root">
+        <style>{CSS}</style>
+        <div style={{ padding: '36px 36px 48px', maxWidth: 1160, margin: '0 auto' }}>
+          <div style={{ marginBottom: 28 }}>
+            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.6px', marginBottom: 6, color: '#0D0D0D' }}>Mes voyages</h1>
+            <p style={{ fontSize: 13.5, color: '#6B6B6B' }}>{trips.length} carnet(s) de voyage — clique sur un voyage pour l&apos;ouvrir.</p>
+          </div>
+
+          <div className="ta-trip-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20 }}>
+            {trips.map((trip) => {
+              const cover = trip.monuments.map(monumentCoverUrl).find(Boolean)
+              return (
+                <button
+                  key={trip.id}
+                  onClick={() => selectTrip(trip.id)}
+                  className="ta-trip-card"
+                  style={{ textAlign: 'left', cursor: 'pointer', border: 'none', padding: 0, background: 'none', borderRadius: 20, overflow: 'hidden', position: 'relative', height: 220, display: 'block' }}
+                >
+                  <div style={{ position: 'absolute', inset: 0, background: cover ? `url('${cover}')` : 'linear-gradient(135deg,#e8e6e1,#cfccc5)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(0,0,0,0.05) 30%,rgba(0,0,0,0.78) 100%)' }} />
+                  <div style={{ position: 'absolute', top: 14, left: 14, display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.16)', backdropFilter: 'blur(8px)', border: '0.5px solid rgba(255,255,255,0.3)', borderRadius: 100, padding: '4px 11px' }}>
+                    <Flag country={trip.country} size={12} />
+                    <span style={{ fontSize: 11, fontWeight: 600, color: '#fff' }}>{trip.country || 'Voyage'}</span>
+                  </div>
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px 18px' }}>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', letterSpacing: '-0.4px', marginBottom: 4, lineHeight: 1.15 }}>{tripLabel(trip)}</div>
+                    <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.7)' }}>
+                      {fmt(trip.started_at)}{trip.ended_at ? ` - ${fmt(trip.ended_at)}` : ''} · {trip.monuments.length} monument(s)
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="ta-dash-root">
@@ -177,6 +225,13 @@ export default function TravelAIDashboard() {
           ) : null
         })()}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg,rgba(0,0,0,0.08) 0%,rgba(0,0,0,0.72) 100%)' }} />
+
+        <div style={{ position: 'absolute', top: 20, left: 28, zIndex: 10 }}>
+          <button className="ta-back-btn" onClick={clearTrip} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.14)', backdropFilter: 'blur(8px)', border: '0.5px solid rgba(255,255,255,0.35)', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, color: '#fff', cursor: 'pointer' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+            Retour
+          </button>
+        </div>
 
         <div style={{ position: 'absolute', top: 20, right: 28, display: 'flex', gap: 8, zIndex: 10 }}>
           <button className="ta-share-btn" disabled={downloading} onClick={handleDownload} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.14)', backdropFilter: 'blur(8px)', border: '0.5px solid rgba(255,255,255,0.35)', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, color: '#fff', cursor: 'pointer' }}>
