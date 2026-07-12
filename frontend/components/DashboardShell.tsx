@@ -9,7 +9,7 @@ import { DASHBOARD_CHROME_CSS, DashboardSidebar, DashboardTopNav, MobileTripBar 
 function ShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const { uuid, trips, selectedTripId, selectTrip, downloading, handleDownload, showMerge, toggleMerge } = useDashboard();
+  const { uuid, trips, selectedTripId, selectTrip, downloading, handleDownload, showMerge, toggleMerge, firstCarnetExportAt } = useDashboard();
   const active = pathname === "/dashboard/stats" ? "profil" : pathname === "/dashboard" ? "voyages" : undefined;
 
   return (
@@ -20,6 +20,7 @@ function ShellInner({ children }: { children: ReactNode }) {
       <div style={{ display: "flex", paddingTop: 60, minHeight: "100vh" }}>
         <DashboardSidebar
           uuid={uuid}
+          name={session?.user?.name ?? null}
           email={session?.user?.email ?? null}
           avatarUrl={session?.user?.image ?? null}
           trips={trips}
@@ -29,6 +30,7 @@ function ShellInner({ children }: { children: ReactNode }) {
           onDownload={handleDownload}
           showMerge={showMerge}
           onToggleMerge={toggleMerge}
+          firstCarnetExportAt={firstCarnetExportAt}
         />
 
         <main className="ta-main-pad" style={{ flex: 1, minWidth: 0, overflowY: "auto", background: "#F4F3F1" }}>

@@ -10,7 +10,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
-import { type Trip } from '@/lib/api'
+import { photoUrl, type Trip } from '@/lib/api'
+import { computeBadges } from '@/lib/badges'
 import Flag from '@/components/Flag'
 
 export const DASHBOARD_CHROME_CSS = `
@@ -22,6 +23,9 @@ export const DASHBOARD_CHROME_CSS = `
   .ta-sidebar-btn:disabled { opacity: 0.5; cursor: default; }
   .ta-mobile-trips { display: none; }
   .ta-mobile-chip { transition: background 0.15s; }
+  .gv-trip { transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; }
+  .gv-trip:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(15,40,70,0.18); }
+  .gv-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(15,40,70,0.16); }
 
   @media (max-width: 1024px) {
     .ta-sidebar { display: none !important; }
@@ -158,6 +162,7 @@ export function DashboardTopNav({ uuid, active, isAdmin }: TopNavProps) {
 
 type SidebarProps = {
   uuid: string
+  name?: string | null
   email?: string | null
   avatarUrl?: string | null
   trips: Trip[]
@@ -167,73 +172,120 @@ type SidebarProps = {
   onDownload: () => void
   showMerge: boolean
   onToggleMerge: () => void
+  firstCarnetExportAt?: string | null
 }
 
-export function DashboardSidebar({ uuid, email, avatarUrl, trips, selectedTripId, onSelectTrip, downloading, onDownload, showMerge, onToggleMerge }: SidebarProps) {
-  const totalMonuments = trips.reduce((s, t) => s + t.monuments.length, 0)
-  const totalConversations = trips.reduce(
-    (s, t) => s + t.monuments.reduce((ms, m) => ms + m.conversations.length, 0),
-    0
-  )
+function tripCoverUrl(trip: Trip): string | null {
+  for (const m of trip.monuments) {
+    const photo = m.photos.find((p) => p.stored)
+    if (photo) return photoUrl(photo.id)
+  }
+  return null
+}
+
+export function DashboardSidebar({ uuid, name, email, avatarUrl, trips, selectedTripId, onSelectTrip, downloading, onDownload, showMerge, onToggleMerge, firstCarnetExportAt = null }: SidebarProps) {
+  const allMonuments = trips.flatMap((t) => t.monuments)
+  const totalMonuments = allMonuments.length
   const countriesCount = new Set(trips.map((t) => t.country).filter(Boolean)).size
+  const badges = computeBadges(trips, allMonuments, firstCarnetExportAt)
+  const totalBadges = badges.filter((b) => b.unlocked).length
+  const nextBadge = badges.find((b) => !b.unlocked)
+  const displayName = name || email || 'Voyageur Anonyme'
+  const initials = displayName.slice(0, 2).toUpperCase()
 
   return (
-    <aside className="ta-sidebar" style={{ width: 272, flexShrink: 0, background: '#fff', borderRight: '0.5px solid rgba(0,0,0,0.06)', position: 'sticky', top: 60, height: 'calc(100vh - 60px)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '24px 20px 20px', borderBottom: '0.5px solid rgba(0,0,0,0.06)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="" style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, border: '2px solid #0D0D0D', objectFit: 'cover' }} />
-          ) : (
-            <div style={{ width: 42, height: 42, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, color: '#0D0D0D', flexShrink: 0, border: '2px solid #0D0D0D' }}>
-              {(email || 'YA').slice(0, 2).toUpperCase()}
-            </div>
-          )}
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0D0D0D', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email || 'Voyageur Anonyme'}</div>
-            <div style={{ fontSize: 10.5, color: '#6B6B6B', fontFamily: 'monospace', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{uuid}</div>
+    <aside className="ta-sidebar" style={{ width: 280, flexShrink: 0, background: '#fff', borderRight: '0.5px solid rgba(0,0,0,0.06)', position: 'sticky', top: 60, height: 'calc(100vh - 60px)', overflowY: 'auto', display: 'flex', flexDirection: 'column', padding: '20px 16px', gap: 11 }}>
+      {/* Profil voyageur */}
+      <div style={{ background: '#0D0D0D', borderRadius: 16, padding: 18, color: '#F4F3EE', textAlign: 'center' }}>
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="" style={{ width: 52, height: 52, borderRadius: '50%', border: '2.5px solid #FFFC00', objectFit: 'cover', marginBottom: 8, display: 'inline-block' }} />
+        ) : (
+          <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#FFFC00', border: '2.5px solid #FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 700, color: '#0D0D0D', margin: '0 auto 8px' }}>
+            {initials}
           </div>
+        )}
+        <div style={{ fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
+        <div style={{ fontSize: 10.5, color: '#FFFC00', fontWeight: 700, marginBottom: 12 }}>
+          {trips.length} voyage{trips.length > 1 ? 's' : ''} complete{trips.length > 1 ? 's' : ''}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: '#F7F7F7', borderRadius: 12, overflow: 'hidden' }}>
-          {[[totalMonuments, 'Sites'], [countriesCount, 'Pays'], [totalConversations, 'Questions']].map(([n, label], i) => (
-            <div key={String(label)} style={{ padding: '12px 8px', textAlign: 'center', borderRight: i < 2 ? '0.5px solid rgba(0,0,0,0.07)' : undefined }}>
-              <div style={{ fontSize: 20, fontWeight: 700, color: '#0D0D0D', lineHeight: 1 }}>{n}</div>
-              <div style={{ fontSize: 9.5, color: '#6B6B6B', marginTop: 3, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
+        <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+          {[
+            [totalMonuments, 'Monuments', '#F4F3EE'],
+            [countriesCount, 'Pays', '#F4F3EE'],
+            [totalBadges, 'Badges', '#FFFC00'],
+          ].map(([value, label, color]) => (
+            <div key={String(label)}>
+              <div style={{ fontSize: 17, fontWeight: 700, color: color as string }}>{value}</div>
+              <div style={{ fontSize: 8.5, color: 'rgba(244,243,238,0.55)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ padding: '16px 12px', flex: 1, overflowY: 'auto' }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: '#B0B0B0', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0 8px', marginBottom: 8 }}>Mes voyages</div>
+      {/* Progression badge */}
+      {nextBadge ? (
+        <div style={{ background: '#FAFAFA', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: '13px 15px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nextBadge.name}</span>
+            <span style={{ fontSize: 10.5, fontWeight: 700, color: '#8A8A8A', flexShrink: 0 }}>{nextBadge.progress}/{nextBadge.target}</span>
+          </div>
+          <div style={{ height: 6, background: 'rgba(0,0,0,0.08)', borderRadius: 3, overflow: 'hidden' }}>
+            <span style={{ display: 'block', width: `${Math.round((nextBadge.progress / nextBadge.target) * 100)}%`, height: '100%', background: '#FFFC00', borderRadius: 3 }} />
+          </div>
+        </div>
+      ) : (
+        <div style={{ background: '#FAFAFA', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: '13px 15px', textAlign: 'center', fontSize: 11.5, fontWeight: 700 }}>
+          🏆 Tous les badges debloques !
+        </div>
+      )}
+
+      {/* Mes voyages — covers photo */}
+      <div style={{ fontSize: 10.5, fontWeight: 700, color: '#B0B0B0', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 4px', marginTop: 4 }}>
+        Mes voyages · {trips.length}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, overflowY: 'auto' }}>
         {trips.map((t) => {
           const selected = t.id === selectedTripId
+          const cover = tripCoverUrl(t)
           return (
-            <div key={t.id} className="ta-trip-item" onClick={() => onSelectTrip(t.id)} style={{ borderRadius: 10, padding: '11px 12px', marginBottom: 4, background: selected ? '#FFFBE0' : 'transparent', border: selected ? '0.5px solid rgba(255,220,0,0.45)' : '0.5px solid transparent' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
-                <Flag country={t.country} size={18} />
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: selected ? 700 : 500, color: '#0D0D0D', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tripLabel(t)}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 4 }}>
-                    <span style={{ fontSize: 10.5, color: '#8A8A8A' }}>{fmtShort(t.started_at)}{t.ended_at ? ` - ${fmtShort(t.ended_at)}` : ''}</span>
-                    <span style={{ color: '#ccc', fontSize: 10 }}>·</span>
-                    <span style={{ fontSize: 10.5, color: '#8A8A8A' }}>{t.monuments.length} etapes</span>
-                  </div>
+            <button
+              key={t.id}
+              onClick={() => onSelectTrip(t.id)}
+              className="gv-trip"
+              style={{
+                position: 'relative', height: selected ? 100 : 72, borderRadius: 14, overflow: 'hidden', border: 'none', padding: 0, background: 'none', display: 'block', width: '100%', textAlign: 'left', flexShrink: 0,
+                boxShadow: selected ? '0 8px 22px rgba(15,40,70,0.14)' : 'none',
+                outline: selected ? '2.5px solid #FFFC00' : 'none', outlineOffset: 2,
+                opacity: selected ? 1 : 0.92,
+              }}
+            >
+              <div style={{ position: 'absolute', inset: 0, background: cover ? `url('${cover}') center/cover` : 'linear-gradient(135deg,#e8e6e1,#cfccc5)' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 25%,rgba(0,0,0,0.72))' }} />
+              {selected && <span style={{ position: 'absolute', top: 8, right: 8, background: '#FFFC00', borderRadius: 100, padding: '3px 9px', fontSize: 9, fontWeight: 700, color: '#0D0D0D' }}>En cours</span>}
+              <div style={{ position: 'absolute', bottom: 9, left: 12, right: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: selected ? 13 : 12, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <Flag country={t.country} size={14} />
+                  {tripLabel(t)}
                 </div>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: selected ? '#FFFC00' : '#E0E0E0', flexShrink: 0, marginTop: 5 }} />
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)' }}>{t.monuments.length} monument(s)</div>
               </div>
-            </div>
+            </button>
           )
         })}
       </div>
 
-      <div style={{ padding: '14px 16px', borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
-        <button className="ta-sidebar-btn" disabled={downloading} onClick={onDownload} style={{ width: '100%', background: '#FFFC00', border: 'none', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 700, color: '#0D0D0D', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 8 }}>
+      {/* Actions */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <button className="ta-sidebar-btn gv-btn" disabled={downloading} onClick={onDownload} style={{ width: '100%', background: '#FFFC00', border: 'none', borderRadius: 11, padding: 12, fontSize: 13, fontWeight: 700, color: '#0D0D0D', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
           {downloading ? 'Generation...' : 'Telecharger le carnet PDF'}
         </button>
-        <button className="ta-sidebar-btn" onClick={onToggleMerge} style={{ width: '100%', background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.09)', borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 600, color: '#0D0D0D', cursor: 'pointer' }}>
+        <button className="ta-sidebar-btn gv-btn" onClick={onToggleMerge} style={{ width: '100%', background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.09)', borderRadius: 11, padding: 11, fontSize: 13, fontWeight: 600, color: '#0D0D0D', cursor: 'pointer' }}>
           {showMerge ? '✕ Fermer' : '+ Fusionner des voyages'}
         </button>
+        <div style={{ paddingTop: 6 }}>
+          <AccountMenu uuid={uuid} />
+        </div>
       </div>
     </aside>
   )
