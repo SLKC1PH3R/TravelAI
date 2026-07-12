@@ -107,10 +107,16 @@ const TRUST = [
   { q: 'Comment les supprimer ?', a: 'À tout moment, en nous écrivant : suppression de tes photos et de tes données sous un mois maximum.' },
 ]
 
-const TESTIMONIALS = [
-  { quote: "« J'ai pointé ma caméra sur une église au hasard à Rome et TravelAI m'a tout raconté — l'année de construction, qui l'a commandée, et un passage secret sous l'autel. Mon guide touristique était sans voix. »", name: 'Sophie M.', role: 'Voyageuse · Lyon, France', avatar: 'linear-gradient(135deg,#ffd3a5,#fd9853)' },
-  { quote: "« Le carnet de voyage PDF m'a bluffé. 3 semaines de monuments, notes IA et photos compilés automatiquement. Je l'ai imprimé et donné à mes parents — ils ont pleuré. »", name: 'James T.', role: 'Photographe · Londres, UK', avatar: 'linear-gradient(135deg,#c8f7c5,#4caf50)' },
-  { quote: '« Une semaine au Japon. Chaque temple, chaque sanctuaire — TravelAI les connaissait tous. Pas de saisie, juste viser et découvrir. Un vrai changement de jeu. »', name: 'Yuki N.', role: 'Nomade digitale · Tokyo, JP', avatar: 'linear-gradient(135deg,#a8d8ea,#6fb3cf)' },
+const RATING_BARS = [
+  { label: '5★', width: '88%', pct: '88%', color: '#FFFC00' },
+  { label: '4★', width: '9%', pct: '9%', color: 'rgba(255,252,0,.55)' },
+  { label: '3★', width: '3%', pct: '3%', color: 'rgba(255,252,0,.3)' },
+]
+
+const STORIES = [
+  { src: '/6.png', alt: 'Notre-Dame de Paris', handle: 'sophie.travels', meta: 'Paris · il y a 2h', quote: "« Une église au hasard à Paris, et TravelAI m'a raconté le passage secret sous l'autel. Mon guide était sans voix. »", avatar: 'linear-gradient(135deg,#ffd3a5,#fd9853)', segments: 3, rot: '-1.2deg', delay: 150 },
+  { src: '/1.jpg', alt: 'Taj Mahal', handle: 'james.shoots', meta: 'Agra · il y a 1j', quote: "« 3 semaines de monuments compilées en un carnet PDF illustré. Je l'ai imprimé pour mes parents — ils ont pleuré. »", avatar: 'linear-gradient(135deg,#c8f7c5,#4caf50)', segments: 2, rot: '0.8deg', delay: 250 },
+  { src: '/10.jpg', alt: 'Parthénon', handle: 'yuki.nomad', meta: 'Athènes · il y a 3j', quote: "« Face au Parthénon, j'ai posé dix questions d'affilée — TravelAI avait réponse à tout. Juste viser et découvrir. »", avatar: 'linear-gradient(135deg,#a8d8ea,#6fb3cf)', segments: 4, rot: '-0.6deg', delay: 350 },
 ]
 
 const GALLERY = [
@@ -904,26 +910,79 @@ export default function LandingPageGlass() {
         </div>
       </section>
 
-      {/* ===== 11. TÉMOIGNAGES (dark) ===== */}
+      {/* ===== 11. TÉMOIGNAGES (dark) : preuve + stories ===== */}
       <section id="temoignages" className="rsec" style={{ background: 'var(--dark)', color: '#F4F3EE', padding: '30px 64px 120px' }}>
-        <div style={{ maxWidth: 1140, margin: '0 auto' }}>
-          <div data-fade="" style={{ textAlign: 'center', marginBottom: 52, paddingTop: 60, borderTop: '1px solid rgba(255,255,255,.08)' }}>
-            <h2 className="tg-h2" style={{ fontSize: 44, letterSpacing: '-1.6px', color: '#F4F3EE' }}>Ils ont voyagé avec TravelAI</h2>
+        <div className="rr" style={{ maxWidth: 1180, margin: '0 auto', display: 'flex', gap: 48, alignItems: 'flex-start', paddingTop: 60, borderTop: '1px solid rgba(255,255,255,.08)' }}>
+          {/* Gauche : panneau de preuve */}
+          <div data-fade="" style={{ flex: '0 0 320px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', background: 'var(--y)', borderRadius: 100, padding: '6px 14px', marginBottom: 16 }}>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: '#0D0D0D', letterSpacing: '.07em', textTransform: 'uppercase' }}>Ils en parlent</span>
+            </div>
+            <h2 className="tg-h2" style={{ fontSize: 42, letterSpacing: '-1.6px', color: '#F4F3EE', marginBottom: 26 }}>Ils ont voyagé<br />avec TravelAI</h2>
+            <div style={{ background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.10)', borderRadius: 18, padding: '26px 28px', marginBottom: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
+                <span style={{ fontSize: 52, fontWeight: 700, letterSpacing: '-2px', color: 'var(--y)' }}>4.9</span>
+                <span style={{ fontSize: 16, color: 'var(--y)', letterSpacing: 2 }}>★★★★★</span>
+              </div>
+              <div style={{ fontSize: 13, color: 'rgba(244,243,238,.55)', marginBottom: 18 }}>Note moyenne · 10 000+ voyageurs</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {RATING_BARS.map(({ label, width, pct, color }) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 11, width: 16, color: 'rgba(244,243,238,.55)' }}>{label}</span>
+                    <span style={{ flex: 1, height: 6, background: 'rgba(255,255,255,.08)', borderRadius: 3, overflow: 'hidden', display: 'inline-block' }}>
+                      <span style={{ display: 'block', width, height: '100%', background: color, borderRadius: 3 }} />
+                    </span>
+                    <span style={{ fontSize: 11, color: 'rgba(244,243,238,.55)' }}>{pct}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <a href="#cta" className="tg-btn-y" style={{ display: 'flex', justifyContent: 'center', padding: 16, width: '100%', marginBottom: 10, boxSizing: 'border-box' }}>
+              <Ghost size={15} color="#0D0D0D" />
+              Essaie gratuitement
+            </a>
+            <div style={{ textAlign: 'center', fontSize: 11.5, color: 'rgba(244,243,238,.4)' }}>Sans inscription · Directement dans Snapchat</div>
           </div>
-          <div className="rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 22 }}>
-            {TESTIMONIALS.map(({ quote, name, role, avatar }, i) => (
-              <div key={name} data-fade="" data-delay={i * 120} style={{ background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.10)', borderRadius: 'var(--r)', padding: '30px 28px' }}>
-                <div style={{ fontSize: 13, color: 'var(--y)', letterSpacing: 2, marginBottom: 16 }}>★★★★★</div>
-                <p style={{ fontSize: 14.5, lineHeight: 1.7, color: 'rgba(244,243,238,.85)', margin: '0 0 22px' }}>{quote}</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-                  <span style={{ width: 38, height: 38, borderRadius: '50%', background: avatar, display: 'inline-block' }} />
-                  <div>
-                    <div style={{ fontSize: 13.5, fontWeight: 700, color: '#F4F3EE' }}>{name}</div>
-                    <div style={{ fontSize: 12, color: 'rgba(244,243,238,.5)' }}>{role}</div>
+
+          {/* Droite : stories */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div data-fade="" data-delay="100" style={{ marginBottom: 26 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.14)', borderRadius: 100, padding: '6px 14px', marginBottom: 12 }}>
+                <Ghost size={12} color="#FFFC00" />
+                <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(244,243,238,.7)', letterSpacing: '.07em', textTransform: 'uppercase' }}>Vu dans leurs stories</span>
+              </div>
+              <p style={{ fontSize: 14, color: 'rgba(244,243,238,.55)', margin: 0 }}>De vraies découvertes, partagées par de vrais voyageurs.</p>
+            </div>
+            <div className="rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18 }}>
+              {STORIES.map(({ src, alt, handle, meta, quote, avatar, segments, rot, delay }) => (
+                <div key={handle} data-fade="" data-delay={delay} style={{ borderRadius: 20, overflow: 'hidden', position: 'relative', height: 400, transform: `rotate(${rot})` }}>
+                  <img src={src} alt={alt} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(0,0,0,.45) 0%,transparent 30%,transparent 45%,rgba(0,0,0,.82) 100%)' }} />
+                  <div style={{ position: 'absolute', top: 12, left: 12, right: 12, display: 'flex', gap: 4 }}>
+                    {Array.from({ length: segments }).map((_, s) => (
+                      <span key={s} style={{ flex: 1, height: 2.5, background: s === 0 ? 'var(--y)' : 'rgba(255,255,255,.35)', borderRadius: 2, display: 'inline-block' }} />
+                    ))}
+                  </div>
+                  <div style={{ position: 'absolute', top: 26, left: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ width: 32, height: 32, borderRadius: '50%', background: avatar, border: '2px solid var(--y)', display: 'inline-block' }} />
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{handle}</div>
+                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,.7)' }}>{meta}</div>
+                    </div>
+                  </div>
+                  <div style={{ position: 'absolute', bottom: 16, left: 12, right: 12 }}>
+                    <div style={{ background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 13, padding: '12px 14px', marginBottom: 9 }}>
+                      <div style={{ fontSize: 10.5, color: 'var(--y)', letterSpacing: 1.5, marginBottom: 6 }}>★★★★★</div>
+                      <p style={{ fontSize: 12, lineHeight: 1.55, color: '#fff', margin: 0 }}>{quote}</p>
+                    </div>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--y)', borderRadius: 100, padding: '5px 11px', fontSize: 10, fontWeight: 700, color: '#0D0D0D' }}>👻 Scanné avec TravelAI</span>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div data-fade="" data-delay="400" style={{ textAlign: 'center', marginTop: 28 }}>
+              <a href="#cta" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--y)', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>Vis ta propre story →</a>
+            </div>
           </div>
         </div>
       </section>
