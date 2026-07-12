@@ -792,7 +792,11 @@ export default function LandingPageGlass() {
           <div data-fade="" style={{ textAlign: 'center', marginBottom: 56 }}>
             <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>Gamification</span></div>
             <h2 className="tg-h2" style={{ marginBottom: 14 }}>Voyage. Scanne. Débloque.</h2>
-            <p style={{ fontSize: 16, color: 'var(--muted)', margin: 0 }}>Des défis qui donnent envie de faire un détour de plus.</p>
+            <p style={{ fontSize: 16, color: 'var(--muted)', margin: '0 0 16px' }}>Des défis qui donnent envie de faire un détour de plus.</p>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'var(--bg2)', border: '1px solid var(--line)', borderRadius: 100, padding: '6px 14px' }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth={2}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)' }}>Exemple de progression — pas la tienne (pas encore !)</span>
+            </div>
           </div>
           <div className="rgrid2" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 18 }}>
             {BADGES.map(({ name, desc, locked, icon }, i) => (
