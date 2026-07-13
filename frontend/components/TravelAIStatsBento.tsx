@@ -208,7 +208,7 @@ export default function TravelAIStatsBento() {
             <div style={{ position: 'absolute', inset: 0 }}>
               <MapView monuments={allMonuments} />
             </div>
-            <div style={{ position: 'absolute', top: 14, left: 16, zIndex: 500, background: 'rgba(255,255,255,.88)', backdropFilter: 'blur(8px)', borderRadius: 10, padding: '8px 13px', pointerEvents: 'none' }}>
+            <div style={{ position: 'absolute', top: 14, right: 16, zIndex: 500, background: 'rgba(255,255,255,.88)', backdropFilter: 'blur(8px)', borderRadius: 10, padding: '8px 13px', pointerEvents: 'none' }}>
               <div style={{ fontSize: 13, fontWeight: 700 }}>Carte du monde</div>
               <div style={{ fontSize: 10.5, color: '#8E99A3' }}>{allMonuments.length} etape(s) · {stats.countries.size} pays</div>
             </div>
