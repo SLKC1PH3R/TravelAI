@@ -189,7 +189,7 @@ export default function TravelAIStatsBento() {
     <div className="tb-root">
       <style>{CSS}</style>
 
-      <div style={{ maxWidth: 1120, margin: '0 auto', padding: '32px 28px 64px' }}>
+      <div style={{ padding: '32px 28px 64px' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
