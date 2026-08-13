@@ -106,8 +106,10 @@ function AccountMenu({ uuid, placement = 'bottom' }: { uuid: string; placement?:
         <div
           style={{
             position: 'fixed', top: pos.top, left: pos.left, right: pos.right, width: 240,
-            background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.6)', borderRadius: 16,
+            ...(placement === 'right'
+              ? { background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)' }
+              : { background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)' }),
+            borderRadius: 16,
             boxShadow: '0 20px 50px rgba(0,0,0,0.18)', overflow: 'hidden', zIndex: 2000,
           }}
         >
