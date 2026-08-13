@@ -51,10 +51,12 @@ export function tripLabel(t: Trip): string {
   return t.title || [t.city, t.country].filter(Boolean).join(', ') || 'Voyage'
 }
 
-function AccountMenu({ uuid }: { uuid: string }) {
+function AccountMenu({ uuid, placement = 'bottom' }: { uuid: string; placement?: 'bottom' | 'right' }) {
   const { data: session } = useSession()
   const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState<{ top: number; left?: number; right?: number } | null>(null)
   const ref = useRef<HTMLDivElement>(null)
+  const btnRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -64,6 +66,18 @@ function AccountMenu({ uuid }: { uuid: string }) {
     return () => document.removeEventListener('mousedown', onClick)
   }, [])
 
+  function toggle() {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      if (placement === 'right') {
+        setPos({ top: Math.min(rect.top, window.innerHeight - 210), left: rect.right + 10 })
+      } else {
+        setPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right })
+      }
+    }
+    setOpen((o) => !o)
+  }
+
   const user = session?.user
   const initials = (user?.name || user?.email || '?').slice(0, 2).toUpperCase()
   const profileHref = `/dashboard/profile?uuid=${encodeURIComponent(uuid)}`
@@ -71,25 +85,33 @@ function AccountMenu({ uuid }: { uuid: string }) {
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <button
-        onClick={() => setOpen((o) => !o)}
-        style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 9, padding: '5px 12px 5px 5px', cursor: 'pointer' }}
+        ref={btnRef}
+        onClick={toggle}
+        style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 9, padding: '5px 12px 5px 5px', cursor: 'pointer', width: placement === 'right' ? '100%' : undefined }}
       >
         {user?.image ? (
-          <img src={user.image} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
+          <img src={user.image} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
         ) : (
-          <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#0D0D0D' }}>{initials}</div>
+          <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#0D0D0D', flexShrink: 0 }}>{initials}</div>
         )}
         <span style={{ fontSize: 13, fontWeight: 600, color: '#0D0D0D', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {user?.name || user?.email || 'Mon compte'}
         </span>
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}>
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
 
-      {open && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: 240, background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 14, boxShadow: '0 12px 36px rgba(0,0,0,0.14)', overflow: 'hidden', zIndex: 1100 }}>
-          <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '0.5px solid rgba(0,0,0,0.06)' }}>
+      {open && pos && (
+        <div
+          style={{
+            position: 'fixed', top: pos.top, left: pos.left, right: pos.right, width: 240,
+            background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.6)', borderRadius: 16,
+            boxShadow: '0 20px 50px rgba(0,0,0,0.18)', overflow: 'hidden', zIndex: 2000,
+          }}
+        >
+          <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '0.5px solid rgba(0,0,0,0.08)' }}>
             {user?.image ? (
               <img src={user.image} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
             ) : (
@@ -110,7 +132,7 @@ function AccountMenu({ uuid }: { uuid: string }) {
           </Link>
           <button
             onClick={() => signOut({ callbackUrl: '/login' })}
-            style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '11px 16px', fontSize: 13, fontWeight: 500, color: '#D02828', background: 'none', border: 'none', borderTop: '0.5px solid rgba(0,0,0,0.06)', cursor: 'pointer', textAlign: 'left' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '11px 16px', fontSize: 13, fontWeight: 500, color: '#D02828', background: 'none', border: 'none', borderTop: '0.5px solid rgba(0,0,0,0.08)', cursor: 'pointer', textAlign: 'left' }}
           >
             Se deconnecter
           </button>
@@ -284,7 +306,7 @@ export function DashboardSidebar({ uuid, name, email, avatarUrl, trips, selected
           {showMerge ? '✕ Fermer' : '+ Fusionner des voyages'}
         </button>
         <div style={{ paddingTop: 6 }}>
-          <AccountMenu uuid={uuid} />
+          <AccountMenu uuid={uuid} placement="right" />
         </div>
       </div>
     </aside>

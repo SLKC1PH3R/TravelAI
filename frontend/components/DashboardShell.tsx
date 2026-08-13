@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { DashboardProvider, useDashboard } from "@/contexts/DashboardContext";
 import { DASHBOARD_CHROME_CSS, DashboardSidebar, DashboardTopNav, MobileTripBar } from "@/components/DashboardChrome";
+import BetaLensPopup from "@/components/BetaLensPopup";
 
 function ShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -15,6 +16,7 @@ function ShellInner({ children }: { children: ReactNode }) {
   return (
     <div style={{ background: "#F4F3F1", minHeight: "100vh" }}>
       <style>{DASHBOARD_CHROME_CSS}</style>
+      <BetaLensPopup />
       <DashboardTopNav uuid={uuid} active={active} isAdmin={session?.user?.isAdmin} />
 
       <div style={{ display: "flex", paddingTop: 60, minHeight: "100vh" }}>

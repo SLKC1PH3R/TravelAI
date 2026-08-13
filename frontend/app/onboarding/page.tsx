@@ -45,7 +45,7 @@ const CSS = `
     100% { left: 100%; opacity: 0; }
   }
 
-  .ta-onb-flip-scene { width: 340px; flex-shrink: 0; perspective: 1400px; }
+  .ta-onb-flip-scene { width: 340px; flex-shrink: 0; perspective: 1400px; transition: width 0.3s ease; }
   .ta-onb-flip-card { position: relative; width: 100%; min-height: 392px; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(.4,.2,.2,1), height 0.3s ease; }
   .ta-onb-flip-card.is-flipped { transform: rotateY(180deg); }
 
@@ -295,7 +295,7 @@ function OnboardingPageInner() {
 
           <FlowConnector />
 
-          <div className="ta-onb-flip-scene">
+          <div className="ta-onb-flip-scene" style={{ width: error && step === "pseudo" ? 380 : undefined }}>
             <div
               className={`ta-onb-flip-card${step === "pseudo" ? " is-flipped" : ""}`}
               style={cardHeight ? { height: cardHeight } : undefined}
@@ -418,7 +418,7 @@ function OnboardingPageInner() {
                       value={pseudo}
                       onChange={isDemo ? undefined : (e) => setPseudo(e.target.value)}
                       readOnly={isDemo}
-                      placeholder="ex: Jeremy"
+                      placeholder="ex: Mont_Mot_De_Passe"
                       required
                       style={{ marginBottom: 0, paddingRight: 40 }}
                     />
