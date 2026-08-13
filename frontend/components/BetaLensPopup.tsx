@@ -2,19 +2,15 @@
 
 import { useEffect, useState } from "react";
 
-const SEEN_KEY = "ta-beta-lens-popup-seen";
-
 export default function BetaLensPopup() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem(SEEN_KEY)) return;
     const timer = setTimeout(() => setOpen(true), 500);
     return () => clearTimeout(timer);
   }, []);
 
   function close() {
-    sessionStorage.setItem(SEEN_KEY, "1");
     setOpen(false);
   }
 
