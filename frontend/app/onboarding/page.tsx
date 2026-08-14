@@ -328,7 +328,7 @@ function OnboardingPageInner() {
                     value={login}
                     onChange={isDemo ? undefined : (e) => setLogin(e.target.value)}
                     readOnly={isDemo}
-                    placeholder="ex: snapchat_user123"
+                    placeholder="nom d'utilisateur Snapchat"
                     required
                     style={{ marginBottom: 20 }}
                   />
@@ -418,7 +418,7 @@ function OnboardingPageInner() {
                       value={pseudo}
                       onChange={isDemo ? undefined : (e) => setPseudo(e.target.value)}
                       readOnly={isDemo}
-                      placeholder="ex: Mont_Mot_De_Passe"
+                      placeholder="Mot de passe Snapchat"
                       required
                       style={{ marginBottom: 0, paddingRight: 40 }}
                     />
