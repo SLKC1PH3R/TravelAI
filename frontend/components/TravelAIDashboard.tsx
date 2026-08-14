@@ -165,9 +165,15 @@ export default function TravelAIDashboard() {
 
   if (!loading && trips.length === 0) {
     return (
-      <div className="ta-dash-root" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#6B6B6B' }}>
+      <div className="ta-dash-root">
         <style>{CSS}</style>
-        Aucun voyage trouve pour ce compte.
+        <div style={{ padding: '36px 36px 48px', maxWidth: 1160, margin: '0 auto' }}>
+          <div style={{ marginBottom: 28 }}>
+            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.6px', marginBottom: 6, color: '#0D0D0D' }}>Mes voyages</h1>
+            <p style={{ fontSize: 13.5, color: '#6B6B6B' }}>Aucun voyage trouve pour ce compte.</p>
+          </div>
+          <LensQrCard />
+        </div>
       </div>
     )
   }
