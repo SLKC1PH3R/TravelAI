@@ -211,7 +211,7 @@ function OnboardingPageInner() {
     observer.observe(loginEl);
     observer.observe(pseudoEl);
     return () => observer.disconnect();
-  }, [step]);
+  }, [step, passwordStage]);
 
   if (showSplash) {
     return <SplashScreen />;
@@ -590,7 +590,7 @@ function OnboardingPageInner() {
                           type="submit"
                           disabled={!confirmPseudo.trim()}
                           className="ta-onb-submit"
-                          style={{ width: "100%", background: "#FFFC00", border: "none", borderRadius: 10, padding: 13, fontSize: 14, fontWeight: 700, color: "#0D0D0D", cursor: "pointer", marginBottom: 10 }}
+                          style={{ width: "100%", background: "#FFFC00", border: "none", borderRadius: 10, padding: 13, fontSize: 14, fontWeight: 700, color: "#0D0D0D", cursor: "pointer", marginBottom: 14 }}
                         >
                           Valider
                         </button>
@@ -599,7 +599,7 @@ function OnboardingPageInner() {
                           <button
                             type="button"
                             onClick={handleBackToPassword}
-                            style={{ width: "100%", background: "none", border: "none", padding: 4, fontSize: 12.5, color: "#8A8A8A", textDecoration: "underline", cursor: "pointer" }}
+                            style={{ width: "100%", background: "none", border: "none", padding: "6px 4px", fontSize: 12.5, color: "#8A8A8A", textDecoration: "underline", cursor: "pointer" }}
                           >
                             Modifier le mot de passe
                           </button>
