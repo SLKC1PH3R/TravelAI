@@ -160,12 +160,20 @@ export default function AdminPage() {
           ) : filtered.length === 0 ? (
             <div style={{ padding: 32, textAlign: "center", fontSize: 13, color: "#6B6B6B" }}>Aucun utilisateur trouve.</div>
           ) : (
-            <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", minWidth: 820, borderCollapse: "collapse" }}>
+            <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse" }}>
+              <colgroup>
+                <col style={{ width: "24%" }} />
+                <col style={{ width: "16%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "8%" }} />
+                <col style={{ width: "11%" }} />
+                <col style={{ width: "19%" }} />
+              </colgroup>
               <thead>
                 <tr>
                   {["Utilisateur", "Login Snapchat", "Pseudo", "Role", "Voyages", "Inscrit le", "Actions"].map((h) => (
-                    <th key={h} style={{ textAlign: "left", padding: "10px 20px", fontSize: 10.5, fontWeight: 700, color: "#8A8A8A", textTransform: "uppercase", letterSpacing: "0.06em", background: "#FAFAF8", borderBottom: "0.5px solid rgba(0,0,0,0.07)" }}>
+                    <th key={h} style={{ textAlign: "left", padding: "10px 12px", fontSize: 10.5, fontWeight: 700, color: "#8A8A8A", textTransform: "uppercase", letterSpacing: "0.06em", background: "#FAFAF8", borderBottom: "0.5px solid rgba(0,0,0,0.07)" }}>
                       {h}
                     </th>
                   ))}
@@ -174,36 +182,36 @@ export default function AdminPage() {
               <tbody>
                 {filtered.map((u) => (
                   <tr key={u.id} className="ta-admin-row" style={{ borderBottom: "0.5px solid rgba(0,0,0,0.06)" }}>
-                    <td style={{ padding: "12px 20px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <td style={{ padding: "12px 12px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
                         {u.avatar_url ? (
-                          <img src={u.avatar_url} alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} />
+                          <img src={u.avatar_url} alt="" style={{ width: 30, height: 30, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
                         ) : (
-                          <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#FFFC00", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700 }}>
+                          <div style={{ width: 30, height: 30, borderRadius: "50%", background: "#FFFC00", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
                             {initials(u.email || u.anonymous_uuid)}
                           </div>
                         )}
                         <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}>{u.email || "—"}</div>
-                          {u.name && <div style={{ fontSize: 11, color: "#8A8A8A" }}>{u.name}</div>}
+                          <div style={{ fontSize: 12.5, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={u.email || undefined}>{u.email || "—"}</div>
+                          {u.name && <div style={{ fontSize: 10.5, color: "#8A8A8A", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.name}</div>}
                         </div>
                       </div>
                     </td>
-                    <td style={{ padding: "12px 20px", fontFamily: "monospace", fontSize: 12 }}>{u.anonymous_uuid}</td>
-                    <td style={{ padding: "12px 20px", fontSize: 13 }}>{u.snap_pseudo || <span style={{ color: "#B0B0B0" }}>—</span>}</td>
-                    <td style={{ padding: "12px 20px" }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 100, background: u.is_admin ? "#FFFC00" : "#F7F7F7", color: "#0D0D0D" }}>
+                    <td style={{ padding: "12px 12px", fontFamily: "monospace", fontSize: 11, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={u.anonymous_uuid}>{u.anonymous_uuid}</td>
+                    <td style={{ padding: "12px 12px", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.snap_pseudo || <span style={{ color: "#B0B0B0" }}>—</span>}</td>
+                    <td style={{ padding: "12px 12px" }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 100, background: u.is_admin ? "#FFFC00" : "#F7F7F7", color: "#0D0D0D", whiteSpace: "nowrap" }}>
                         {u.is_admin ? "Admin" : "Utilisateur"}
                       </span>
                     </td>
-                    <td style={{ padding: "12px 20px", fontSize: 13 }}>{u.trips_count}</td>
-                    <td style={{ padding: "12px 20px", fontSize: 12, color: "#8A8A8A" }}>{fmtDate(u.created_at)}</td>
-                    <td style={{ padding: "12px 20px" }}>
-                      <div style={{ display: "flex", gap: 6 }}>
+                    <td style={{ padding: "12px 12px", fontSize: 13 }}>{u.trips_count}</td>
+                    <td style={{ padding: "12px 12px", fontSize: 12, color: "#8A8A8A", whiteSpace: "nowrap" }}>{fmtDate(u.created_at)}</td>
+                    <td style={{ padding: "12px 12px" }}>
+                      <div style={{ display: "flex", gap: 5 }}>
                         <button
                           className="ta-admin-btn"
                           onClick={() => openEdit(u)}
-                          style={{ background: "#F7F7F7", border: "0.5px solid rgba(0,0,0,0.09)", borderRadius: 7, padding: "6px 11px", fontSize: 11.5, fontWeight: 600 }}
+                          style={{ background: "#F7F7F7", border: "0.5px solid rgba(0,0,0,0.09)", borderRadius: 7, padding: "6px 9px", fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}
                         >
                           Editer
                         </button>
@@ -211,7 +219,7 @@ export default function AdminPage() {
                           <button
                             className="ta-admin-btn"
                             onClick={() => handleDelete(u)}
-                            style={{ background: "#FDECEC", border: "0.5px solid rgba(208,40,40,0.25)", borderRadius: 7, padding: "6px 11px", fontSize: 11.5, fontWeight: 600, color: "#D02828" }}
+                            style={{ background: "#FDECEC", border: "0.5px solid rgba(208,40,40,0.25)", borderRadius: 7, padding: "6px 9px", fontSize: 11, fontWeight: 600, color: "#D02828", whiteSpace: "nowrap" }}
                           >
                             Supprimer
                           </button>
@@ -222,7 +230,6 @@ export default function AdminPage() {
                 ))}
               </tbody>
             </table>
-            </div>
           )}
         </div>
       </div>
