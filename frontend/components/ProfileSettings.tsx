@@ -32,7 +32,7 @@ export default function ProfileSettings() {
   const [loading, setLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(false);
   const [name, setName] = useState("");
-  const [pseudo, setPseudo] = useState("");
+  const [login, setLogin] = useState("");
   const [location, setLocation] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [saving, setSaving] = useState(false);
@@ -46,7 +46,7 @@ export default function ProfileSettings() {
       .then((profile) => {
         setIsLocked(profile.is_locked);
         setName(profile.name || session?.user?.name || "");
-        setPseudo(profile.snap_pseudo || "");
+        setLogin(profile.anonymous_uuid || "");
         setLocation(profile.location || "");
         setAvatarUrl(profile.avatar_url || session?.user?.image || "");
       })
@@ -63,7 +63,6 @@ export default function ProfileSettings() {
     try {
       await updateProfile(email, {
         name: name.trim(),
-        snap_pseudo: pseudo.trim(),
         avatar_url: avatarUrl.trim(),
         location: location.trim(),
       });
@@ -129,7 +128,7 @@ export default function ProfileSettings() {
           </Field>
 
           <Field label="Pseudo Snapchat">
-            <input className="ta-profile-input" value={pseudo} onChange={(e) => setPseudo(e.target.value)} disabled={isLocked} />
+            <input className="ta-profile-input" value={login} disabled />
           </Field>
 
           <Field label="Lieu de residence">
