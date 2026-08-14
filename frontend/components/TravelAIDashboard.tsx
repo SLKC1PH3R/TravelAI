@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { mergeTrips, photoUrl, type Monument } from '@/lib/api'
 import Flag from '@/components/Flag'
 import { GhostIcon, fmtShort, tripLabel } from '@/components/DashboardChrome'
+import LensQrCard from '@/components/LensQrCard'
 import { useDashboard } from '@/contexts/DashboardContext'
 
 /* ===== Embedded CSS (page-specific only ; chrome partage dans DashboardChrome.tsx) ===== */
@@ -180,6 +181,8 @@ export default function TravelAIDashboard() {
             <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.6px', marginBottom: 6, color: '#0D0D0D' }}>Mes voyages</h1>
             <p style={{ fontSize: 13.5, color: '#6B6B6B' }}>{trips.length} carnet(s) de voyage — clique sur un voyage pour l&apos;ouvrir.</p>
           </div>
+
+          <LensQrCard />
 
           <div className="ta-trip-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20 }}>
             {trips.map((trip) => {
