@@ -160,7 +160,8 @@ export default function AdminPage() {
           ) : filtered.length === 0 ? (
             <div style={{ padding: 32, textAlign: "center", fontSize: 13, color: "#6B6B6B" }}>Aucun utilisateur trouve.</div>
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", minWidth: 820, borderCollapse: "collapse" }}>
               <thead>
                 <tr>
                   {["Utilisateur", "Login Snapchat", "Pseudo", "Role", "Voyages", "Inscrit le", "Actions"].map((h) => (
@@ -221,6 +222,7 @@ export default function AdminPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>
