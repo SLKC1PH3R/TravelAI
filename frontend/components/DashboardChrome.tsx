@@ -12,7 +12,9 @@ import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { photoUrl, type Trip } from '@/lib/api'
 import { computeBadges } from '@/lib/badges'
+import { useLocale } from '@/contexts/LocaleContext'
 import Flag from '@/components/Flag'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 export const DASHBOARD_CHROME_CSS = `
   .ta-nav-pill { transition: color 0.15s, background 0.15s; }
@@ -45,7 +47,8 @@ export function GhostIcon({ size = 13, color = 'currentColor' }: { size?: number
   )
 }
 
-export const fmtShort = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+export const fmtShort = (d: string, locale: string) =>
+  new Date(d).toLocaleDateString(locale === 'en' ? 'en-US' : 'fr-FR', { day: 'numeric', month: 'short' })
 
 export function tripLabel(t: Trip): string {
   return t.title || [t.city, t.country].filter(Boolean).join(', ') || 'Voyage'
@@ -53,6 +56,7 @@ export function tripLabel(t: Trip): string {
 
 function AccountMenu({ uuid, placement = 'bottom' }: { uuid: string; placement?: 'bottom' | 'right' }) {
   const { data: session } = useSession()
+  const { locale, dict } = useLocale()
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState<{ top: number; left?: number; right?: number } | null>(null)
   const ref = useRef<HTMLDivElement>(null)
@@ -80,7 +84,7 @@ function AccountMenu({ uuid, placement = 'bottom' }: { uuid: string; placement?:
 
   const user = session?.user
   const initials = (user?.name || user?.email || '?').slice(0, 2).toUpperCase()
-  const profileHref = `/dashboard/profile?uuid=${encodeURIComponent(uuid)}`
+  const profileHref = `/${locale}/dashboard/profile?uuid=${encodeURIComponent(uuid)}`
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
@@ -95,7 +99,7 @@ function AccountMenu({ uuid, placement = 'bottom' }: { uuid: string; placement?:
           <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#0D0D0D', flexShrink: 0 }}>{initials}</div>
         )}
         <span style={{ fontSize: 13, fontWeight: 600, color: '#0D0D0D', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {user?.name || user?.email || 'Mon compte'}
+          {user?.name || user?.email || dict.dashboardChrome.myTrips}
         </span>
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}>
           <path d="M6 9l6 6 6-6" />
@@ -120,7 +124,7 @@ function AccountMenu({ uuid, placement = 'bottom' }: { uuid: string; placement?:
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#0D0D0D' }}>{initials}</div>
             )}
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#0D0D0D', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name || 'Mon compte'}</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#0D0D0D', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name || dict.common.brand}</div>
               <div style={{ fontSize: 11.5, color: '#8A8A8A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</div>
             </div>
           </div>
@@ -130,13 +134,13 @@ function AccountMenu({ uuid, placement = 'bottom' }: { uuid: string; placement?:
             className="ta-nav-pill"
             style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '11px 16px', fontSize: 13, fontWeight: 500, color: '#0D0D0D', textDecoration: 'none' }}
           >
-            Mon profil
+            {dict.dashboardChrome.myProfile}
           </Link>
           <button
-            onClick={() => signOut({ callbackUrl: '/login' })}
+            onClick={() => signOut({ callbackUrl: `/${locale}/login` })}
             style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '11px 16px', fontSize: 13, fontWeight: 500, color: '#D02828', background: 'none', border: 'none', borderTop: '0.5px solid rgba(0,0,0,0.08)', cursor: 'pointer', textAlign: 'left' }}
           >
-            Se deconnecter
+            {dict.dashboardChrome.signOut}
           </button>
         </div>
       )}
@@ -151,33 +155,35 @@ type TopNavProps = {
 }
 
 export function DashboardTopNav({ uuid, active, isAdmin }: TopNavProps) {
+  const { locale, dict } = useLocale()
   const q = encodeURIComponent(uuid)
   return (
     <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', background: 'rgba(255,255,255,0.97)', borderBottom: '0.5px solid rgba(0,0,0,0.07)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
-      <Link href={`/dashboard?uuid=${q}`} style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}>
+      <Link href={`/${locale}/dashboard?uuid=${q}`} style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}>
         <div style={{ width: 28, height: 28, borderRadius: 7, overflow: 'hidden' }}>
           <img src="/voyageur.jpg" alt="TravelAI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
-        <span style={{ fontSize: 16, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.4px' }}>TravelAI</span>
+        <span style={{ fontSize: 16, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.4px' }}>{dict.common.brand}</span>
       </Link>
       <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#F3F3F3', borderRadius: 9, padding: 3 }}>
         {active === 'profil' ? (
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#0D0D0D', padding: '6px 14px', borderRadius: 7, background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>Mes statistiques</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#0D0D0D', padding: '6px 14px', borderRadius: 7, background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>{dict.dashboardChrome.stats}</span>
         ) : (
-          <Link href={`/dashboard/stats?uuid=${q}`} className="ta-nav-pill" style={{ fontSize: 13, fontWeight: 500, color: '#6B6B6B', textDecoration: 'none', padding: '6px 14px', borderRadius: 7 }}>Mes statistiques</Link>
+          <Link href={`/${locale}/dashboard/stats?uuid=${q}`} className="ta-nav-pill" style={{ fontSize: 13, fontWeight: 500, color: '#6B6B6B', textDecoration: 'none', padding: '6px 14px', borderRadius: 7 }}>{dict.dashboardChrome.stats}</Link>
         )}
         {active === 'voyages' ? (
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#0D0D0D', padding: '6px 14px', borderRadius: 7, background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>Mes voyages</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#0D0D0D', padding: '6px 14px', borderRadius: 7, background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>{dict.dashboardChrome.trips}</span>
         ) : (
-          <Link href={`/dashboard?uuid=${q}`} className="ta-nav-pill" style={{ fontSize: 13, fontWeight: 500, color: '#6B6B6B', textDecoration: 'none', padding: '6px 14px', borderRadius: 7 }}>Mes voyages</Link>
+          <Link href={`/${locale}/dashboard?uuid=${q}`} className="ta-nav-pill" style={{ fontSize: 13, fontWeight: 500, color: '#6B6B6B', textDecoration: 'none', padding: '6px 14px', borderRadius: 7 }}>{dict.dashboardChrome.trips}</Link>
         )}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {isAdmin && (
-          <Link href="/dashboard/admin" className="ta-nav-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#0D0D0D', color: '#FFFC00', padding: '9px 14px', borderRadius: 9, fontSize: 12.5, fontWeight: 700, textDecoration: 'none' }}>
-            ⚙ Admin
+          <Link href={`/${locale}/dashboard/admin`} className="ta-nav-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#0D0D0D', color: '#FFFC00', padding: '9px 14px', borderRadius: 9, fontSize: 12.5, fontWeight: 700, textDecoration: 'none' }}>
+            {dict.dashboardChrome.admin}
           </Link>
         )}
+        <LanguageSwitcher />
         <AccountMenu uuid={uuid} />
       </div>
     </nav>
@@ -208,13 +214,14 @@ function tripCoverUrl(trip: Trip): string | null {
 }
 
 export function DashboardSidebar({ uuid, name, email, avatarUrl, trips, selectedTripId, onSelectTrip, downloading, onDownload, showMerge, onToggleMerge, firstCarnetExportAt = null }: SidebarProps) {
+  const { dict } = useLocale()
   const allMonuments = trips.flatMap((t) => t.monuments)
   const totalMonuments = allMonuments.length
   const countriesCount = new Set(trips.map((t) => t.country).filter(Boolean)).size
   const badges = computeBadges(trips, allMonuments, firstCarnetExportAt)
   const totalBadges = badges.filter((b) => b.unlocked).length
   const nextBadge = badges.find((b) => !b.unlocked)
-  const displayName = name || email || 'Voyageur Anonyme'
+  const displayName = name || email || dict.dashboardChrome.myTrips
   const initials = displayName.slice(0, 2).toUpperCase()
 
   return (
@@ -230,13 +237,13 @@ export function DashboardSidebar({ uuid, name, email, avatarUrl, trips, selected
         )}
         <div style={{ fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
         <div style={{ fontSize: 10.5, color: '#FFFC00', fontWeight: 700, marginBottom: 12 }}>
-          {trips.length} voyage{trips.length > 1 ? 's' : ''} complete{trips.length > 1 ? 's' : ''}
+          {trips.length} {dict.stats.trips}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-around' }}>
           {[
-            [totalMonuments, 'Monuments', '#F4F3EE'],
-            [countriesCount, 'Pays', '#F4F3EE'],
-            [totalBadges, 'Badges', '#FFFC00'],
+            [totalMonuments, dict.dashboardTrips.monuments.split(' ')[0], '#F4F3EE'],
+            [countriesCount, dict.stats.countries, '#F4F3EE'],
+            [totalBadges, dict.nav.items.badges, '#FFFC00'],
           ].map(([value, label, color]) => (
             <div key={String(label)}>
               <div style={{ fontSize: 17, fontWeight: 700, color: color as string }}>{value}</div>
@@ -259,13 +266,13 @@ export function DashboardSidebar({ uuid, name, email, avatarUrl, trips, selected
         </div>
       ) : (
         <div style={{ background: '#FAFAFA', border: '0.5px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: '13px 15px', textAlign: 'center', fontSize: 11.5, fontWeight: 700 }}>
-          🏆 Tous les badges debloques !
+          {dict.dashboardChrome.allBadgesUnlocked}
         </div>
       )}
 
       {/* Mes voyages — covers photo */}
       <div style={{ fontSize: 10.5, fontWeight: 700, color: '#B0B0B0', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 4px', marginTop: 4 }}>
-        Mes voyages · {trips.length}
+        {dict.dashboardChrome.myTrips} · {trips.length}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, overflowY: 'auto' }}>
         {trips.map((t) => {
@@ -285,13 +292,13 @@ export function DashboardSidebar({ uuid, name, email, avatarUrl, trips, selected
             >
               <div style={{ position: 'absolute', inset: 0, background: cover ? `url('${cover}') center/cover` : 'linear-gradient(135deg,#e8e6e1,#cfccc5)' }} />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 25%,rgba(0,0,0,0.72))' }} />
-              {selected && <span style={{ position: 'absolute', top: 8, right: 8, background: '#FFFC00', borderRadius: 100, padding: '3px 9px', fontSize: 9, fontWeight: 700, color: '#0D0D0D' }}>En cours</span>}
+              {selected && <span style={{ position: 'absolute', top: 8, right: 8, background: '#FFFC00', borderRadius: 100, padding: '3px 9px', fontSize: 9, fontWeight: 700, color: '#0D0D0D' }}>{dict.dashboardChrome.inProgress}</span>}
               <div style={{ position: 'absolute', bottom: 9, left: 12, right: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: selected ? 13 : 12, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   <Flag country={t.country} size={14} />
                   {tripLabel(t)}
                 </div>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)' }}>{t.monuments.length} monument(s)</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)' }}>{t.monuments.length} {dict.dashboardTrips.monuments.split(' ')[0]}</div>
               </div>
             </button>
           )
@@ -302,10 +309,10 @@ export function DashboardSidebar({ uuid, name, email, avatarUrl, trips, selected
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <button className="ta-sidebar-btn gv-btn" disabled={downloading} onClick={onDownload} style={{ width: '100%', background: '#FFFC00', border: 'none', borderRadius: 11, padding: 12, fontSize: 13, fontWeight: 700, color: '#0D0D0D', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
-          {downloading ? 'Generation...' : 'Telecharger le carnet PDF'}
+          {downloading ? dict.dashboardChrome.generating : dict.dashboardChrome.downloadPdf}
         </button>
         <button className="ta-sidebar-btn gv-btn" onClick={onToggleMerge} style={{ width: '100%', background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.09)', borderRadius: 11, padding: 11, fontSize: 13, fontWeight: 600, color: '#0D0D0D', cursor: 'pointer' }}>
-          {showMerge ? '✕ Fermer' : '+ Fusionner des voyages'}
+          {showMerge ? dict.dashboardChrome.close : dict.dashboardChrome.mergeTrips}
         </button>
         <div style={{ paddingTop: 6 }}>
           <AccountMenu uuid={uuid} placement="right" />
@@ -321,6 +328,7 @@ export function DashboardSidebar({ uuid, name, email, avatarUrl, trips, selected
  * voyage sans la sidebar.
  */
 export function MobileTripBar({ trips, selectedTripId, onSelectTrip, downloading, onDownload, onToggleMerge }: SidebarProps) {
+  const { dict } = useLocale()
   return (
     <div className="ta-mobile-trips" style={{ alignItems: 'center', gap: 8, background: '#fff', borderBottom: '0.5px solid rgba(0,0,0,0.07)', padding: '10px 12px' }}>
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', flex: 1, WebkitOverflowScrolling: 'touch' }}>
@@ -357,14 +365,14 @@ export function MobileTripBar({ trips, selectedTripId, onSelectTrip, downloading
         className="ta-sidebar-btn"
         disabled={downloading}
         onClick={onDownload}
-        aria-label="Telecharger le carnet PDF"
+        aria-label={dict.dashboardChrome.downloadPdf}
         style={{ flexShrink: 0, width: 36, height: 36, borderRadius: '50%', background: '#FFFC00', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
       </button>
       <button
         onClick={onToggleMerge}
-        aria-label="Fusionner des voyages"
+        aria-label={dict.dashboardChrome.mergeTrips}
         style={{ flexShrink: 0, width: 36, height: 36, borderRadius: '50%', background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 18, lineHeight: 1, color: '#0D0D0D' }}
       >
         +

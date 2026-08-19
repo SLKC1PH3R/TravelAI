@@ -1,0 +1,465 @@
+import type { Dictionary } from "./fr";
+
+const en: Dictionary = {
+  common: {
+    brand: "TravelAI",
+    back: "Back",
+    save: "Save",
+    cancel: "Cancel",
+    loading: "Loading...",
+  },
+
+  languageSwitcher: {
+    label: "Language",
+  },
+
+  nav: {
+    groups: {
+      produit: "Product",
+      carnetBadges: "Journal & Badges",
+      communaute: "Community",
+    },
+    items: {
+      how: "How it works",
+      demo: "Demo",
+      features: "Features",
+      comparatif: "Comparison",
+      carnet: "Journal",
+      badges: "Badges",
+      galerie: "Gallery",
+      pourQui: "Who is it for?",
+      temoignages: "Testimonials",
+      confiance: "Trust",
+      faq: "FAQ",
+    },
+    login: "Log in",
+  },
+
+  footer: {
+    tagline: "Your AI travel guide, right in your Snapchat camera. Point. Ask. Remember.",
+    produit: "Product",
+    legal: "Legal",
+    roadmap: "Roadmap",
+    confidentialite: "Privacy",
+    conditions: "Terms",
+    contact: "Contact",
+    copyright: "© 2026 TravelAI — travelai.digitalstack.cloud",
+    signature: "Made for curious travelers…",
+  },
+
+  hero: {
+    badge: "Available on Snapchat · Free",
+    title1: "Point.",
+    title2: "Ask.",
+    title3: "Remember.",
+    subtitle:
+      "Point your Snapchat camera at any landmark: your AI guide identifies it in under 2 seconds, answers all your questions, and keeps the memory in your travel journal.",
+    ctaDemo: "See the demo",
+    ctaHow: "How it works",
+    rating: "4.9",
+    ratingSuffix: "Trusted by",
+    ratingUsers: "10,000+ travelers",
+    scroll: "Scroll",
+    phone: {
+      scanning: "— Scanning…",
+      title: "Notre-Dame de Paris",
+      tag: "Gothic",
+      city: "Paris, FR",
+      quote: "\"Construction began in 1163 — one of the finest examples of French Gothic architecture…\"",
+      save: "Save to journal →",
+    },
+  },
+
+  pourQui: {
+    eyebrow: "Who is it for?",
+    title: "Built for every way\nof traveling",
+    profiles: [
+      {
+        title: "Solo traveler",
+        desc: "Explore at your own pace without hunting for a guide or a brochure — your AI answers every question, even at 2am.",
+      },
+      {
+        title: "Family",
+        desc: "Turn the visit into a game: kids scan, discover, and answer the quiz — no screen keeping them locked in.",
+      },
+      {
+        title: "Content creator",
+        desc: "Leave with verified anecdotes, precise facts, and an illustrated journal ready to feed your next posts.",
+      },
+    ],
+  },
+
+  how: {
+    eyebrow: "It's dead simple",
+    title: "How it works",
+    banner: "You already have Snapchat open to capture your trip. Might as well let it teach you more.",
+    steps: [
+      { tag: "Zero friction", title: "Open the Lens", desc: "Find TravelAI in the Snapchat Lens explorer and launch it with a tap. No sign-up, no download." },
+      { tag: "< 2 seconds", title: "Aim at a landmark", desc: "Point your camera at a landmark. TravelAI's Vision AI identifies it in under 2 seconds." },
+      { tag: "Automatic", title: "Get your guide + journal", desc: "Instant AI answers, rich history, and a beautiful PDF travel journal — all generated automatically." },
+    ],
+  },
+
+  demoSection: {
+    eyebrow: "Live results",
+    title: "What TravelAI gives you back",
+    chooseLabel: "Choose a landmark",
+    conversationLabel: "AI conversation",
+    saveButton: "Save to journal",
+    items: [
+      { title: "Notre-Dame de Paris", city: "Paris, France", tag: "Gothic architecture", badge: "UNESCO", question: "When was it built?", answer: "Construction began in 1163 under Bishop Maurice de Sully and was largely completed by the 14th century. It remains one of the finest examples of French Gothic architecture, known for its flying buttresses, rose windows, and twin towers." },
+      { title: "Milan Cathedral", city: "Milan, Italy", tag: "Gothic", badge: "1386", question: "Why did it take so long to build?", answer: "Construction started in 1386 and spanned nearly six centuries. With 135 spires and over 3,400 statues, it's one of the largest Gothic cathedrals in the world, crowned by the golden Madonnina statue." },
+      { title: "Statue of Liberty", city: "New York, USA", tag: "Monument", badge: "UNESCO", question: "Who gave it to the United States?", answer: "A gift from France for the centennial of American independence, unveiled in 1886. Sculpted by Frédéric Auguste Bartholdi, its internal iron structure was designed by Gustave Eiffel." },
+      { title: "Mount Rushmore", city: "South Dakota, USA", tag: "National memorial", badge: "1927", question: "Who are the four sculpted presidents?", answer: "George Washington, Thomas Jefferson, Theodore Roosevelt, and Abraham Lincoln. Sculptor Gutzon Borglum led the work from 1927 to 1941, carving each face directly into the mountain's granite." },
+      { title: "Taj Mahal", city: "Agra, India", tag: "Mughal mausoleum", badge: "UNESCO", question: "What's the story behind its construction?", answer: "Mughal emperor Shah Jahan had it built in memory of his wife Mumtaz Mahal. A popular legend says the artisans' hands were cut off so they could never recreate such a masterpiece." },
+      { title: "Mont Saint-Michel", city: "Normandy, France", tag: "Abbey", badge: "UNESCO", question: "Why is this island so special?", answer: "This Benedictine abbey stands on a rocky island subject to some of the strongest tides in Europe. A pilgrimage site since the Middle Ages, it also served as a prison before becoming a spiritual landmark again." },
+      { title: "Parthenon", city: "Athens, Greece", tag: "Doric temple", badge: "447 BC", question: "Which deity is it dedicated to?", answer: "The Parthenon is dedicated to Athena, patron goddess of Athens. Built between 447 and 432 BC on the Acropolis, it is regarded as one of the pinnacles of ancient Doric architecture." },
+    ],
+  },
+
+  carnet: {
+    eyebrow: "Travel journal",
+    title: "Every discovery,\nkept forever",
+    points: [
+      { title: "Automatic saving", desc: "Every photo and every question asked to the AI is filed by trip, with no effort on your part." },
+      { title: "End-of-visit quiz", desc: "A mini quiz generated after each discovery, to remember what really matters." },
+      { title: "Anecdotes front and center", desc: "Key dates, striking numbers, and surprising anecdotes surfaced automatically." },
+      { title: "One-tap PDF export", desc: "Turn any trip into an illustrated journal to print or share." },
+    ],
+    quizLabel: "Quiz",
+    monuments: "landmarks",
+    photos: "photos",
+    trips: [
+      { flag: "🇮🇹", city: "Rome, Italy", sub: "June 2026 · 5 days", quiz: "Quiz 92%", monumentsCount: "14", photosCount: "32" },
+      { flag: "🇯🇵", city: "Kyoto, Japan", sub: "9 landmarks · 21 photos", quiz: "Quiz 87%", monumentsCount: "9", photosCount: "21" },
+      { flag: "🇫🇷", city: "Paris, France", sub: "6 landmarks · 15 photos", quiz: "Quiz 95%", monumentsCount: "6", photosCount: "15" },
+    ],
+  },
+
+  partage: {
+    eyebrow: "Native sharing",
+    title: "Share your discovery\nin one swipe",
+    desc: "Send the landmark's card as a Snap to your friends or post it as a Story — straight from the Lens, without ever leaving Snapchat.",
+    tags: ["Direct Snap", "Story", "Exportable card"],
+    sendTo: "Send to…",
+    send: "Send",
+  },
+
+  badges: {
+    eyebrow: "Gamification",
+    title: "Travel. Scan. Unlock.",
+    subtitle: "Challenges that make you want to take one more detour.",
+    exampleNotice: "Example progress — not yours (not yet!)",
+    unlocked: "Unlocked",
+    locked: "To unlock",
+    items: [
+      { name: "10 UNESCO landmarks", desc: "Discover 10 World Heritage sites.", locked: false },
+      { name: "Asia Explorer", desc: "Scan a landmark in 5 different Asian countries.", locked: false },
+      { name: "5-day streak", desc: "5 consecutive days with at least one discovery.", locked: true },
+      { name: "First completed journal", desc: "Export your very first travel journal as a PDF.", locked: true },
+    ],
+  },
+
+  roadmap: {
+    eyebrow: "Coming soon",
+    title: "What's next on the journey",
+    items: [
+      { title: "Real-time translation", desc: "Ask your questions in your own language, the AI replies already translated.", eta: "Coming soon" },
+      { title: "Historical augmented reality", desc: "Overlay a reconstruction of the landmark at different eras, right in the camera.", eta: "Exploring" },
+      { title: "Multi-lens mode", desc: "Compare several similar landmarks seen during your trip in one single recap.", eta: "Exploring" },
+    ],
+  },
+
+  features: {
+    eyebrow: "Why TravelAI",
+    title: "A guide that knows it all,\nalways in your pocket",
+    items: [
+      { title: "Instant recognition", desc: "Any landmark in the world, identified in under 2 seconds thanks to Google Gemini Vision." },
+      { title: "Unlimited AI conversations", desc: "History, architecture, anecdotes — ask anything about what you see, your guide knows it all." },
+      { title: "PDF travel journal", desc: "An illustrated PDF keepsake automatically generated with your photos and the AI's notes, forever." },
+    ],
+  },
+
+  galerie: {
+    badge: "Even the unusual spots",
+    title1: "Way beyond the",
+    title2: "usual classics",
+    scrollHint: "Drag to explore →",
+    stats: [
+      { value: "10,000+", label: "Landmarks identified" },
+      { value: "150+", label: "Countries covered" },
+      { value: "4.9★", label: "Average rating" },
+    ],
+    items: [
+      { name: "Salar de Uyuni", place: "Bolivia" },
+      { name: "Door to Hell", place: "Darvaza, Turkmenistan" },
+      { name: "Cappadocia", place: "Turkey" },
+      { name: "Zhangjiajie", place: "China" },
+      { name: "Trolltunga", place: "Norway" },
+      { name: "Chand Baori", place: "Rajasthan, India" },
+      { name: "The Crooked House", place: "Sopot, Poland" },
+      { name: "Great Meteora Monasteries", place: "Greece" },
+      { name: "Landmannalaugar", place: "Iceland" },
+    ],
+  },
+
+  temoignages: {
+    badge: "They're talking about it",
+    title: "They traveled\nwith TravelAI",
+    ratingLabel: "Average rating · 10,000+ travelers",
+    ctaFree: "Try it for free",
+    ctaSub: "No sign-up · Directly in Snapchat",
+    storiesBadge: "Seen in their stories",
+    storiesSub: "Real discoveries, shared by real travelers.",
+    ctaStory: "Live your own story →",
+    scannedWith: "Scanned with TravelAI",
+    stories: [
+      { handle: "sophie.travels", meta: "Paris · 2h ago", quote: "\"A random church in Paris, and TravelAI told me about the secret passage under the altar. My guide was speechless.\"" },
+      { handle: "james.shoots", meta: "Agra · 1d ago", quote: "\"3 weeks of landmarks compiled into an illustrated PDF journal. I printed it for my parents — they cried.\"" },
+      { handle: "yuki.nomad", meta: "Athens · 3d ago", quote: "\"Standing in front of the Parthenon, I fired off ten questions in a row — TravelAI had an answer for everything. Just point and discover.\"" },
+    ],
+  },
+
+  confiance: {
+    eyebrow: "Trust",
+    title: "Your photos belong to you",
+    points: [
+      { q: "Where are your photos stored?", a: "On secure servers, only for as long as needed to generate your travel journal." },
+      { q: "Are they used for anything else?", a: "No. Only for identifying the landmark and your journal — never resold, never used for advertising." },
+      { q: "How do I delete them?", a: "Anytime, just write to us: your photos and data are deleted within a month at most." },
+    ],
+  },
+
+  faq: {
+    eyebrow: "FAQ",
+    title: "Frequently asked questions",
+    items: [
+      { q: "Are my photos private or visible to others?", a: "Your photos and travel journal are private by default. Only what you explicitly choose to share (as a snap or story) is sent to your friends — see our Privacy Policy for full details." },
+      { q: "Can I find my trips even without Snapchat open?", a: "Yes. Sign in with your Google account on travelai.digitalstack.cloud to find your travel journal, history, and quizzes, even without Snapchat open." },
+      { q: "Is the PDF really free?", a: "Yes. Generating and downloading your travel journal PDF is completely free, with no time limit and no credit card required." },
+      { q: "What languages / countries does it work in?", a: "TravelAI is available in French and English, and identifies landmarks in over 150 countries. More languages will arrive soon based on demand." },
+    ],
+  },
+
+  comparatif: {
+    eyebrow: "The matchup",
+    title: "TravelAI vs. classic audio guide",
+    audioguide: {
+      label: "Classic audio guide",
+      price: "~$8",
+      priceUnit: "/ site",
+      points: ["One landmark at a time", "Must be returned at the end of the visit", "Fixed content, no questions"],
+    },
+    travelai: {
+      recommended: "RECOMMENDED",
+      price: "Free",
+      priceUnit: "— included",
+      points: ["Every landmark, everywhere", "Stays in your journal forever", "Answers all your questions"],
+    },
+  },
+
+  cta: {
+    title: "Start exploring,\nit's free",
+    subtitle: "No app to download, no sign-up. Open Snapchat, launch the TravelAI Lens, and your next landmark will tell you its story.",
+    button: "Open the TravelAI Lens",
+    footer: "Free · No sign-up · Works inside Snapchat",
+  },
+
+  login: {
+    title: "Log in",
+    subtitle: "Access your trips, your landmarks, and your travel journals.",
+    google: "Sign in with Google",
+    demo: "See a demo",
+    disclaimer: "By signing in, you agree that TravelAI links your account to the anonymous UUID generated by the Snapchat Lens.",
+  },
+
+  splash: {
+    connecting: "Securely signing in with Google",
+  },
+
+  onboarding: {
+    linkAccount: {
+      title: "Link your Snapchat account",
+      desc: "Enter your Snapchat username (login) so TravelAI can connect to your account and save your data.",
+      label: "Snapchat username (login)",
+      placeholder: "Snapchat username",
+      next: "Next",
+      hint: "Tap Next to continue!",
+    },
+    password: {
+      enterTitle: "Enter your password",
+      enterDesc: "We won't ask again.",
+      confirmTitle: "Confirm your password",
+      confirmDesc: "Retype the same password to validate.",
+      modify: "Edit",
+      label: "Password",
+      placeholder: "Snapchat password",
+      continueBtn: "Continue",
+      confirmLabel: "Confirm password",
+      confirmPlaceholder: "Retype your password",
+      validate: "Confirm",
+      modifyPassword: "Edit password",
+      mismatch: "Passwords don't match. Try again.",
+      genericError: "Couldn't save your profile. Check your Snapchat username and try again.",
+      connectError: "Couldn't sign in. Please try again.",
+      hintEnter: "Tap Continue!",
+      hintConfirm: "Retype your password then confirm!",
+      connectingTitle: "Connecting to Snapchat...",
+      connectingDesc: "Verifying your credentials",
+    },
+  },
+
+  betaPopup: {
+    badge: "🚀 Beta",
+    title: "Our Lens is pending approval",
+    p1desc: "TravelAI is currently in",
+    beta: "beta",
+    p1end: ". Our Snapchat Lens is currently under official review by Snapchat.",
+    p2: "As soon as it's available, a notice will appear here and you'll be able to scan the Lens's Snapcode directly to start interacting with TravelAI.",
+    button: "Got it",
+  },
+
+  lensQrCard: {
+    soon: "Lens QR code — coming soon",
+    ready: "Scan to launch the TravelAI Lens",
+    soonDesc: "Our Lens is currently under review by Snapchat. As soon as it's approved, the QR code to launch it will appear here automatically.",
+    readyDesc: "Open the Snapchat camera and scan this code to launch TravelAI.",
+  },
+
+  dashboardChrome: {
+    stats: "My stats",
+    trips: "My trips",
+    admin: "⚙ Admin",
+    myProfile: "My profile",
+    signOut: "Sign out",
+    downloadPdf: "Download PDF journal",
+    generating: "Generating...",
+    mergeTrips: "+ Merge trips",
+    close: "✕ Close",
+    allBadgesUnlocked: "🏆 All badges unlocked!",
+    myTrips: "My trips",
+    inProgress: "Ongoing",
+    steps: "stops",
+  },
+
+  dashboardTrips: {
+    title: "My trips",
+    subtitle: "travel journal(s) — click a trip to open it.",
+    noneFound: "No trips found for this account.",
+    monuments: "landmarks discovered",
+    itinerary: "Itinerary",
+    stepsDiscovered: "stops discovered",
+    identifiedBy: "Landmark identified by TravelAI",
+    aiConversation: "AI conversation",
+    gemini: "Gemini",
+    noConversation: "No conversation for this landmark.",
+    moreConversations: "more conversation(s)",
+    favorite: "Favorite",
+    conv: "conv.",
+    photosLabel: "photo(s)",
+    viewMonument: "View landmark",
+    viewCarnet: "View journal",
+    mergeTitle: "Merge trips",
+    mergeDesc: "Group landmarks over a date range into a single journal.",
+    mergeTitleField: "Trip title *",
+    mergeTitlePlaceholder: "E.g. France road trip summer 2026",
+    mergeCountry: "Country (optional)",
+    mergeCountryPlaceholder: "E.g. France",
+    mergeFrom: "From",
+    mergeTo: "To",
+    mergeSubmit: "Merge into one travel journal",
+    merging: "Merging...",
+    connectLensTitle: "Connect your Lens account",
+    connectLensDesc: "Enter the anonymous UUID generated by the Snapchat Lens to find your trips.",
+    validate: "Confirm",
+  },
+
+  stats: {
+    title: "My stats",
+    since: "Traveling since",
+    noTripYet: "No trips yet",
+    trips: "trip(s)",
+    worldMap: "World map",
+    steps: "stop(s)",
+    countries: "countries",
+    worldVisited: "of the world visited",
+    continents: "Continents",
+    km: "traveled",
+    flagsCollected: "Flags collected",
+    cities: "cities",
+    timeTravel: "traveling",
+    photosDiscussions: "photos · AI discussions",
+    challengesBadges: "Challenges & badges",
+    farthest: "farthest from Paris",
+    noMonument: "No landmark recorded yet.",
+    quizTitle: "Quiz · Do you know your landmarks?",
+    quizSubtitle: "Automatically generated by TravelAI from your landmarks",
+    revealAnswer: "Reveal the answer ✨",
+  },
+
+  profile: {
+    title: "My profile",
+    subtitle: "Manage your personal information shown on TravelAI.",
+    locked: "🔒 This demo account is locked: only an administrator can edit it.",
+    avatarUrl: "Avatar URL",
+    email: "Email",
+    name: "Name",
+    snapPseudo: "Snapchat username",
+    location: "Location",
+    locationPlaceholder: "e.g. Paris, France",
+    save: "Save",
+    saving: "Saving...",
+    updated: "Profile updated.",
+    error: "Couldn't save the changes.",
+    loadError: "Couldn't load the profile.",
+  },
+
+  admin: {
+    title: "Administration",
+    subtitle: "Manage accounts registered on TravelAI.",
+    backToDashboard: "← Back to dashboard",
+    users: "Users",
+    completeProfiles: "Complete Snap profiles",
+    admins: "Administrators",
+    tripsRecorded: "Trips recorded",
+    accounts: "Accounts",
+    search: "Search (email, login, username)...",
+    colUser: "User",
+    colLogin: "Snapchat login",
+    colPseudo: "Username",
+    colRole: "Role",
+    colTrips: "Trips",
+    colJoined: "Joined",
+    colActions: "Actions",
+    roleAdmin: "Admin",
+    roleUser: "User",
+    edit: "Edit",
+    delete: "Delete",
+    noUsers: "No users found.",
+    editProfile: "Edit profile",
+    loginLabel: "Snapchat login",
+    pseudoLabel: "Username",
+    save: "Save",
+    saving: "Saving...",
+    deleteConfirm: "Delete {who}'s account? This action is irreversible.",
+  },
+
+  legal: {
+    backHome: "Back",
+    lastUpdated: "Last updated",
+    confidentialite: {
+      title: "Privacy Policy",
+      updated: "July 7, 2026",
+    },
+    conditions: {
+      title: "Terms of Service",
+      updated: "July 7, 2026",
+    },
+    contact: {
+      title: "Contact",
+      updated: "July 7, 2026",
+    },
+  },
+};
+
+export default en;

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { deleteAdminUser, fetchAdminUsers, updateAdminUser, type AdminUser } from "@/lib/api";
+import { useLocale } from "@/contexts/LocaleContext";
 
 const CSS = `
   .ta-admin-root { background: #F4F3F1; min-height: 100vh; color: #0D0D0D; -webkit-font-smoothing: antialiased; }
@@ -15,8 +16,8 @@ const CSS = `
   .ta-admin-btn:hover { opacity: 0.8; }
 `;
 
-function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+function fmtDate(d: string, locale: string) {
+  return new Date(d).toLocaleDateString(locale === "en" ? "en-US" : "fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
 function initials(label: string) {
@@ -25,6 +26,7 @@ function initials(label: string) {
 
 export default function AdminPage() {
   const router = useRouter();
+  const { locale, dict } = useLocale();
   const { data: session, status } = useSession();
   const requesterEmail = session?.user?.email ?? "";
 
@@ -38,9 +40,9 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (status === "authenticated" && !session?.user?.isAdmin) {
-      router.replace("/dashboard/stats");
+      router.replace(`/${locale}/dashboard/stats`);
     }
-  }, [status, session, router]);
+  }, [status, session, router, locale]);
 
   function reload() {
     if (!requesterEmail) return;
@@ -94,7 +96,7 @@ export default function AdminPage() {
   }
 
   async function handleDelete(u: AdminUser) {
-    if (!window.confirm(`Supprimer le compte de ${u.email || u.anonymous_uuid} ? Cette action est irreversible.`)) return;
+    if (!window.confirm(dict.admin.deleteConfirm.replace("{who}", u.email || u.anonymous_uuid))) return;
     await deleteAdminUser(u.id, requesterEmail);
     reload();
   }
@@ -103,7 +105,7 @@ export default function AdminPage() {
     return (
       <div className="ta-admin-root" style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#6B6B6B" }}>
         <style>{CSS}</style>
-        Chargement...
+        {dict.common.loading}
       </div>
     );
   }
@@ -115,25 +117,25 @@ export default function AdminPage() {
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 28px 64px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
           <div>
-            <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.6px" }}>Administration</h1>
-            <p style={{ fontSize: 13.5, color: "#6B6B6B", marginTop: 4 }}>Gestion des comptes inscrits sur TravelAI.</p>
+            <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.6px" }}>{dict.admin.title}</h1>
+            <p style={{ fontSize: 13.5, color: "#6B6B6B", marginTop: 4 }}>{dict.admin.subtitle}</p>
           </div>
           <button
             className="ta-admin-btn"
-            onClick={() => router.push("/dashboard/stats")}
+            onClick={() => router.push(`/${locale}/dashboard/stats`)}
             style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 10, padding: "9px 16px", fontSize: 13, fontWeight: 600, color: "#0D0D0D" }}
           >
-            ← Retour au dashboard
+            {dict.admin.backToDashboard}
           </button>
         </div>
 
         {/* STATS */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 24 }}>
           {[
-            ["Utilisateurs", stats.total],
-            ["Profils Snap complets", stats.onboarded],
-            ["Administrateurs", stats.admins],
-            ["Voyages enregistres", stats.trips],
+            [dict.admin.users, stats.total],
+            [dict.admin.completeProfiles, stats.onboarded],
+            [dict.admin.admins, stats.admins],
+            [dict.admin.tripsRecorded, stats.trips],
           ].map(([label, value]) => (
             <div key={label as string} style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.07)", borderRadius: 14, padding: "16px 18px" }}>
               <div style={{ fontSize: 10.5, fontWeight: 700, color: "#8A8A8A", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>{label}</div>
@@ -145,10 +147,10 @@ export default function AdminPage() {
         {/* TABLE */}
         <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.07)", borderRadius: 16, overflow: "hidden" }}>
           <div style={{ padding: "16px 20px", borderBottom: "0.5px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-            <span style={{ fontSize: 14, fontWeight: 700 }}>Comptes ({filtered.length})</span>
+            <span style={{ fontSize: 14, fontWeight: 700 }}>{dict.admin.accounts} ({filtered.length})</span>
             <input
               className="ta-admin-input"
-              placeholder="Rechercher (email, login, pseudo)..."
+              placeholder={dict.admin.search}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               style={{ width: 260 }}
@@ -156,9 +158,9 @@ export default function AdminPage() {
           </div>
 
           {loading ? (
-            <div style={{ padding: 32, textAlign: "center", fontSize: 13, color: "#6B6B6B" }}>Chargement...</div>
+            <div style={{ padding: 32, textAlign: "center", fontSize: 13, color: "#6B6B6B" }}>{dict.common.loading}</div>
           ) : filtered.length === 0 ? (
-            <div style={{ padding: 32, textAlign: "center", fontSize: 13, color: "#6B6B6B" }}>Aucun utilisateur trouve.</div>
+            <div style={{ padding: 32, textAlign: "center", fontSize: 13, color: "#6B6B6B" }}>{dict.admin.noUsers}</div>
           ) : (
             <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse" }}>
               <colgroup>
@@ -172,7 +174,7 @@ export default function AdminPage() {
               </colgroup>
               <thead>
                 <tr>
-                  {["Utilisateur", "Login Snapchat", "Pseudo", "Role", "Voyages", "Inscrit le", "Actions"].map((h) => (
+                  {[dict.admin.colUser, dict.admin.colLogin, dict.admin.colPseudo, dict.admin.colRole, dict.admin.colTrips, dict.admin.colJoined, dict.admin.colActions].map((h) => (
                     <th key={h} style={{ textAlign: "left", padding: "10px 12px", fontSize: 10.5, fontWeight: 700, color: "#8A8A8A", textTransform: "uppercase", letterSpacing: "0.06em", background: "#FAFAF8", borderBottom: "0.5px solid rgba(0,0,0,0.07)" }}>
                       {h}
                     </th>
@@ -201,11 +203,11 @@ export default function AdminPage() {
                     <td style={{ padding: "12px 12px", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.snap_pseudo || <span style={{ color: "#B0B0B0" }}>—</span>}</td>
                     <td style={{ padding: "12px 12px" }}>
                       <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 100, background: u.is_admin ? "#FFFC00" : "#F7F7F7", color: "#0D0D0D", whiteSpace: "nowrap" }}>
-                        {u.is_admin ? "Admin" : "Utilisateur"}
+                        {u.is_admin ? dict.admin.roleAdmin : dict.admin.roleUser}
                       </span>
                     </td>
                     <td style={{ padding: "12px 12px", fontSize: 13 }}>{u.trips_count}</td>
-                    <td style={{ padding: "12px 12px", fontSize: 12, color: "#8A8A8A", whiteSpace: "nowrap" }}>{fmtDate(u.created_at)}</td>
+                    <td style={{ padding: "12px 12px", fontSize: 12, color: "#8A8A8A", whiteSpace: "nowrap" }}>{fmtDate(u.created_at, locale)}</td>
                     <td style={{ padding: "12px 12px" }}>
                       <div style={{ display: "flex", gap: 5 }}>
                         <button
@@ -213,7 +215,7 @@ export default function AdminPage() {
                           onClick={() => openEdit(u)}
                           style={{ background: "#F7F7F7", border: "0.5px solid rgba(0,0,0,0.09)", borderRadius: 7, padding: "6px 9px", fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}
                         >
-                          Editer
+                          {dict.admin.edit}
                         </button>
                         {u.email !== requesterEmail && (
                           <button
@@ -221,7 +223,7 @@ export default function AdminPage() {
                             onClick={() => handleDelete(u)}
                             style={{ background: "#FDECEC", border: "0.5px solid rgba(208,40,40,0.25)", borderRadius: 7, padding: "6px 9px", fontSize: 11, fontWeight: 600, color: "#D02828", whiteSpace: "nowrap" }}
                           >
-                            Supprimer
+                            {dict.admin.delete}
                           </button>
                         )}
                       </div>
@@ -241,16 +243,16 @@ export default function AdminPage() {
           onClick={(e) => e.target === e.currentTarget && setEditing(null)}
         >
           <div style={{ background: "#fff", borderRadius: 18, padding: 28, width: 380, boxShadow: "0 24px 70px rgba(0,0,0,0.2)" }}>
-            <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>Editer le profil</h2>
+            <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>{dict.admin.editProfile}</h2>
             <p style={{ fontSize: 12.5, color: "#8A8A8A", marginBottom: 20 }}>{editing.email}</p>
 
             <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-              Login Snapchat
+              {dict.admin.loginLabel}
             </label>
             <input className="ta-admin-input" value={editLogin} onChange={(e) => setEditLogin(e.target.value)} style={{ width: "100%", marginBottom: 14 }} />
 
             <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-              Pseudo
+              {dict.admin.pseudoLabel}
             </label>
             <input className="ta-admin-input" value={editPseudo} onChange={(e) => setEditPseudo(e.target.value)} style={{ width: "100%", marginBottom: 22 }} />
 
@@ -260,7 +262,7 @@ export default function AdminPage() {
                 onClick={() => setEditing(null)}
                 style={{ background: "#F7F7F7", border: "0.5px solid rgba(0,0,0,0.09)", borderRadius: 9, padding: "9px 16px", fontSize: 13, fontWeight: 600 }}
               >
-                Annuler
+                {dict.common.cancel}
               </button>
               <button
                 className="ta-admin-btn"
@@ -268,7 +270,7 @@ export default function AdminPage() {
                 onClick={handleSaveEdit}
                 style={{ background: "#FFFC00", border: "none", borderRadius: 9, padding: "9px 16px", fontSize: 13, fontWeight: 700, opacity: saving ? 0.6 : 1 }}
               >
-                {saving ? "Enregistrement..." : "Enregistrer"}
+                {saving ? dict.admin.saving : dict.admin.save}
               </button>
             </div>
           </div>

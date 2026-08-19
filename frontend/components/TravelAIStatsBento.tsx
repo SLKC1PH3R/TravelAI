@@ -22,6 +22,7 @@ import { ALL_CONTINENTS, continentFor, haversineKm, PARIS, TOTAL_COUNTRIES_IN_WO
 import { computeBadges } from '@/lib/badges'
 import Flag from '@/components/Flag'
 import { useDashboard } from '@/contexts/DashboardContext'
+import { useLocale } from '@/contexts/LocaleContext'
 
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
 
@@ -65,11 +66,12 @@ function useCountUp(target: number, durationMs = 900) {
   return value
 }
 
-function fmtMonthYear(d: string) {
-  return new Date(d).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+function fmtMonthYear(d: string, locale: string) {
+  return new Date(d).toLocaleDateString(locale === 'en' ? 'en-US' : 'fr-FR', { month: 'long', year: 'numeric' })
 }
 
 function QuizCard({ monument }: { monument: Monument }) {
+  const { dict } = useLocale()
   const [revealed, setRevealed] = useState(false)
   return (
     <div className="tb-tile" style={{ padding: 18 }}>
@@ -81,7 +83,7 @@ function QuizCard({ monument }: { monument: Monument }) {
         </div>
       ) : (
         <button className="tb-quiz-btn" onClick={() => setRevealed(true)} style={{ background: '#EDF1F4', border: '0.5px solid rgba(10,30,50,0.09)', borderRadius: 9, padding: '9px 14px', fontSize: 12.5, fontWeight: 600, color: '#0D1217' }}>
-          Reveler la reponse ✨
+          {dict.stats.revealAnswer}
         </button>
       )}
     </div>
@@ -97,14 +99,15 @@ const BADGE_EMOJI: Record<string, string> = {
 
 export default function TravelAIStatsBento() {
   const router = useRouter()
+  const { locale, dict } = useLocale()
   const { data: session } = useSession()
   const { uuid, trips, loading, firstCarnetExportAt } = useDashboard()
 
   useEffect(() => {
     if (!uuid && session?.user?.anonymousUuid) {
-      router.replace(`/dashboard/stats?uuid=${encodeURIComponent(session.user.anonymousUuid)}`)
+      router.replace(`/${locale}/dashboard/stats?uuid=${encodeURIComponent(session.user.anonymousUuid)}`)
     }
-  }, [uuid, session, router])
+  }, [uuid, session, router, locale])
 
   const allMonuments = useMemo(() => trips.flatMap((t) => t.monuments), [trips])
 
@@ -180,7 +183,7 @@ export default function TravelAIStatsBento() {
     return (
       <div className="tb-root" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#8E99A3' }}>
         <style>{CSS}</style>
-        Chargement...
+        {dict.common.loading}
       </div>
     )
   }
@@ -193,11 +196,11 @@ export default function TravelAIStatsBento() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.8px' }}>Mes statistiques</h1>
+            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.8px' }}>{dict.stats.title}</h1>
             <span style={{ background: '#FFFC00', borderRadius: 100, padding: '3px 11px', fontSize: 12, fontWeight: 700, color: '#0D0D0D' }}>{new Date().getFullYear()}</span>
           </div>
           <span style={{ fontSize: 12.5, color: '#8E99A3' }}>
-            {stats.firstTrip ? `Voyageur depuis ${fmtMonthYear(stats.firstTrip.started_at)}` : 'Aucun voyage encore'} · {stats.voyages} voyage(s)
+            {stats.firstTrip ? `${dict.stats.since} ${fmtMonthYear(stats.firstTrip.started_at, locale)}` : dict.stats.noTripYet} · {stats.voyages} {dict.stats.trips}
           </span>
         </div>
 
@@ -209,15 +212,15 @@ export default function TravelAIStatsBento() {
               <MapView monuments={allMonuments} />
             </div>
             <div style={{ position: 'absolute', top: 14, right: 16, zIndex: 500, background: 'rgba(255,255,255,.88)', backdropFilter: 'blur(8px)', borderRadius: 10, padding: '8px 13px', pointerEvents: 'none' }}>
-              <div style={{ fontSize: 13, fontWeight: 700 }}>Carte du monde</div>
-              <div style={{ fontSize: 10.5, color: '#8E99A3' }}>{allMonuments.length} etape(s) · {stats.countries.size} pays</div>
+              <div style={{ fontSize: 13, fontWeight: 700 }}>{dict.stats.worldMap}</div>
+              <div style={{ fontSize: 10.5, color: '#8E99A3' }}>{allMonuments.length} {dict.stats.steps} · {stats.countries.size} {dict.stats.countries}</div>
             </div>
           </div>
 
           {/* Pays (sombre) */}
           <div className="tb-dark" style={{ background: '#0D1217', borderRadius: 18, padding: '18px 20px', color: '#F4F3EE', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-1.2px' }}>
-              {animCountries} <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(244,243,238,.55)' }}>pays</span>
+              {animCountries} <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(244,243,238,.55)' }}>{dict.stats.countries}</span>
             </div>
             <div style={{ display: 'inline-flex', gap: 5, flexWrap: 'wrap' }}>
               {Array.from(stats.countries.keys()).map((c) => <Flag key={c} country={c} size={15} />)}
@@ -228,13 +231,13 @@ export default function TravelAIStatsBento() {
           <div style={{ position: 'relative', overflow: 'hidden', background: '#FFFC00', borderRadius: 18, padding: '18px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <span style={{ position: 'absolute', top: -24, right: -24, width: 90, height: 90, borderRadius: '50%', background: 'rgba(255,255,255,.2)' }} />
             <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-1.2px', color: '#0D0D0D', position: 'relative' }}>{worldPercent}%</div>
-            <div style={{ fontSize: 11.5, color: 'rgba(13,13,13,.7)', position: 'relative' }}>du monde visite · {stats.countries.size}/{TOTAL_COUNTRIES_IN_WORLD}</div>
+            <div style={{ fontSize: 11.5, color: 'rgba(13,13,13,.7)', position: 'relative' }}>{dict.stats.worldVisited} · {stats.countries.size}/{TOTAL_COUNTRIES_IN_WORLD}</div>
           </div>
 
           {/* Continents */}
           <div className="tb-tile" style={{ padding: '16px 18px', overflow: 'hidden' }}>
             <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 8 }}>
-              Continents <span style={{ color: '#8E99A3', fontWeight: 500 }}>{stats.continents.size}/{ALL_CONTINENTS.length}</span>
+              {dict.stats.continents} <span style={{ color: '#8E99A3', fontWeight: 500 }}>{stats.continents.size}/{ALL_CONTINENTS.length}</span>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
               {ALL_CONTINENTS.map((continent) => {
@@ -252,16 +255,16 @@ export default function TravelAIStatsBento() {
           <div className="tb-tile" style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <span style={{ fontSize: 16 }}>✈️</span>
             <div>
-              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-.8px' }}>{animKm.toLocaleString('fr-FR')} km</div>
-              <div style={{ fontSize: 10.5, color: '#8E99A3' }}>parcourus</div>
+              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-.8px' }}>{animKm.toLocaleString(locale === 'en' ? 'en-US' : 'fr-FR')} km</div>
+              <div style={{ fontSize: 10.5, color: '#8E99A3' }}>{dict.stats.km}</div>
             </div>
           </div>
 
           {/* Drapeaux + villes (span 2) */}
           <div className="tb-tile tb-span2" style={{ padding: '16px 20px', overflow: 'hidden' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-              <span style={{ fontSize: 13, fontWeight: 700 }}>Drapeaux collectes</span>
-              <span style={{ fontSize: 10.5, color: '#8E99A3' }}>{stats.countries.size} pays · {stats.cities.size} ville(s)</span>
+              <span style={{ fontSize: 13, fontWeight: 700 }}>{dict.stats.flagsCollected}</span>
+              <span style={{ fontSize: 10.5, color: '#8E99A3' }}>{stats.countries.size} {dict.stats.countries} · {stats.cities.size} {dict.stats.cities}</span>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
               {Array.from(stats.countries.entries())
@@ -285,7 +288,7 @@ export default function TravelAIStatsBento() {
             <span style={{ fontSize: 16 }}>⏱</span>
             <div>
               <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-.8px' }}>{stats.totalDays}j {stats.totalHours}h</div>
-              <div style={{ fontSize: 10.5, color: '#8E99A3' }}>en voyage</div>
+              <div style={{ fontSize: 10.5, color: '#8E99A3' }}>{dict.stats.timeTravel}</div>
             </div>
           </div>
 
@@ -294,14 +297,14 @@ export default function TravelAIStatsBento() {
             <span style={{ fontSize: 16 }}>💬</span>
             <div>
               <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-.8px' }}>{animPhotos} · {animDiscussions}</div>
-              <div style={{ fontSize: 10.5, color: '#8E99A3' }}>photos · discussions IA</div>
+              <div style={{ fontSize: 10.5, color: '#8E99A3' }}>{dict.stats.photosDiscussions}</div>
             </div>
           </div>
 
           {/* Badges (span 2) — computeBadges existant */}
           <div className="tb-tile tb-span2" style={{ padding: '16px 20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <span style={{ fontSize: 13, fontWeight: 700 }}>Defis et badges</span>
+              <span style={{ fontSize: 13, fontWeight: 700 }}>{dict.stats.challengesBadges}</span>
               <span style={{ background: '#FFFC00', borderRadius: 100, padding: '2px 10px', fontSize: 10.5, fontWeight: 700, color: '#0D0D0D' }}>{unlockedCount}/{badges.length}</span>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -323,11 +326,11 @@ export default function TravelAIStatsBento() {
                 <span style={{ width: 38, height: 38, borderRadius: 11, background: 'rgba(255,255,255,.08)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🏠</span>
                 <span style={{ flex: 1, height: 1, background: 'repeating-linear-gradient(90deg,rgba(255,252,0,.5) 0 6px,transparent 6px 12px)' }} />
                 <div style={{ textAlign: 'center', flexShrink: 0 }}>
-                  <div style={{ fontSize: 17, fontWeight: 700, color: '#FFFC00' }}>{stats.farthestKm.toLocaleString('fr-FR')} km</div>
-                  <div style={{ fontSize: 9.5, color: 'rgba(244,243,238,.55)' }}>le + loin de Paris</div>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: '#FFFC00' }}>{stats.farthestKm.toLocaleString(locale === 'en' ? 'en-US' : 'fr-FR')} km</div>
+                  <div style={{ fontSize: 9.5, color: 'rgba(244,243,238,.55)' }}>{dict.stats.farthest}</div>
                 </div>
                 <span style={{ flex: 1, height: 1, background: 'repeating-linear-gradient(90deg,rgba(255,252,0,.5) 0 6px,transparent 6px 12px)' }} />
-                <Link href={`/monuments/${stats.farthest.id}`} style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none', color: '#F4F3EE', flexShrink: 0 }}>
+                <Link href={`/${locale}/monuments/${stats.farthest.id}`} style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none', color: '#F4F3EE', flexShrink: 0 }}>
                   <span style={{ width: 38, height: 38, borderRadius: 11, background: '#FFFC00', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>📍</span>
                   <div>
                     <div style={{ fontSize: 12.5, fontWeight: 700 }}>{stats.farthest.name}</div>
@@ -338,7 +341,7 @@ export default function TravelAIStatsBento() {
                 </Link>
               </>
             ) : (
-              <span style={{ fontSize: 12.5, color: 'rgba(244,243,238,.55)' }}>Aucun monument enregistre pour le moment.</span>
+              <span style={{ fontSize: 12.5, color: 'rgba(244,243,238,.55)' }}>{dict.stats.noMonument}</span>
             )}
           </div>
         </div>
@@ -346,8 +349,8 @@ export default function TravelAIStatsBento() {
         {/* ===== Quiz (conserve) ===== */}
         {quizMonuments.length > 0 && (
           <div style={{ marginTop: 28 }}>
-            <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Quiz · Connais-tu tes monuments ?</h2>
-            <p style={{ fontSize: 12, color: '#8E99A3', marginBottom: 16 }}>Genere automatiquement par TravelAI a partir de tes monuments</p>
+            <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{dict.stats.quizTitle}</h2>
+            <p style={{ fontSize: 12, color: '#8E99A3', marginBottom: 16 }}>{dict.stats.quizSubtitle}</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 14 }}>
               {quizMonuments.map((m) => <QuizCard key={m.id} monument={m} />)}
             </div>

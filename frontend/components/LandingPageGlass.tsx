@@ -15,6 +15,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useLocale } from '@/contexts/LocaleContext'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 /* ============================== Données ============================== */
 
@@ -39,28 +41,8 @@ interface DemoItem {
   answer: string
 }
 
-const DEMO_ITEMS: DemoItem[] = [
-  { src: '/6.png', title: 'Notre-Dame de Paris', city: 'Paris, France', tag: 'Architecture gothique', badge: 'UNESCO', question: 'Quand a-t-elle été construite ?', answer: "La construction a commencé en 1163 sous l'évêque Maurice de Sully et s'est largement achevée au XIVe siècle. Elle reste l'un des plus beaux exemples d'architecture gothique française, reconnue pour ses arcs-boutants, ses rosaces et ses tours jumelles." },
-  { src: '/4.jpg', title: 'Duomo de Milan', city: 'Milan, Italie', tag: 'Gothique', badge: '1386', question: 'Pourquoi a-t-elle pris autant de temps à construire ?', answer: "Le chantier a débuté en 1386 et s'est étalé sur près de six siècles. Avec ses 135 flèches et plus de 3 400 statues, c'est l'une des plus grandes cathédrales gothiques au monde, couronnée par la statue dorée de la Madonnina." },
-  { src: '/8.jpg', title: 'Statue de la Liberté', city: 'New York, USA', tag: 'Monument', badge: 'UNESCO', question: "Qui l'a offerte aux États-Unis ?", answer: "C'est un cadeau de la France pour le centenaire de l'indépendance américaine, inauguré en 1886. Sculptée par Frédéric Auguste Bartholdi, sa structure interne en fer a été conçue par Gustave Eiffel." },
-  { src: '/2.jpg', title: 'Mont Rushmore', city: 'Dakota du Sud, USA', tag: 'Mémorial national', badge: '1927', question: 'Qui sont les quatre présidents sculptés ?', answer: "George Washington, Thomas Jefferson, Theodore Roosevelt et Abraham Lincoln. Le sculpteur Gutzon Borglum a dirigé les travaux de 1927 à 1941, taillant chaque visage directement dans le granit de la montagne." },
-  { src: '/1.jpg', title: 'Taj Mahal', city: 'Agra, Inde', tag: 'Mausolée moghol', badge: 'UNESCO', question: 'Quelle histoire se cache derrière sa construction ?', answer: "L'empereur moghol Shah Jahan l'a fait construire en mémoire de son épouse Mumtaz Mahal. Une légende populaire raconte que les mains des artisans auraient été coupées pour qu'ils ne puissent jamais recréer un tel chef-d'œuvre." },
-  { src: '/7.jpg', title: 'Mont Saint-Michel', city: 'Normandie, France', tag: 'Abbaye', badge: 'UNESCO', question: 'Pourquoi cet îlot est-il si particulier ?', answer: "Cette abbaye bénédictine se dresse sur un îlot rocheux soumis à des marées parmi les plus fortes d'Europe. Lieu de pèlerinage depuis le Moyen Âge, elle a aussi servi de prison avant de redevenir un haut lieu spirituel." },
-  { src: '/10.jpg', title: 'Parthénon', city: 'Athènes, Grèce', tag: 'Temple dorique', badge: '447 av. J.-C.', question: 'À quelle divinité est-il dédié ?', answer: "Le Parthénon est dédié à Athéna, déesse protectrice d'Athènes. Construit entre 447 et 432 av. J.-C. sur l'Acropole, il est considéré comme l'un des sommets de l'architecture dorique antique." },
-]
-
-const FAQ_ITEMS = [
-  { q: "Mes photos sont-elles privées ou visibles par d'autres ?", a: "Tes photos et ton carnet de voyage sont privés par défaut. Seul ce que tu choisis explicitement de partager (en snap ou en story) est envoyé à tes amis — voir notre Politique de confidentialité pour le détail complet." },
-  { q: 'Est-ce que je peux retrouver mes voyages même sans Snapchat ouvert ?', a: 'Oui. Connecte-toi avec ton compte Google sur travelai.digitalstack.cloud pour retrouver ton carnet de voyage, ton historique et tes quiz, même sans avoir Snapchat ouvert.' },
-  { q: 'Le PDF est-il vraiment gratuit ?', a: 'Oui. La génération et le téléchargement de ton carnet de voyage PDF sont entièrement gratuits, sans limite de temps ni carte bancaire requise.' },
-  { q: 'Ça fonctionne dans quelles langues / quels pays ?', a: "TravelAI est disponible en français et en anglais pour le moment, et identifie des monuments dans plus de 150 pays. D'autres langues arriveront prochainement selon la demande." },
-]
-
-const STEPS = [
-  { n: '1', tag: 'Zéro friction', title: 'Ouvre la Lens', desc: "Retrouve TravelAI dans l'explorateur de Lens Snapchat et lance-la en un tap. Pas d'inscription, pas de téléchargement." },
-  { n: '2', tag: '< 2 secondes', title: 'Vise un monument', desc: "Pointe ta caméra sur un monument. L'IA Vision de TravelAI l'identifie en moins de 2 secondes." },
-  { n: '3', tag: 'Automatique', title: 'Reçois ton guide + carnet', desc: 'Réponses IA instantanées, histoire riche, et un carnet de voyage PDF magnifique — tout est généré automatiquement.' },
-]
+/* Images uniquement — le texte (titre, ville, tag, badge, question, réponse) vient de dict.demoSection.items */
+const DEMO_SRCS = ['/6.png', '/4.jpg', '/8.jpg', '/2.jpg', '/1.jpg', '/7.jpg', '/10.jpg']
 
 const POLAROIDS = [
   { src: '/6.png', label: 'Notre-Dame · Paris', cls: 'ta-float-a', pos: { top: 16, left: 26 } as React.CSSProperties, w: 158, h: 116 },
@@ -69,43 +51,38 @@ const POLAROIDS = [
   { src: '/1.jpg', label: 'Taj Mahal · Agra', cls: 'ta-float-d', pos: { bottom: 44, right: 8 } as React.CSSProperties, w: 148, h: 106 },
 ]
 
-const JOURNAL_POINTS = [
-  { title: 'Sauvegarde automatique', desc: "Chaque photo et chaque question posée à l'IA est rangée par voyage, sans action de ta part.", icon: <><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></> },
-  { title: 'Quiz de fin de visite', desc: 'Un mini-quiz généré après chaque découverte, pour retenir ce qui compte vraiment.', icon: <><circle cx="12" cy="12" r="10" /><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5" /><line x1="12" y1="16.5" x2="12.01" y2="16.5" /></> },
-  { title: 'Anecdotes en évidence', desc: 'Dates clés, chiffres marquants et anecdotes surprenantes remontées automatiquement.', icon: <path d="M12 2l2.4 6.9L22 9l-5.6 4.9L18 22l-6-4-6 4 1.6-8.1L2 9l7.6-.1z" /> },
-  { title: 'Export PDF en un tap', desc: "Transforme n'importe quel voyage en carnet illustré à imprimer ou à partager.", icon: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></> },
+/* Icônes uniquement — le texte (title/desc) vient de dict.carnet.points */
+const JOURNAL_ICONS = [
+  <><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></>,
+  <><circle cx="12" cy="12" r="10" /><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5" /><line x1="12" y1="16.5" x2="12.01" y2="16.5" /></>,
+  <path d="M12 2l2.4 6.9L22 9l-5.6 4.9L18 22l-6-4-6 4 1.6-8.1L2 9l7.6-.1z" />,
+  <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></>,
 ]
 
-const AUDIENCES = [
-  { title: 'Voyageur solo', desc: "Explore à ton rythme sans chercher un guide ou une brochure — ton IA répond à chaque question, même à 2h du matin.", icon: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></> },
-  { title: 'Famille', desc: 'Transforme la visite en jeu : les enfants scannent, découvrent et répondent au quiz — sans écran qui les enferme.', icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></> },
-  { title: 'Créateur de contenu', desc: 'Repars avec des anecdotes vérifiées, des faits précis et un carnet illustré prêt à nourrir tes prochains posts.', icon: <><rect x="2" y="6" width="14" height="12" rx="2" /><path d="M22 8.5v7l-6-3.5z" /></> },
+/* Icônes uniquement — le texte (title/desc) vient de dict.pourQui.profiles */
+const AUDIENCE_ICONS = [
+  <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>,
+  <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>,
+  <><rect x="2" y="6" width="14" height="12" rx="2" /><path d="M22 8.5v7l-6-3.5z" /></>,
 ]
 
-const FEATURES = [
-  { title: 'Reconnaissance instantanée', desc: "N'importe quel monument dans le monde, identifié en moins de 2 secondes grâce à Google Gemini Vision.", icon: <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></> },
-  { title: 'Conversations IA illimitées', desc: 'Histoire, architecture, anecdotes — pose toutes tes questions sur ce que tu vois, ton guide sait tout.', icon: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /> },
-  { title: 'Carnet de voyage PDF', desc: "Un souvenir PDF illustré généré automatiquement avec tes photos et les notes de l'IA, à vie.", icon: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></> },
+/* Icônes uniquement — le texte (title/desc) vient de dict.features.items */
+const FEATURE_ICONS = [
+  <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></>,
+  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
+  <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></>,
 ]
 
-const BADGES = [
-  { name: '10 monuments UNESCO', desc: 'Découvre 10 sites classés au patrimoine mondial.', locked: false, icon: <><path d="M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12z" /><path d="M8.5 13.5 7 22l5-3 5 3-1.5-8.5" /></> },
-  { name: "Explorateur de l'Asie", desc: 'Scanne un monument dans 5 pays asiatiques différents.', locked: false, icon: <path d="M2 12h4l3-9 4 18 3-9h6" /> },
-  { name: 'Série de 5 jours', desc: '5 jours consécutifs avec au moins une découverte.', locked: true, icon: <path d="M13 2 3 14h7l-1 8 10-12h-7z" /> },
-  { name: 'Premier carnet complété', desc: 'Exporte ton tout premier carnet de voyage en PDF.', locked: true, icon: <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></> },
+/* Icônes uniquement — le texte (name/desc/locked) vient de dict.badges.items */
+const BADGE_ICONS = [
+  <><path d="M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12z" /><path d="M8.5 13.5 7 22l5-3 5 3-1.5-8.5" /></>,
+  <path d="M2 12h4l3-9 4 18 3-9h6" />,
+  <path d="M13 2 3 14h7l-1 8 10-12h-7z" />,
+  <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></>,
 ]
 
-const ROADMAP = [
-  { title: 'Traduction en temps réel', desc: "Pose tes questions dans ta langue, l'IA te répond directement traduit.", eta: 'Prochainement', hot: true },
-  { title: 'Réalité augmentée historique', desc: 'Superpose une reconstitution du monument à différentes époques, directement dans la caméra.', eta: "À l'étude", hot: false },
-  { title: 'Mode multi-lens', desc: 'Compare plusieurs monuments similaires vus pendant ton voyage en un seul récap.', eta: "À l'étude", hot: false },
-]
-
-const TRUST = [
-  { q: 'Où sont stockées tes photos ?', a: 'Sur des serveurs sécurisés, uniquement le temps nécessaire pour générer ton carnet de voyage.' },
-  { q: 'Servent-elles à autre chose ?', a: "Non. Uniquement l'identification du monument et ton carnet — jamais revendues, jamais utilisées à des fins publicitaires." },
-  { q: 'Comment les supprimer ?', a: 'À tout moment, en nous écrivant : suppression de tes photos et de tes données sous un mois maximum.' },
-]
+/* "hot" uniquement — le texte (title/desc/eta) vient de dict.roadmap.items */
+const ROADMAP_HOT = [true, false, false]
 
 const RATING_BARS = [
   { label: '5★', width: '88%', pct: '88%', color: '#FFFC00' },
@@ -113,29 +90,28 @@ const RATING_BARS = [
   { label: '3★', width: '3%', pct: '3%', color: 'rgba(255,252,0,.3)' },
 ]
 
-const STORIES = [
-  { src: '/6.png', alt: 'Notre-Dame de Paris', handle: 'sophie.travels', meta: 'Paris · il y a 2h', quote: "« Une église au hasard à Paris, et TravelAI m'a raconté le passage secret sous l'autel. Mon guide était sans voix. »", avatar: 'linear-gradient(135deg,#ffd3a5,#fd9853)', segments: 3, rot: '-1.2deg', delay: 150 },
-  { src: '/1.jpg', alt: 'Taj Mahal', handle: 'james.shoots', meta: 'Agra · il y a 1j', quote: "« 3 semaines de monuments compilées en un carnet PDF illustré. Je l'ai imprimé pour mes parents — ils ont pleuré. »", avatar: 'linear-gradient(135deg,#c8f7c5,#4caf50)', segments: 2, rot: '0.8deg', delay: 250 },
-  { src: '/10.jpg', alt: 'Parthénon', handle: 'yuki.nomad', meta: 'Athènes · il y a 3j', quote: "« Face au Parthénon, j'ai posé dix questions d'affilée — TravelAI avait réponse à tout. Juste viser et découvrir. »", avatar: 'linear-gradient(135deg,#a8d8ea,#6fb3cf)', segments: 4, rot: '-0.6deg', delay: 350 },
+/* Visuels uniquement — le texte (handle/meta/quote) vient de dict.temoignages.stories */
+const STORY_VISUALS = [
+  { src: '/6.png', alt: 'Notre-Dame de Paris', avatar: 'linear-gradient(135deg,#ffd3a5,#fd9853)', segments: 3, rot: '-1.2deg', delay: 150 },
+  { src: '/1.jpg', alt: 'Taj Mahal', avatar: 'linear-gradient(135deg,#c8f7c5,#4caf50)', segments: 2, rot: '0.8deg', delay: 250 },
+  { src: '/10.jpg', alt: 'Parthénon', avatar: 'linear-gradient(135deg,#a8d8ea,#6fb3cf)', segments: 4, rot: '-0.6deg', delay: 350 },
 ]
 
-const GALLERY = [
-  { src: '/salar-de-uyuni.jpg', name: 'Salar de Uyuni', place: 'Bolivie' },
-  { src: '/porte-de-lenfer.jpg', name: "Porte de l'Enfer", place: 'Darvaza, Turkménistan' },
-  { src: '/cappadoce.jpg', name: 'Cappadoce', place: 'Turquie' },
-  { src: '/zhangjiajie.jpg', name: 'Zhangjiajie', place: 'Chine' },
-  { src: '/trolltunga.jpg', name: 'Trolltunga', place: 'Norvège' },
-  { src: '/chandps.jpg', name: 'Chand Baori', place: 'Rajasthan, Inde' },
-  { src: '/Krzywy_Domek_w_Sopocie.jpg', name: 'La maison tordue', place: 'Sopot, Pologne' },
-  { src: '/monastere.jpg', name: 'Monastères de Grand Météore', place: 'Grèce' },
-  { src: '/landman.jpg', name: 'Landmannalaugar ', place: 'Islande' },
+/* Images uniquement — le texte (name/place) vient de dict.galerie.items */
+const GALLERY_SRCS = [
+  '/salar-de-uyuni.jpg',
+  '/porte-de-lenfer.jpg',
+  '/cappadoce.jpg',
+  '/zhangjiajie.jpg',
+  '/trolltunga.jpg',
+  '/chandps.jpg',
+  '/Krzywy_Domek_w_Sopocie.jpg',
+  '/monastere.jpg',
+  '/landman.jpg',
 ]
 
-const TRIPS = [
-  { flag: '🇮🇹', city: 'Rome, Italie', sub: 'Juin 2026 · 5 jours', quiz: 'Quiz 92%', main: true },
-  { flag: '🇯🇵', city: 'Kyoto, Japon', sub: '9 monuments · 21 photos', quiz: 'Quiz 87%', main: false },
-  { flag: '🇫🇷', city: 'Paris, France', sub: '6 monuments · 15 photos', quiz: 'Quiz 95%', main: false },
-]
+/* Drapeaux uniquement — le texte (city/sub/quiz) vient de dict.carnet.trips */
+const TRIP_FLAGS = ['🇮🇹', '🇯🇵', '🇫🇷']
 
 /* ============================== CSS ============================== */
 
@@ -202,35 +178,6 @@ const CSS = `
 `
 
 /* ============================== Composant ============================== */
-
-const NAV_GROUPS: { label: string; href?: string; items?: { name: string; href: string }[] }[] = [
-  {
-    label: 'Produit',
-    items: [
-      { name: 'Comment ça marche', href: '#how' },
-      { name: 'Démo', href: '#demo' },
-      { name: 'Fonctionnalités', href: '#features' },
-      { name: 'Comparatif', href: '#comparatif' },
-    ],
-  },
-  {
-    label: 'Carnet & Badges',
-    items: [
-      { name: 'Carnet', href: '#carnet' },
-      { name: 'Badges', href: '#badges' },
-      { name: 'Galerie', href: '#galerie' },
-    ],
-  },
-  {
-    label: 'Communauté',
-    items: [
-      { name: 'Pour qui ?', href: '#pour-qui' },
-      { name: 'Témoignages', href: '#temoignages' },
-      { name: 'Confiance', href: '#confiance' },
-    ],
-  },
-  { label: 'FAQ', href: '#faq' },
-]
 
 function NavDropdown({
   group,
@@ -312,6 +259,7 @@ function NavDropdown({
 }
 
 export default function LandingPageGlass() {
+  const { locale, dict } = useLocale()
   const rootRef = useRef<HTMLDivElement>(null)
   const galleryRef = useRef<HTMLDivElement>(null)
   const navRef = useRef<HTMLElement>(null)
@@ -319,6 +267,57 @@ export default function LandingPageGlass() {
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [activeStep, setActiveStep] = useState(0)
   const [openNavGroup, setOpenNavGroup] = useState<number | null>(null)
+
+  const NAV_GROUPS: { label: string; href?: string; items?: { name: string; href: string }[] }[] = [
+    {
+      label: dict.nav.groups.produit,
+      items: [
+        { name: dict.nav.items.how, href: '#how' },
+        { name: dict.nav.items.demo, href: '#demo' },
+        { name: dict.nav.items.features, href: '#features' },
+        { name: dict.nav.items.comparatif, href: '#comparatif' },
+      ],
+    },
+    {
+      label: dict.nav.groups.carnetBadges,
+      items: [
+        { name: dict.nav.items.carnet, href: '#carnet' },
+        { name: dict.nav.items.badges, href: '#badges' },
+        { name: dict.nav.items.galerie, href: '#galerie' },
+      ],
+    },
+    {
+      label: dict.nav.groups.communaute,
+      items: [
+        { name: dict.nav.items.pourQui, href: '#pour-qui' },
+        { name: dict.nav.items.temoignages, href: '#temoignages' },
+        { name: dict.nav.items.confiance, href: '#confiance' },
+      ],
+    },
+    { label: dict.nav.items.faq, href: '#faq' },
+  ]
+
+  const DEMO_ITEMS: DemoItem[] = DEMO_SRCS.map((src, i) => ({ src, ...dict.demoSection.items[i] }))
+  const FAQ_ITEMS = dict.faq.items
+  const STEPS = dict.how.steps.map((s, i) => ({ n: String(i + 1), ...s }))
+  const JOURNAL_POINTS = dict.carnet.points.map((p, i) => ({ ...p, icon: JOURNAL_ICONS[i] }))
+  const AUDIENCES = dict.pourQui.profiles.map((p, i) => ({ ...p, icon: AUDIENCE_ICONS[i] }))
+  const FEATURES = dict.features.items.map((f, i) => ({ ...f, icon: FEATURE_ICONS[i] }))
+  const BADGES = dict.badges.items.map((b, i) => ({ ...b, icon: BADGE_ICONS[i] }))
+  const ROADMAP = dict.roadmap.items.map((r, i) => ({ ...r, hot: ROADMAP_HOT[i] }))
+  const TRUST = dict.confiance.points
+  const STORIES = dict.temoignages.stories.map((s, i) => ({ ...s, ...STORY_VISUALS[i] }))
+  const GALLERY = dict.galerie.items.map((g, i) => ({ ...g, src: GALLERY_SRCS[i] }))
+  const TRIPS = dict.carnet.trips.map((t, i) => ({ ...t, flag: TRIP_FLAGS[i], main: i === 0 }))
+
+  /* Convertit les retours à la ligne "\n" des titres du dictionnaire en <br /> */
+  const nl2br = (text: string) =>
+    text.split('\n').map((line, i, arr) => (
+      <span key={i}>
+        {line}
+        {i < arr.length - 1 && <br />}
+      </span>
+    ))
 
   useEffect(() => {
     if (openNavGroup === null) return
@@ -466,8 +465,8 @@ export default function LandingPageGlass() {
       {/* ===== NAV PILL ===== */}
       <nav ref={navRef} className="tg-card" style={{ position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, display: 'flex', alignItems: 'center', gap: 22, borderRadius: 999, padding: '8px 8px 8px 16px', maxWidth: 'calc(100vw - 32px)', boxShadow: '0 8px 32px rgba(10,10,5,.10)' }}>
         <a href="#hero" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
-          <img src="/voyageur.jpg" alt="TravelAI" style={{ width: 26, height: 26, borderRadius: 7, objectFit: 'cover', display: 'block' }} />
-          <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.4px', color: 'var(--ink)' }}>TravelAI</span>
+          <img src="/voyageur.jpg" alt={dict.common.brand} style={{ width: 26, height: 26, borderRadius: 7, objectFit: 'cover', display: 'block' }} />
+          <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.4px', color: 'var(--ink)' }}>{dict.common.brand}</span>
         </a>
         <div className="rnavlinks" style={{ display: 'flex', alignItems: 'center', gap: 22 }}>
           {NAV_GROUPS.map((group, i) => (
@@ -481,10 +480,11 @@ export default function LandingPageGlass() {
             />
           ))}
         </div>
-        <a href="/login" className="tg-btn-y" style={{ padding: '9px 18px', borderRadius: 999, fontSize: 13, flexShrink: 0, whiteSpace: 'nowrap' }}>
+        <a href={`/${locale}/login`} className="tg-btn-y" style={{ padding: '9px 18px', borderRadius: 999, fontSize: 13, flexShrink: 0, whiteSpace: 'nowrap' }}>
           <Ghost size={14} color="#0D0D0D" />
-          Se connecter
+          {dict.nav.login}
         </a>
+        <LanguageSwitcher />
       </nav>
 
       {/* ===== 1. HERO ===== */}
@@ -495,23 +495,23 @@ export default function LandingPageGlass() {
             <div data-fade="" className="tg-eyebrow" style={{ marginBottom: 30 }}>
               <span className="tg-livedot" />
               <Ghost size={13} color="#0D0D0D" />
-              <span>Disponible sur Snapchat · Gratuit</span>
+              <span>{dict.hero.badge}</span>
             </div>
             <h1 className="rh1" data-fade="" data-delay="80" style={{ fontSize: 88, fontWeight: 700, lineHeight: 0.98, letterSpacing: '-3.5px', margin: '0 0 28px' }}>
-              Point.<br />Ask.<br />
-              <span style={{ background: 'var(--y)', color: '#0D0D0D', padding: '2px 14px 4px', borderRadius: 10, display: 'inline-block', marginTop: 6 }}>Remember.</span>
+              {dict.hero.title1}<br />{dict.hero.title2}<br />
+              <span style={{ background: 'var(--y)', color: '#0D0D0D', padding: '2px 14px 4px', borderRadius: 10, display: 'inline-block', marginTop: 6 }}>{dict.hero.title3}</span>
             </h1>
             <p data-fade="" data-delay="160" style={{ fontSize: 18, lineHeight: 1.65, color: 'var(--muted)', margin: '0 0 40px', maxWidth: 460 }}>
-              Pointe ta caméra Snapchat sur n&apos;importe quel monument : ton guide IA l&apos;identifie en moins de 2 secondes, répond à toutes tes questions et garde le souvenir dans ton carnet de voyage.
+              {dict.hero.subtitle}
             </p>
             <div data-fade="" data-delay="240" style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-              <a href="/onboarding?demo=1" className="tg-btn-y" style={{ padding: '16px 30px' }}>
+              <a href={`/${locale}/onboarding?demo=1`} className="tg-btn-y" style={{ padding: '16px 30px' }}>
                 <Ghost size={16} color="#0D0D0D" />
-                Voir la démo
+                {dict.hero.ctaDemo}
               </a>
               <a href="#how" className="tg-btn-ghost">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round"><circle cx="12" cy="12" r="10" /><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none" /></svg>
-                Comment ça marche
+                {dict.hero.ctaHow}
               </a>
             </div>
             <div data-fade="" data-delay="320" style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 44 }}>
@@ -521,8 +521,8 @@ export default function LandingPageGlass() {
                 ))}
               </div>
               <div>
-                <div style={{ fontSize: 13, color: '#E8C400', letterSpacing: 1.5 }}>★★★★★ <span style={{ color: 'var(--ink)', fontWeight: 700, fontSize: 12.5, letterSpacing: 0 }}>4.9</span></div>
-                <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>Adopté par <strong style={{ color: 'var(--ink)' }}>10 000+</strong> voyageurs</div>
+                <div style={{ fontSize: 13, color: '#E8C400', letterSpacing: 1.5 }}>★★★★★ <span style={{ color: 'var(--ink)', fontWeight: 700, fontSize: 12.5, letterSpacing: 0 }}>{dict.hero.rating}</span></div>
+                <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>{dict.hero.ratingSuffix} <strong style={{ color: 'var(--ink)' }}>{dict.hero.ratingUsers}</strong></div>
               </div>
             </div>
           </div>
@@ -541,7 +541,7 @@ export default function LandingPageGlass() {
             {/* Téléphone : caméra Snapchat en scan */}
             <div style={{ position: 'relative', zIndex: 10, width: 268, height: 548, background: '#111', borderRadius: 44, boxShadow: '0 40px 90px rgba(0,0,0,.28), 0 0 0 1px rgba(255,255,255,.08) inset, 0 0 0 7px #1a1a1a', overflow: 'hidden', flexShrink: 0 }}>
               <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 92, height: 29, background: '#111', borderRadius: '0 0 20px 20px', zIndex: 30 }} />
-              <img src="/6.png" alt="Caméra Snapchat" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }} />
+              <img src="/6.png" alt="Snapchat camera" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }} />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(0,0,0,.38) 0%,transparent 32%,transparent 52%,rgba(0,0,0,.72) 100%)' }} />
               <div style={{ position: 'absolute', top: 38, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 18px', zIndex: 20 }}>
                 <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,.4)' }}>9:41</span>
@@ -554,18 +554,18 @@ export default function LandingPageGlass() {
               <div className="tg-corner" style={{ top: 262, right: 18, borderRight: '2.5px solid #FFFC00', borderBottom: '2.5px solid #FFFC00', borderRadius: '0 0 3px 0' }} />
               <div className="tg-scanline" />
               <div style={{ position: 'absolute', top: 88, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,252,0,.45)', borderRadius: 100, padding: '5px 13px', whiteSpace: 'nowrap', zIndex: 21 }}>
-                <span style={{ fontSize: 9.5, fontWeight: 700, color: '#FFFC00', letterSpacing: '.05em' }}>✦ TravelAI</span>
-                <span style={{ fontSize: 9.5, color: 'rgba(255,255,255,.65)' }}> — Scan en cours…</span>
+                <span style={{ fontSize: 9.5, fontWeight: 700, color: '#FFFC00', letterSpacing: '.05em' }}>✦ {dict.common.brand}</span>
+                <span style={{ fontSize: 9.5, color: 'rgba(255,255,255,.65)' }}> {dict.hero.phone.scanning}</span>
               </div>
               <div style={{ position: 'absolute', bottom: 64, left: 10, right: 10, background: 'rgba(255,255,255,.94)', backdropFilter: 'blur(16px)', borderRadius: 18, padding: 14, zIndex: 25, boxShadow: '0 10px 30px rgba(0,0,0,.25)' }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#0D0D0D', marginBottom: 6 }}>Notre-Dame de Paris</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#0D0D0D', marginBottom: 6 }}>{dict.hero.phone.title}</div>
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 9 }}>
-                  <span style={{ background: '#F4F4F0', border: '.5px solid rgba(0,0,0,.1)', borderRadius: 100, padding: '3px 9px', fontSize: 9, fontWeight: 500, color: '#0D0D0D' }}>Gothique</span>
-                  <span style={{ background: '#F4F4F0', border: '.5px solid rgba(0,0,0,.1)', borderRadius: 100, padding: '3px 9px', fontSize: 9, fontWeight: 500, color: '#0D0D0D' }}>Paris, FR</span>
+                  <span style={{ background: '#F4F4F0', border: '.5px solid rgba(0,0,0,.1)', borderRadius: 100, padding: '3px 9px', fontSize: 9, fontWeight: 500, color: '#0D0D0D' }}>{dict.hero.phone.tag}</span>
+                  <span style={{ background: '#F4F4F0', border: '.5px solid rgba(0,0,0,.1)', borderRadius: 100, padding: '3px 9px', fontSize: 9, fontWeight: 500, color: '#0D0D0D' }}>{dict.hero.phone.city}</span>
                   <span style={{ background: '#FFFC00', borderRadius: 100, padding: '3px 9px', fontSize: 9, fontWeight: 700, color: '#0D0D0D' }}>UNESCO</span>
                 </div>
-                <div style={{ fontSize: 9.5, color: '#6B6B6B', lineHeight: 1.55, marginBottom: 10 }}>« La construction a commencé en 1163 — l&apos;un des plus beaux exemples d&apos;architecture gothique française… »</div>
-                <div style={{ background: '#FFFC00', borderRadius: 8, padding: 8, textAlign: 'center', fontSize: 10.5, fontWeight: 700, color: '#0D0D0D' }}>Sauvegarder dans le carnet →</div>
+                <div style={{ fontSize: 9.5, color: '#6B6B6B', lineHeight: 1.55, marginBottom: 10 }}>{dict.hero.phone.quote}</div>
+                <div style={{ background: '#FFFC00', borderRadius: 8, padding: 8, textAlign: 'center', fontSize: 10.5, fontWeight: 700, color: '#0D0D0D' }}>{dict.hero.phone.save}</div>
               </div>
               <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 34, zIndex: 26 }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} style={{ opacity: 0.85 }}><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="9" cy="9" r="2" /><path d="M21 15l-5-5L5 21" /></svg>
@@ -576,7 +576,7 @@ export default function LandingPageGlass() {
           </div>
         </div>
         <div className="rhide" style={{ position: 'absolute', bottom: 26, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, opacity: 0.4 }}>
-          <span style={{ fontSize: 10.5, fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase' }}>Scroll</span>
+          <span style={{ fontSize: 10.5, fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase' }}>{dict.hero.scroll}</span>
           <span style={{ width: 1, height: 38, background: 'linear-gradient(180deg,var(--ink),transparent)', display: 'inline-block' }} />
         </div>
       </section>
@@ -585,8 +585,8 @@ export default function LandingPageGlass() {
       <section id="pour-qui" className="rsec" style={{ background: 'var(--bg2)', padding: '110px 64px', borderTop: '1px solid var(--line)' }}>
         <div style={{ maxWidth: 1140, margin: '0 auto' }}>
           <div data-fade="" style={{ textAlign: 'center', marginBottom: 56 }}>
-            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>Pour qui ?</span></div>
-            <h2 className="tg-h2">Fait pour chaque façon<br />de voyager</h2>
+            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>{dict.pourQui.eyebrow}</span></div>
+            <h2 className="tg-h2">{nl2br(dict.pourQui.title)}</h2>
           </div>
           <div className="rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 22 }}>
             {AUDIENCES.map(({ title, desc, icon }, i) => (
@@ -606,8 +606,8 @@ export default function LandingPageGlass() {
       <section id="how" className="rsec" style={{ background: 'var(--bg)', padding: '120px 64px', borderTop: '1px solid var(--line)' }}>
         <div style={{ maxWidth: 1140, margin: '0 auto' }}>
           <div data-fade="" style={{ textAlign: 'center', marginBottom: 64 }}>
-            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>C&apos;est tout simple</span></div>
-            <h2 className="tg-h2" style={{ fontSize: 52, letterSpacing: '-2px' }}>Comment ça marche</h2>
+            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>{dict.how.eyebrow}</span></div>
+            <h2 className="tg-h2" style={{ fontSize: 52, letterSpacing: '-2px' }}>{dict.how.title}</h2>
           </div>
           <div className="rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 22 }}>
             {STEPS.map((s, i) => {
@@ -626,7 +626,7 @@ export default function LandingPageGlass() {
           </div>
           <div data-fade="" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, margin: '52px auto 0', background: 'var(--bg2)', border: '1px solid var(--line)', borderRadius: 100, padding: '14px 28px', maxWidth: 640 }}>
             <Ghost size={18} />
-            <p style={{ margin: 0, fontSize: 14, fontWeight: 600, textAlign: 'center', lineHeight: 1.5 }}>Tu as déjà Snapchat ouvert pour immortaliser ton voyage. Autant qu&apos;il t&apos;en apprenne plus.</p>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 600, textAlign: 'center', lineHeight: 1.5 }}>{dict.how.banner}</p>
           </div>
         </div>
       </section>
@@ -635,8 +635,8 @@ export default function LandingPageGlass() {
       <section id="demo" className="rsec" style={{ background: 'var(--bg2)', padding: '120px 64px', borderTop: '1px solid var(--line)' }}>
         <div style={{ maxWidth: 1180, margin: '0 auto' }}>
           <div data-fade="" style={{ textAlign: 'center', marginBottom: 60 }}>
-            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>Résultats en direct</span></div>
-            <h2 className="tg-h2" style={{ fontSize: 52, letterSpacing: '-2px' }}>Ce que TravelAI te renvoie</h2>
+            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>{dict.demoSection.eyebrow}</span></div>
+            <h2 className="tg-h2" style={{ fontSize: 52, letterSpacing: '-2px' }}>{dict.demoSection.title}</h2>
           </div>
           <div className="rr" style={{ display: 'flex', gap: 26, alignItems: 'flex-start' }}>
             <div data-fade="" className="tg-card" style={{ flex: 1.35, overflow: 'hidden' }}>
@@ -654,7 +654,7 @@ export default function LandingPageGlass() {
                   <span className="tg-badge-y">{demo.badge}</span>
                 </div>
                 <div style={{ borderTop: '1px solid var(--line)', paddingTop: 20, marginBottom: 20 }}>
-                  <div style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 14 }}>Conversation IA</div>
+                  <div style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 14 }}>{dict.demoSection.conversationLabel}</div>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
                     <div style={{ background: 'var(--bg2)', border: '1px solid var(--line)', borderRadius: '14px 14px 4px 14px', padding: '11px 16px', maxWidth: '75%' }}>
                       <p style={{ fontSize: 13.5, margin: 0 }}>« {demo.question} »</p>
@@ -667,11 +667,11 @@ export default function LandingPageGlass() {
                     </div>
                   </div>
                 </div>
-                <div className="tg-btn-y" style={{ width: '100%', justifyContent: 'center', padding: 14, borderRadius: 12, fontSize: 14 }}>Sauvegarder dans le carnet</div>
+                <div className="tg-btn-y" style={{ width: '100%', justifyContent: 'center', padding: 14, borderRadius: 12, fontSize: 14 }}>{dict.demoSection.saveButton}</div>
               </div>
             </div>
             <div data-fade="" data-delay="150" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Choisis un monument</div>
+              <div style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>{dict.demoSection.chooseLabel}</div>
               {DEMO_ITEMS.map((d, i) => (
                 <div key={d.title} onClick={() => setActiveDemo(i)} className="tg-card tg-thumb" style={{ display: 'flex', gap: 14, alignItems: 'center', border: `1.5px solid ${i === activeDemo ? '#FFFC00' : 'var(--cardBorder)'}`, borderRadius: 14, padding: '10px 14px 10px 10px' }}>
                   <img src={d.src} alt={d.title} style={{ width: 66, height: 50, objectFit: 'cover', borderRadius: 9, display: 'block', flexShrink: 0 }} />
@@ -691,8 +691,8 @@ export default function LandingPageGlass() {
       <section id="carnet" className="rsec" style={{ background: 'var(--bg)', padding: '120px 64px', borderTop: '1px solid var(--line)' }}>
         <div className="rr" style={{ maxWidth: 1140, margin: '0 auto', display: 'flex', gap: 64, alignItems: 'center' }}>
           <div style={{ flex: 1 }}>
-            <div data-fade="" className="tg-eyebrow" style={{ marginBottom: 18 }}><span>Carnet de voyage</span></div>
-            <h2 className="tg-h2" data-fade="" style={{ marginBottom: 40 }}>Chaque découverte,<br />gardée pour toujours</h2>
+            <div data-fade="" className="tg-eyebrow" style={{ marginBottom: 18 }}><span>{dict.carnet.eyebrow}</span></div>
+            <h2 className="tg-h2" data-fade="" style={{ marginBottom: 40 }}>{nl2br(dict.carnet.title)}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
               {JOURNAL_POINTS.map(({ title, desc, icon }, i) => (
                 <div key={title} data-fade="" data-delay={i * 100} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
@@ -710,8 +710,8 @@ export default function LandingPageGlass() {
           <div data-fade="" data-delay="150" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div className="tg-card" style={{ padding: '22px 24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}><span style={{ fontSize: 26 }}>🇮🇹</span><div><div style={{ fontSize: 16, fontWeight: 700 }}>Rome, Italie</div><div style={{ fontSize: 12, color: 'var(--muted)' }}>Juin 2026 · 5 jours</div></div></div>
-                <span className="tg-badge-y" style={{ fontSize: 11 }}>Quiz 92%</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}><span style={{ fontSize: 26 }}>{TRIPS[0].flag}</span><div><div style={{ fontSize: 16, fontWeight: 700 }}>{TRIPS[0].city}</div><div style={{ fontSize: 12, color: 'var(--muted)' }}>{TRIPS[0].sub}</div></div></div>
+                <span className="tg-badge-y" style={{ fontSize: 11 }}>{TRIPS[0].quiz}</span>
               </div>
               <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
                 <img src="/9.jpg" alt="Rome" style={{ flex: 1, height: 64, objectFit: 'cover', borderRadius: 8, minWidth: 0 }} />
@@ -719,8 +719,8 @@ export default function LandingPageGlass() {
                 <img src="/5.jpg" alt="Rome" style={{ flex: 1, height: 64, objectFit: 'cover', borderRadius: 8, minWidth: 0 }} />
               </div>
               <div style={{ display: 'flex', gap: 18, fontSize: 12.5, color: 'var(--muted)' }}>
-                <span><strong style={{ color: 'var(--ink)' }}>14</strong> monuments</span>
-                <span><strong style={{ color: 'var(--ink)' }}>32</strong> photos</span>
+                <span><strong style={{ color: 'var(--ink)' }}>{TRIPS[0].monumentsCount}</strong> {dict.carnet.monuments}</span>
+                <span><strong style={{ color: 'var(--ink)' }}>{TRIPS[0].photosCount}</strong> {dict.carnet.photos}</span>
                 <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5, fontWeight: 700, color: 'var(--ink)' }}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>PDF
                 </span>
@@ -742,32 +742,32 @@ export default function LandingPageGlass() {
       <section id="partage" className="rsec" style={{ background: 'var(--bg2)', padding: '120px 64px', borderTop: '1px solid var(--line)' }}>
         <div className="rrc" style={{ maxWidth: 1140, margin: '0 auto', display: 'flex', gap: 64, alignItems: 'center', flexDirection: 'row-reverse' }}>
           <div style={{ flex: 1 }}>
-            <div data-fade="" className="tg-eyebrow" style={{ marginBottom: 18 }}><span>Partage natif</span></div>
-            <h2 className="tg-h2" data-fade="" style={{ marginBottom: 20 }}>Partage ta découverte<br />en un swipe</h2>
+            <div data-fade="" className="tg-eyebrow" style={{ marginBottom: 18 }}><span>{dict.partage.eyebrow}</span></div>
+            <h2 className="tg-h2" data-fade="" style={{ marginBottom: 20 }}>{nl2br(dict.partage.title)}</h2>
             <p data-fade="" data-delay="100" style={{ fontSize: 16, lineHeight: 1.7, color: 'var(--muted)', margin: '0 0 28px', maxWidth: 440 }}>
-              Envoie la fiche du monument en Snap à tes amis ou publie-la en Story — directement depuis la Lens, sans jamais quitter Snapchat.
+              {dict.partage.desc}
             </p>
             <div data-fade="" data-delay="180" style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              {['Snap direct', 'Story', 'Fiche exportable'].map((label) => (
+              {dict.partage.tags.map((label) => (
                 <span key={label} className="tg-card" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 100, padding: '9px 16px', fontSize: 13, fontWeight: 600 }}>{label}</span>
               ))}
             </div>
           </div>
           <div data-fade="" data-delay="120" style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: 280, background: '#141414', borderRadius: 36, boxShadow: '0 32px 70px rgba(0,0,0,.25), 0 0 0 6px #1a1a1a', padding: '20px 16px' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', textAlign: 'center', marginBottom: 14 }}>Envoyer à…</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', textAlign: 'center', marginBottom: 14 }}>{dict.partage.sendTo}</div>
               <div style={{ background: '#1E1E1E', borderRadius: 16, padding: 12, marginBottom: 14 }}>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                  <img src="/4.jpg" alt="Duomo" style={{ width: 52, height: 52, objectFit: 'cover', borderRadius: 10 }} />
+                  <img src="/4.jpg" alt={DEMO_ITEMS[1].title} style={{ width: 52, height: 52, objectFit: 'cover', borderRadius: 10 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>Duomo de Milan</div>
-                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,.55)' }}>Fiche TravelAI · Gothique · 1386</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{DEMO_ITEMS[1].title}</div>
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,.55)' }}>{dict.common.brand} · {DEMO_ITEMS[1].tag} · {DEMO_ITEMS[1].badge}</div>
                   </div>
-                  <span style={{ background: '#FFFC00', borderRadius: 100, padding: '3px 8px', fontSize: 8.5, fontWeight: 700, color: '#0D0D0D' }}>TravelAI</span>
+                  <span style={{ background: '#FFFC00', borderRadius: 100, padding: '3px 8px', fontSize: 8.5, fontWeight: 700, color: '#0D0D0D' }}>{dict.common.brand}</span>
                 </div>
               </div>
               {[
-                { initial: 'M', name: 'Ma Story', bg: 'linear-gradient(135deg,#a78bfa,#7c3aed)', checked: true },
+                { initial: 'M', name: locale === 'fr' ? 'Ma Story' : 'My Story', bg: 'linear-gradient(135deg,#a78bfa,#7c3aed)', checked: true },
                 { initial: 'L', name: 'Léa', bg: 'linear-gradient(135deg,#ffd3a5,#fd9853)', checked: true },
                 { initial: 'T', name: 'Thomas', bg: 'linear-gradient(135deg,#a8d8ea,#6fb3cf)', checked: false },
               ].map((f, i) => (
@@ -784,7 +784,7 @@ export default function LandingPageGlass() {
                 </div>
               ))}
               <div style={{ background: '#FFFC00', borderRadius: 100, padding: 13, textAlign: 'center', fontSize: 13, fontWeight: 700, color: '#0D0D0D', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                Envoyer
+                {dict.partage.send}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth={2.5} strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
               </div>
             </div>
@@ -796,12 +796,12 @@ export default function LandingPageGlass() {
       <section id="badges" className="rsec" style={{ background: 'var(--bg)', padding: '120px 64px', borderTop: '1px solid var(--line)' }}>
         <div style={{ maxWidth: 1140, margin: '0 auto' }}>
           <div data-fade="" style={{ textAlign: 'center', marginBottom: 56 }}>
-            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>Gamification</span></div>
-            <h2 className="tg-h2" style={{ marginBottom: 14 }}>Voyage. Scanne. Débloque.</h2>
-            <p style={{ fontSize: 16, color: 'var(--muted)', margin: '0 0 16px' }}>Des défis qui donnent envie de faire un détour de plus.</p>
+            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>{dict.badges.eyebrow}</span></div>
+            <h2 className="tg-h2" style={{ marginBottom: 14 }}>{dict.badges.title}</h2>
+            <p style={{ fontSize: 16, color: 'var(--muted)', margin: '0 0 16px' }}>{dict.badges.subtitle}</p>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'var(--bg2)', border: '1px solid var(--line)', borderRadius: 100, padding: '6px 14px' }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth={2}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)' }}>Exemple de progression — pas la tienne (pas encore !)</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)' }}>{dict.badges.exampleNotice}</span>
             </div>
           </div>
           <div className="rgrid2" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 18 }}>
@@ -812,10 +812,10 @@ export default function LandingPageGlass() {
                 </div>
                 {locked ? (
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 8 }}>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg> À débloquer
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg> {dict.badges.locked}
                   </div>
                 ) : (
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#0D9F5B', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 8 }}>✓ Débloqué</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#0D9F5B', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 8 }}>✓ {dict.badges.unlocked}</div>
                 )}
                 <div style={{ fontSize: 15.5, fontWeight: 700, marginBottom: 6 }}>{name}</div>
                 <div style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--muted)' }}>{desc}</div>
@@ -829,8 +829,8 @@ export default function LandingPageGlass() {
       <section id="roadmap" className="rsec" style={{ background: 'var(--bg2)', padding: '110px 64px', borderTop: '1px solid var(--line)' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <div data-fade="" style={{ textAlign: 'center', marginBottom: 52 }}>
-            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>Bientôt</span></div>
-            <h2 className="tg-h2" style={{ fontSize: 44, letterSpacing: '-1.6px' }}>La suite du voyage</h2>
+            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>{dict.roadmap.eyebrow}</span></div>
+            <h2 className="tg-h2" style={{ fontSize: 44, letterSpacing: '-1.6px' }}>{dict.roadmap.title}</h2>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {ROADMAP.map(({ title, desc, eta, hot }, i) => (
@@ -851,8 +851,8 @@ export default function LandingPageGlass() {
       <section id="features" className="rsec" style={{ background: 'var(--bg)', padding: '120px 64px', borderTop: '1px solid var(--line)' }}>
         <div style={{ maxWidth: 1140, margin: '0 auto' }}>
           <div data-fade="" style={{ textAlign: 'center', marginBottom: 56 }}>
-            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>Pourquoi TravelAI</span></div>
-            <h2 className="tg-h2">Un guide qui sait tout,<br />toujours dans ta poche</h2>
+            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>{dict.features.eyebrow}</span></div>
+            <h2 className="tg-h2">{nl2br(dict.features.title)}</h2>
           </div>
           <div className="rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 22 }}>
             {FEATURES.map(({ title, desc, icon }, i) => (
@@ -874,13 +874,13 @@ export default function LandingPageGlass() {
         <div className="rsec" style={{ maxWidth: 1140, margin: '0 auto', padding: '0 64px' }}>
           <div data-fade="" style={{ textAlign: 'center', marginBottom: 52 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.14)', borderRadius: 100, padding: '6px 14px', marginBottom: 18 }}>
-              <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(244,243,238,.7)', letterSpacing: '.07em', textTransform: 'uppercase' }}>Même les lieux insolites</span>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(244,243,238,.7)', letterSpacing: '.07em', textTransform: 'uppercase' }}>{dict.galerie.badge}</span>
             </div>
             <h2 className="tg-h2" style={{ color: '#F4F3EE', marginBottom: 12 }}>
-              Bien au-delà des<br />
-              <span style={{ background: 'var(--y)', color: '#0D0D0D', padding: '0 12px 3px', borderRadius: 8, display: 'inline-block' }}>grands classiques</span>
+              {dict.galerie.title1}<br />
+              <span style={{ background: 'var(--y)', color: '#0D0D0D', padding: '0 12px 3px', borderRadius: 8, display: 'inline-block' }}>{dict.galerie.title2}</span>
             </h2>
-            <p style={{ fontSize: 15, color: 'rgba(244,243,238,.55)', margin: 0 }}>Fais glisser pour explorer →</p>
+            <p style={{ fontSize: 15, color: 'rgba(244,243,238,.55)', margin: 0 }}>{dict.galerie.scrollHint}</p>
           </div>
         </div>
         <div ref={galleryRef} className="tg-noscroll" style={{ display: 'flex', gap: 20, overflowX: 'auto', padding: '8px 64px 28px', cursor: 'grab', WebkitOverflowScrolling: 'touch', userSelect: 'none' }}>
@@ -904,9 +904,9 @@ export default function LandingPageGlass() {
           ))}
         </div>
         <div className="rrc" style={{ maxWidth: 900, margin: '56px auto 0', display: 'flex', justifyContent: 'space-around', gap: 40, padding: '0 40px', textAlign: 'center' }}>
-          <div data-fade=""><div data-count="10000" data-suffix="+" style={{ fontSize: 54, fontWeight: 700, letterSpacing: '-2px' }}>10 000+</div><div style={{ fontSize: 13, color: 'rgba(244,243,238,.55)', letterSpacing: '.05em', textTransform: 'uppercase', marginTop: 4 }}>Monuments identifiés</div></div>
-          <div data-fade="" data-delay="120"><div data-count="150" data-suffix="+" style={{ fontSize: 54, fontWeight: 700, letterSpacing: '-2px' }}>150+</div><div style={{ fontSize: 13, color: 'rgba(244,243,238,.55)', letterSpacing: '.05em', textTransform: 'uppercase', marginTop: 4 }}>Pays couverts</div></div>
-          <div data-fade="" data-delay="240"><div data-count="4.9" data-decimal="true" data-suffix="★" style={{ fontSize: 54, fontWeight: 700, letterSpacing: '-2px', color: 'var(--y)' }}>4.9★</div><div style={{ fontSize: 13, color: 'rgba(244,243,238,.55)', letterSpacing: '.05em', textTransform: 'uppercase', marginTop: 4 }}>Note moyenne</div></div>
+          <div data-fade=""><div data-count="10000" data-suffix="+" style={{ fontSize: 54, fontWeight: 700, letterSpacing: '-2px' }}>{dict.galerie.stats[0].value}</div><div style={{ fontSize: 13, color: 'rgba(244,243,238,.55)', letterSpacing: '.05em', textTransform: 'uppercase', marginTop: 4 }}>{dict.galerie.stats[0].label}</div></div>
+          <div data-fade="" data-delay="120"><div data-count="150" data-suffix="+" style={{ fontSize: 54, fontWeight: 700, letterSpacing: '-2px' }}>{dict.galerie.stats[1].value}</div><div style={{ fontSize: 13, color: 'rgba(244,243,238,.55)', letterSpacing: '.05em', textTransform: 'uppercase', marginTop: 4 }}>{dict.galerie.stats[1].label}</div></div>
+          <div data-fade="" data-delay="240"><div data-count="4.9" data-decimal="true" data-suffix="★" style={{ fontSize: 54, fontWeight: 700, letterSpacing: '-2px', color: 'var(--y)' }}>{dict.galerie.stats[2].value}</div><div style={{ fontSize: 13, color: 'rgba(244,243,238,.55)', letterSpacing: '.05em', textTransform: 'uppercase', marginTop: 4 }}>{dict.galerie.stats[2].label}</div></div>
         </div>
       </section>
 
@@ -916,15 +916,15 @@ export default function LandingPageGlass() {
           {/* Gauche : panneau de preuve */}
           <div data-fade="" style={{ flex: '0 0 320px' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', background: 'var(--y)', borderRadius: 100, padding: '6px 14px', marginBottom: 16 }}>
-              <span style={{ fontSize: 11.5, fontWeight: 600, color: '#0D0D0D', letterSpacing: '.07em', textTransform: 'uppercase' }}>Ils en parlent</span>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: '#0D0D0D', letterSpacing: '.07em', textTransform: 'uppercase' }}>{dict.temoignages.badge}</span>
             </div>
-            <h2 className="tg-h2" style={{ fontSize: 42, letterSpacing: '-1.6px', color: '#F4F3EE', marginBottom: 26 }}>Ils ont voyagé<br />avec TravelAI</h2>
+            <h2 className="tg-h2" style={{ fontSize: 42, letterSpacing: '-1.6px', color: '#F4F3EE', marginBottom: 26 }}>{nl2br(dict.temoignages.title)}</h2>
             <div style={{ background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.10)', borderRadius: 18, padding: '26px 28px', marginBottom: 18 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
-                <span style={{ fontSize: 52, fontWeight: 700, letterSpacing: '-2px', color: 'var(--y)' }}>4.9</span>
+                <span style={{ fontSize: 52, fontWeight: 700, letterSpacing: '-2px', color: 'var(--y)' }}>{dict.hero.rating}</span>
                 <span style={{ fontSize: 16, color: 'var(--y)', letterSpacing: 2 }}>★★★★★</span>
               </div>
-              <div style={{ fontSize: 13, color: 'rgba(244,243,238,.55)', marginBottom: 18 }}>Note moyenne · 10 000+ voyageurs</div>
+              <div style={{ fontSize: 13, color: 'rgba(244,243,238,.55)', marginBottom: 18 }}>{dict.temoignages.ratingLabel}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {RATING_BARS.map(({ label, width, pct, color }) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -939,9 +939,9 @@ export default function LandingPageGlass() {
             </div>
             <a href="#cta" className="tg-btn-y" style={{ display: 'flex', justifyContent: 'center', padding: 16, width: '100%', marginBottom: 10, boxSizing: 'border-box' }}>
               <Ghost size={15} color="#0D0D0D" />
-              Essaie gratuitement
+              {dict.temoignages.ctaFree}
             </a>
-            <div style={{ textAlign: 'center', fontSize: 11.5, color: 'rgba(244,243,238,.4)' }}>Sans inscription · Directement dans Snapchat</div>
+            <div style={{ textAlign: 'center', fontSize: 11.5, color: 'rgba(244,243,238,.4)' }}>{dict.temoignages.ctaSub}</div>
           </div>
 
           {/* Droite : stories */}
@@ -949,9 +949,9 @@ export default function LandingPageGlass() {
             <div data-fade="" data-delay="100" style={{ marginBottom: 26 }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.14)', borderRadius: 100, padding: '6px 14px', marginBottom: 12 }}>
                 <Ghost size={12} color="#FFFC00" />
-                <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(244,243,238,.7)', letterSpacing: '.07em', textTransform: 'uppercase' }}>Vu dans leurs stories</span>
+                <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(244,243,238,.7)', letterSpacing: '.07em', textTransform: 'uppercase' }}>{dict.temoignages.storiesBadge}</span>
               </div>
-              <p style={{ fontSize: 14, color: 'rgba(244,243,238,.55)', margin: 0 }}>De vraies découvertes, partagées par de vrais voyageurs.</p>
+              <p style={{ fontSize: 14, color: 'rgba(244,243,238,.55)', margin: 0 }}>{dict.temoignages.storiesSub}</p>
             </div>
             <div className="rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18 }}>
               {STORIES.map(({ src, alt, handle, meta, quote, avatar, segments, rot, delay }) => (
@@ -975,13 +975,13 @@ export default function LandingPageGlass() {
                       <div style={{ fontSize: 10.5, color: 'var(--y)', letterSpacing: 1.5, marginBottom: 6 }}>★★★★★</div>
                       <p style={{ fontSize: 12, lineHeight: 1.55, color: '#fff', margin: 0 }}>{quote}</p>
                     </div>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--y)', borderRadius: 100, padding: '5px 11px', fontSize: 10, fontWeight: 700, color: '#0D0D0D' }}>👻 Scanné avec TravelAI</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--y)', borderRadius: 100, padding: '5px 11px', fontSize: 10, fontWeight: 700, color: '#0D0D0D' }}>👻 {dict.temoignages.scannedWith}</span>
                   </div>
                 </div>
               ))}
             </div>
             <div data-fade="" data-delay="400" style={{ textAlign: 'center', marginTop: 28 }}>
-              <a href="#cta" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--y)', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>Vis ta propre story →</a>
+              <a href="#cta" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--y)', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>{dict.temoignages.ctaStory}</a>
             </div>
           </div>
         </div>
@@ -993,9 +993,9 @@ export default function LandingPageGlass() {
           <div data-fade="" style={{ textAlign: 'center', marginBottom: 56 }}>
             <div className="tg-eyebrow" style={{ marginBottom: 18 }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" strokeWidth={2.2}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-              <span>Confiance</span>
+              <span>{dict.confiance.eyebrow}</span>
             </div>
-            <h2 className="tg-h2">Tes photos t&apos;appartiennent</h2>
+            <h2 className="tg-h2">{dict.confiance.title}</h2>
           </div>
           <div className="rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 22 }}>
             {TRUST.map(({ q, a }, i) => (
@@ -1012,8 +1012,8 @@ export default function LandingPageGlass() {
       <section id="faq" className="rsec" style={{ background: 'var(--bg2)', padding: '110px 64px', borderTop: '1px solid var(--line)' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <div data-fade="" style={{ textAlign: 'center', marginBottom: 48 }}>
-            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>FAQ</span></div>
-            <h2 className="tg-h2" style={{ fontSize: 44, letterSpacing: '-1.6px' }}>Questions fréquentes</h2>
+            <div className="tg-eyebrow" style={{ marginBottom: 18 }}><span>{dict.faq.eyebrow}</span></div>
+            <h2 className="tg-h2" style={{ fontSize: 44, letterSpacing: '-1.6px' }}>{dict.faq.title}</h2>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {FAQ_ITEMS.map(({ q, a }, i) => {
@@ -1041,16 +1041,16 @@ export default function LandingPageGlass() {
         <div style={{ maxWidth: 940, margin: '0 auto' }}>
           <div data-fade="" style={{ textAlign: 'center', marginBottom: 52 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.14)', borderRadius: 100, padding: '6px 14px', marginBottom: 18 }}>
-              <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(244,243,238,.7)', letterSpacing: '.07em', textTransform: 'uppercase' }}>Le match</span>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(244,243,238,.7)', letterSpacing: '.07em', textTransform: 'uppercase' }}>{dict.comparatif.eyebrow}</span>
             </div>
-            <h2 className="tg-h2" style={{ fontSize: 44, letterSpacing: '-1.6px', color: '#F4F3EE' }}>TravelAI vs audioguide classique</h2>
+            <h2 className="tg-h2" style={{ fontSize: 44, letterSpacing: '-1.6px', color: '#F4F3EE' }}>{dict.comparatif.title}</h2>
           </div>
           <div className="rr" style={{ display: 'flex', gap: 22, alignItems: 'stretch' }}>
             <div data-fade="" style={{ flex: 1, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.10)', borderRadius: 'var(--r)', padding: '34px 32px' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(244,243,238,.55)', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 8 }}>Audioguide classique</div>
-              <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-1px', marginBottom: 26 }}>~8€ <span style={{ fontSize: 15, fontWeight: 500, color: 'rgba(244,243,238,.5)' }}>/ site</span></div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(244,243,238,.55)', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 8 }}>{dict.comparatif.audioguide.label}</div>
+              <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-1px', marginBottom: 26 }}>{dict.comparatif.audioguide.price} <span style={{ fontSize: 15, fontWeight: 500, color: 'rgba(244,243,238,.5)' }}>{dict.comparatif.audioguide.priceUnit}</span></div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {['Un seul monument à la fois', 'À rendre en fin de visite', 'Contenu figé, pas de questions'].map((p) => (
+                {dict.comparatif.audioguide.points.map((p) => (
                   <div key={p} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 14, color: 'rgba(244,243,238,.7)', lineHeight: 1.5 }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(244,243,238,.4)" strokeWidth={2.4} strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                     {p}
@@ -1059,14 +1059,14 @@ export default function LandingPageGlass() {
               </div>
             </div>
             <div data-fade="" data-delay="140" style={{ flex: 1, background: 'rgba(255,252,0,.05)', border: '2px solid var(--y)', borderRadius: 'var(--r)', padding: '34px 32px', position: 'relative' }}>
-              <span style={{ position: 'absolute', top: -13, left: 28, background: 'var(--y)', color: '#0D0D0D', borderRadius: 100, padding: '4px 14px', fontSize: 11, fontWeight: 700, letterSpacing: '.04em' }}>RECOMMANDÉ</span>
+              <span style={{ position: 'absolute', top: -13, left: 28, background: 'var(--y)', color: '#0D0D0D', borderRadius: 100, padding: '4px 14px', fontSize: 11, fontWeight: 700, letterSpacing: '.04em' }}>{dict.comparatif.travelai.recommended}</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <Ghost size={16} color="#FFFC00" />
-                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--y)', letterSpacing: '.06em', textTransform: 'uppercase' }}>TravelAI</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--y)', letterSpacing: '.06em', textTransform: 'uppercase' }}>{dict.common.brand}</span>
               </div>
-              <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-1px', marginBottom: 26 }}>Gratuit <span style={{ fontSize: 15, fontWeight: 500, color: 'rgba(244,243,238,.5)' }}>— inclus</span></div>
+              <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-1px', marginBottom: 26 }}>{dict.comparatif.travelai.price} <span style={{ fontSize: 15, fontWeight: 500, color: 'rgba(244,243,238,.5)' }}>{dict.comparatif.travelai.priceUnit}</span></div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {['Tous les monuments, partout', 'Reste dans ton carnet à vie', 'Répond à toutes tes questions'].map((p) => (
+                {dict.comparatif.travelai.points.map((p) => (
                   <div key={p} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 14, lineHeight: 1.5 }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFC00" strokeWidth={2.6} strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }}><polyline points="20 6 9 17 4 12" /></svg>
                     {p}
@@ -1084,17 +1084,17 @@ export default function LandingPageGlass() {
           <div data-fade="" style={{ marginBottom: 26, display: 'flex', justifyContent: 'center' }}>
             <img src="/snapchat.png" alt="Snapchat" style={{ width: 58, height: 58, borderRadius: 14, objectFit: 'contain', background: '#FFFC00', padding: 8 }} />
           </div>
-          <h2 className="tg-h2" data-fade="" data-delay="80" style={{ fontSize: 56, letterSpacing: '-2.2px', lineHeight: 1.05, marginBottom: 18 }}>Commence à explorer,<br />c&apos;est gratuit</h2>
+          <h2 className="tg-h2" data-fade="" data-delay="80" style={{ fontSize: 56, letterSpacing: '-2.2px', lineHeight: 1.05, marginBottom: 18 }}>{nl2br(dict.cta.title)}</h2>
           <p data-fade="" data-delay="160" style={{ fontSize: 17, lineHeight: 1.65, opacity: 0.65, margin: '0 0 38px' }}>
-            Pas d&apos;app à télécharger, pas d&apos;inscription. Ouvre Snapchat, lance la Lens TravelAI, et ton prochain monument te racontera son histoire.
+            {dict.cta.subtitle}
           </p>
           <div data-fade="" data-delay="240" style={{ display: 'flex', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
-            <a href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#0D0D0D', color: '#FFFC00', padding: '18px 38px', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none', transition: 'all .2s ease' }}>
+            <a href={`/${locale}/login`} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#0D0D0D', color: '#FFFC00', padding: '18px 38px', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none', transition: 'all .2s ease' }}>
               <Ghost size={17} color="#FFFC00" />
-              Ouvrir la Lens TravelAI
+              {dict.cta.button}
             </a>
           </div>
-          <div data-fade="" data-delay="320" style={{ marginTop: 22, fontSize: 12.5, opacity: 0.5 }}>Gratuit · Sans inscription · Fonctionne dans Snapchat</div>
+          <div data-fade="" data-delay="320" style={{ marginTop: 22, fontSize: 12.5, opacity: 0.5 }}>{dict.cta.footer}</div>
         </div>
       </section>
 
@@ -1103,29 +1103,29 @@ export default function LandingPageGlass() {
         <div className="rrc" style={{ maxWidth: 1140, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 40, flexWrap: 'wrap' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14 }}>
-              <img src="/voyageur.jpg" alt="TravelAI" style={{ width: 28, height: 28, borderRadius: 8, objectFit: 'cover' }} />
-              <span style={{ fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '-.4px' }}>TravelAI</span>
+              <img src="/voyageur.jpg" alt={dict.common.brand} style={{ width: 28, height: 28, borderRadius: 8, objectFit: 'cover' }} />
+              <span style={{ fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '-.4px' }}>{dict.common.brand}</span>
             </div>
-            <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0, maxWidth: 260 }}>Ton guide de voyage IA, dans ta caméra Snapchat. Point. Ask. Remember.</p>
+            <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0, maxWidth: 260 }}>{dict.footer.tagline}</p>
           </div>
           <div style={{ display: 'flex', gap: 56, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <span style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,.7)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 2 }}>Produit</span>
-              <a href="#how" className="tg-footer-link">Comment ça marche</a>
-              <a href="#demo" className="tg-footer-link">Démo</a>
-              <a href="#roadmap" className="tg-footer-link">Roadmap</a>
+              <span style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,.7)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 2 }}>{dict.footer.produit}</span>
+              <a href="#how" className="tg-footer-link">{dict.nav.items.how}</a>
+              <a href="#demo" className="tg-footer-link">{dict.nav.items.demo}</a>
+              <a href="#roadmap" className="tg-footer-link">{dict.footer.roadmap}</a>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <span style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,.7)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 2 }}>Légal</span>
-              <a href="/confidentialite" className="tg-footer-link">Confidentialité</a>
-              <a href="/conditions" className="tg-footer-link">Conditions</a>
-              <a href="/contact" className="tg-footer-link">Contact</a>
+              <span style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,.7)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 2 }}>{dict.footer.legal}</span>
+              <a href={`/${locale}/confidentialite`} className="tg-footer-link">{dict.footer.confidentialite}</a>
+              <a href={`/${locale}/conditions`} className="tg-footer-link">{dict.footer.conditions}</a>
+              <a href={`/${locale}/contact`} className="tg-footer-link">{dict.footer.contact}</a>
             </div>
           </div>
         </div>
         <div style={{ maxWidth: 1140, margin: '40px auto 0', paddingTop: 22, borderTop: '1px solid rgba(255,255,255,.08)', display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', fontSize: 12, color: 'rgba(255,255,255,.3)' }}>
-          <span>© 2026 TravelAI — travelai.digitalstack.cloud</span>
-          <span>Fait pour les voyageurs curieux ✦</span>
+          <span>{dict.footer.copyright}</span>
+          <span>{dict.footer.signature}</span>
         </div>
       </footer>
     </div>

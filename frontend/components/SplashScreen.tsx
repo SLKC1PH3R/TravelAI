@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale } from "@/contexts/LocaleContext";
+
 const SPLASH_CSS = `
   @keyframes ta-splash-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes ta-splash-spin { to { transform: rotate(360deg); } }
@@ -32,6 +34,7 @@ function GoogleIcon() {
 }
 
 export default function SplashScreen() {
+  const { dict } = useLocale();
   return (
     <div style={{ position: "fixed", inset: 0, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 }}>
       <style>{SPLASH_CSS}</style>
@@ -53,7 +56,7 @@ export default function SplashScreen() {
             <rect x="5" y="10" width="14" height="10" rx="2" />
             <path className="ta-splash-lock-shackle" d="M8 10V7a4 4 0 0 1 8 0v3" />
           </svg>
-          <span style={{ fontSize: 13.5, fontWeight: 700, color: "#0D0D0D" }}>Connexion sécurisée avec Google</span>
+          <span style={{ fontSize: 13.5, fontWeight: 700, color: "#0D0D0D" }}>{dict.splash.connecting}</span>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>

@@ -2,7 +2,7 @@
  * TravelAI — Dashboard Mes Voyages (Timeline Polarsteps-style)
  *
  * Contenu de la vue "Mes voyages" : la nav/sidebar partagees vivent dans
- * DashboardShell (cf. app/dashboard/(main)/layout.tsx), seul ce <main> change.
+ * DashboardShell (cf. app/[locale]/dashboard/(main)/layout.tsx), seul ce <main> change.
  */
 
 'use client'
@@ -16,6 +16,7 @@ import Flag from '@/components/Flag'
 import { GhostIcon, fmtShort, tripLabel } from '@/components/DashboardChrome'
 import LensQrCard from '@/components/LensQrCard'
 import { useDashboard } from '@/contexts/DashboardContext'
+import { useLocale } from '@/contexts/LocaleContext'
 
 /* ===== Embedded CSS (page-specific only ; chrome partage dans DashboardChrome.tsx) ===== */
 const CSS = `
@@ -51,8 +52,6 @@ const CSS = `
   }
 `
 
-const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-
 function monumentCoverUrl(m: Monument): string | null {
   const stored = m.photos.find((p) => p.stored)
   return stored ? photoUrl(stored.id) : null
@@ -61,13 +60,16 @@ function monumentCoverUrl(m: Monument): string | null {
 export default function TravelAIDashboard() {
   const router = useRouter()
   const { data: session } = useSession()
+  const { locale, dict } = useLocale()
   const { uuid, trips, loading, selectedTrip, selectedTripId, selectTrip, clearTrip, downloading, handleDownload, showMerge, setShowMerge, reload } = useDashboard()
+
+  const fmt = (d: string) => new Date(d).toLocaleDateString(locale === 'en' ? 'en-US' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 
   useEffect(() => {
     if (!uuid && session?.user?.anonymousUuid) {
-      router.replace(`/dashboard?uuid=${encodeURIComponent(session.user.anonymousUuid)}`)
+      router.replace(`/${locale}/dashboard?uuid=${encodeURIComponent(session.user.anonymousUuid)}`)
     }
-  }, [uuid, session, router])
+  }, [uuid, session, router, locale])
 
   const [mergeTitle, setMergeTitle] = useState('')
   const [mergeCountry, setMergeCountry] = useState('')
@@ -133,15 +135,15 @@ export default function TravelAIDashboard() {
             onSubmit={(e) => {
               e.preventDefault()
               const value = new FormData(e.currentTarget).get('uuid') as string
-              router.push(`/dashboard?uuid=${encodeURIComponent(value)}`)
+              router.push(`/${locale}/dashboard?uuid=${encodeURIComponent(value)}`)
             }}
           >
-            <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Connecte ton compte Lens</h1>
+            <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>{dict.dashboardTrips.connectLensTitle}</h1>
             <p style={{ fontSize: 13, color: '#6B6B6B', marginBottom: 16, lineHeight: 1.5 }}>
-              Entre l&apos;UUID anonyme genere par la Lens Snapchat pour retrouver tes voyages.
+              {dict.dashboardTrips.connectLensDesc}
             </p>
             <input name="uuid" required style={{ width: '100%', padding: '10px 14px', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 10, fontSize: 14, marginBottom: 12 }} />
-            <button type="submit" style={{ width: '100%', background: '#FFFC00', border: 'none', borderRadius: 10, padding: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Valider</button>
+            <button type="submit" style={{ width: '100%', background: '#FFFC00', border: 'none', borderRadius: 10, padding: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>{dict.dashboardTrips.validate}</button>
           </form>
         </div>
       )
@@ -149,7 +151,7 @@ export default function TravelAIDashboard() {
     return (
       <div className="ta-dash-root" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#6B6B6B' }}>
         <style>{CSS}</style>
-        Chargement...
+        {dict.common.loading}
       </div>
     )
   }
@@ -158,7 +160,7 @@ export default function TravelAIDashboard() {
     return (
       <div className="ta-dash-root" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#6B6B6B' }}>
         <style>{CSS}</style>
-        Chargement...
+        {dict.common.loading}
       </div>
     )
   }
@@ -169,8 +171,8 @@ export default function TravelAIDashboard() {
         <style>{CSS}</style>
         <div style={{ padding: '36px 36px 48px', maxWidth: 1160, margin: '0 auto' }}>
           <div style={{ marginBottom: 28 }}>
-            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.6px', marginBottom: 6, color: '#0D0D0D' }}>Mes voyages</h1>
-            <p style={{ fontSize: 13.5, color: '#6B6B6B' }}>Aucun voyage trouve pour ce compte.</p>
+            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.6px', marginBottom: 6, color: '#0D0D0D' }}>{dict.dashboardTrips.title}</h1>
+            <p style={{ fontSize: 13.5, color: '#6B6B6B' }}>{dict.dashboardTrips.noneFound}</p>
           </div>
           <LensQrCard />
         </div>
@@ -184,8 +186,8 @@ export default function TravelAIDashboard() {
         <style>{CSS}</style>
         <div style={{ padding: '36px 36px 48px', maxWidth: 1160, margin: '0 auto' }}>
           <div style={{ marginBottom: 28 }}>
-            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.6px', marginBottom: 6, color: '#0D0D0D' }}>Mes voyages</h1>
-            <p style={{ fontSize: 13.5, color: '#6B6B6B' }}>{trips.length} carnet(s) de voyage — clique sur un voyage pour l&apos;ouvrir.</p>
+            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.6px', marginBottom: 6, color: '#0D0D0D' }}>{dict.dashboardTrips.title}</h1>
+            <p style={{ fontSize: 13.5, color: '#6B6B6B' }}>{trips.length} {dict.dashboardTrips.subtitle}</p>
           </div>
 
           <LensQrCard />
@@ -209,7 +211,7 @@ export default function TravelAIDashboard() {
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px 18px' }}>
                     <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', letterSpacing: '-0.4px', marginBottom: 4, lineHeight: 1.15 }}>{tripLabel(trip)}</div>
                     <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.7)' }}>
-                      {fmt(trip.started_at)}{trip.ended_at ? ` - ${fmt(trip.ended_at)}` : ''} · {trip.monuments.length} monument(s)
+                      {fmt(trip.started_at)}{trip.ended_at ? ` - ${fmt(trip.ended_at)}` : ''} · {trip.monuments.length} {dict.dashboardTrips.monuments}
                     </div>
                   </div>
                 </button>
@@ -238,14 +240,14 @@ export default function TravelAIDashboard() {
         <div style={{ position: 'absolute', top: 20, left: 28, zIndex: 10 }}>
           <button className="ta-back-btn" onClick={clearTrip} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.14)', backdropFilter: 'blur(8px)', border: '0.5px solid rgba(255,255,255,0.35)', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, color: '#fff', cursor: 'pointer' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-            Retour
+            {dict.common.back}
           </button>
         </div>
 
         <div style={{ position: 'absolute', top: 20, right: 28, display: 'flex', gap: 8, zIndex: 10 }}>
           <button className="ta-share-btn" disabled={downloading} onClick={handleDownload} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.14)', backdropFilter: 'blur(8px)', border: '0.5px solid rgba(255,255,255,0.35)', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, color: '#fff', cursor: 'pointer' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-            Voir le carnet
+            {dict.dashboardTrips.viewCarnet}
           </button>
         </div>
 
@@ -260,7 +262,7 @@ export default function TravelAIDashboard() {
               {fmt(selectedTrip.started_at)}{selectedTrip.ended_at ? ` - ${fmt(selectedTrip.ended_at)}` : ''}
             </span>
             <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>·</span>
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)' }}>{selectedTrip.monuments.length} monuments decouverts</span>
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)' }}>{selectedTrip.monuments.length} {dict.dashboardTrips.monuments}</span>
           </div>
         </div>
       </div>
@@ -268,9 +270,9 @@ export default function TravelAIDashboard() {
       {/* STATS BAR */}
       <div className="ta-stats-bar" style={{ background: '#fff', borderBottom: '0.5px solid rgba(0,0,0,0.06)', padding: '18px 36px', display: 'flex', alignItems: 'center', gap: 32 }}>
         {[
-          { value: selectedTrip.monuments.length, label: 'Monuments', icon: <><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></>, bg: '#F7F7F7' },
-          { value: tripConvs, label: 'Conversations IA', icon: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />, bg: '#F7F7F7' },
-          { value: tripFavorites, label: 'Favoris', icon: <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#0D0D0D" stroke="none" />, bg: '#FFFC00' },
+          { value: selectedTrip.monuments.length, label: locale === 'en' ? 'Landmarks' : 'Monuments', icon: <><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></>, bg: '#F7F7F7' },
+          { value: tripConvs, label: dict.dashboardTrips.aiConversation, icon: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />, bg: '#F7F7F7' },
+          { value: tripFavorites, label: dict.dashboardTrips.favorite, icon: <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#0D0D0D" stroke="none" />, bg: '#FFFC00' },
         ].map(({ value, label, icon, bg }, i) => (
           <Fragment key={label}>
             {i > 0 && <div style={{ width: 0.5, height: 36, background: 'rgba(0,0,0,0.08)' }} />}
@@ -289,14 +291,14 @@ export default function TravelAIDashboard() {
 
       {/* ROUTE STRIP */}
       <div className="ta-route-strip" style={{ background: '#fff', borderBottom: '0.5px solid rgba(0,0,0,0.06)', padding: '18px 36px', overflowX: 'auto' }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: '#B0B0B0', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Itineraire</div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: '#B0B0B0', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>{dict.dashboardTrips.itinerary}</div>
         <div style={{ display: 'flex', alignItems: 'center', paddingBottom: 2 }}>
           {selectedTrip.monuments.map((m, i) => (
             <Fragment key={m.id}>
-              <Link href={`/monuments/${m.id}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, cursor: 'pointer', textDecoration: 'none' }}>
+              <Link href={`/${locale}/monuments/${m.id}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, cursor: 'pointer', textDecoration: 'none' }}>
                 <div style={{ width: 11, height: 11, borderRadius: '50%', background: '#FFFC00', border: '2.5px solid #0D0D0D', flexShrink: 0 }} />
                 <div style={{ fontSize: 11.5, fontWeight: 600, color: '#0D0D0D', whiteSpace: 'nowrap', maxWidth: 110, overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'center' }}>{m.name}</div>
-                <div style={{ fontSize: 10, color: '#8A8A8A', whiteSpace: 'nowrap' }}>{fmtShort(m.visited_at)}</div>
+                <div style={{ fontSize: 10, color: '#8A8A8A', whiteSpace: 'nowrap' }}>{fmtShort(m.visited_at, locale)}</div>
               </Link>
               {i < selectedTrip.monuments.length - 1 && (
                 <div style={{ width: 72, height: 0, borderTop: '1.5px dashed rgba(0,0,0,0.15)', marginBottom: 34, flexShrink: 0 }} />
@@ -309,10 +311,10 @@ export default function TravelAIDashboard() {
       {/* MONUMENT TIMELINE */}
       <div style={{ padding: '32px 36px 48px', maxWidth: 860 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#0D0D0D' }}>{selectedTrip.monuments.length} etapes decouvertes</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#0D0D0D' }}>{selectedTrip.monuments.length} {dict.dashboardTrips.stepsDiscovered}</h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FFFC00', border: '2px solid #0D0D0D' }} />
-            <span style={{ fontSize: 11, color: '#8A8A8A', fontWeight: 500 }}>Monument identifie par TravelAI</span>
+            <span style={{ fontSize: 11, color: '#8A8A8A', fontWeight: 500 }}>{dict.dashboardTrips.identifiedBy}</span>
           </div>
         </div>
 
@@ -323,20 +325,20 @@ export default function TravelAIDashboard() {
             const firstConv = m.conversations[0]
             const moreConvs = m.conversations.length - 1
             const cover = monumentCoverUrl(m)
-            const tags = [selectedTrip.country, m.is_favorite ? 'Favori' : null].filter(Boolean) as string[]
+            const tags = [selectedTrip.country, m.is_favorite ? dict.dashboardTrips.favorite : null].filter(Boolean) as string[]
             return (
               <div key={m.id} style={{ position: 'relative', marginBottom: 28 }} data-fade="">
                 <div style={{ position: 'absolute', left: -28, top: 20, width: 14, height: 14, borderRadius: '50%', background: '#FFFC00', border: '2.5px solid #0D0D0D', zIndex: 1 }} />
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                   <span style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.09)', borderRadius: 7, padding: '4px 11px', fontSize: 11.5, fontWeight: 600, color: '#0D0D0D' }}>{fmt(m.visited_at)}</span>
-                  {m.is_favorite && <span style={{ background: '#FFFC00', borderRadius: 7, padding: '4px 11px', fontSize: 11, fontWeight: 700, color: '#0D0D0D' }}>★ Favori</span>}
+                  {m.is_favorite && <span style={{ background: '#FFFC00', borderRadius: 7, padding: '4px 11px', fontSize: 11, fontWeight: 700, color: '#0D0D0D' }}>★ {dict.dashboardTrips.favorite}</span>}
                   {selectedTrip.city && <span style={{ fontSize: 11, color: '#B0B0B0' }}>{selectedTrip.city}, {selectedTrip.country}</span>}
                 </div>
 
                 <div className="ta-monument-card" style={{ background: '#fff', borderRadius: 18, border: '0.5px solid rgba(0,0,0,0.07)', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
 
-                  <Link href={`/monuments/${m.id}`} style={{ position: 'relative', height: 210, overflow: 'hidden', display: 'block', textDecoration: 'none' }}>
+                  <Link href={`/${locale}/monuments/${m.id}`} style={{ position: 'relative', height: 210, overflow: 'hidden', display: 'block', textDecoration: 'none' }}>
                     <div style={{ width: '100%', height: '100%', background: cover ? `url('${cover}')` : 'linear-gradient(135deg,#e8e6e1,#cfccc5)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg,transparent 40%,rgba(0,0,0,0.72) 100%)' }} />
                     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '18px 22px' }}>
@@ -351,7 +353,7 @@ export default function TravelAIDashboard() {
                           )}
                         </div>
                         <div className="ta-view-btn" style={{ opacity: 0, transition: 'opacity 0.2s', flexShrink: 0 }}>
-                          <div style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', border: '0.5px solid rgba(255,255,255,0.4)', borderRadius: 8, padding: '8px 14px', fontSize: 11.5, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>Voir →</div>
+                          <div style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', border: '0.5px solid rgba(255,255,255,0.4)', borderRadius: 8, padding: '8px 14px', fontSize: 11.5, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>{locale === 'en' ? 'View →' : 'Voir →'}</div>
                         </div>
                       </div>
                     </div>
@@ -371,9 +373,9 @@ export default function TravelAIDashboard() {
                         <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#FFFC00', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           <GhostIcon size={9} color="#0D0D0D" />
                         </div>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#0D0D0D' }}>TravelAI</span>
-                        <span style={{ fontSize: 11, color: '#8A8A8A' }}>Conversation IA</span>
-                        <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: '#FFFC00', background: '#0D0D0D', borderRadius: 100, padding: '2px 9px' }}>Gemini</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#0D0D0D' }}>{dict.common.brand}</span>
+                        <span style={{ fontSize: 11, color: '#8A8A8A' }}>{dict.dashboardTrips.aiConversation}</span>
+                        <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: '#FFFC00', background: '#0D0D0D', borderRadius: 100, padding: '2px 9px' }}>{dict.dashboardTrips.gemini}</span>
                       </div>
                       {firstConv ? (
                         <>
@@ -392,11 +394,11 @@ export default function TravelAIDashboard() {
                           </div>
                         </>
                       ) : (
-                        <p style={{ fontSize: 12.5, color: '#8A8A8A' }}>Aucune conversation pour ce monument.</p>
+                        <p style={{ fontSize: 12.5, color: '#8A8A8A' }}>{dict.dashboardTrips.noConversation}</p>
                       )}
                       {moreConvs > 0 && (
                         <div style={{ marginTop: 10, paddingTop: 10, borderTop: '0.5px solid rgba(0,0,0,0.06)', textAlign: 'center' }}>
-                          <span style={{ fontSize: 11.5, color: '#8A8A8A', fontWeight: 500 }}>+ {moreConvs} autre(s) conversation(s)</span>
+                          <span style={{ fontSize: 11.5, color: '#8A8A8A', fontWeight: 500 }}>+ {moreConvs} {dict.dashboardTrips.moreConversations}</span>
                         </div>
                       )}
                     </div>
@@ -404,8 +406,8 @@ export default function TravelAIDashboard() {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                         {[
-                          [m.conversations.length, 'conv.', <path key="c" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />],
-                          [m.photos.filter((p) => p.stored).length, 'photo(s)', <><path key="p1" d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle key="p2" cx="12" cy="13" r="4" /></>],
+                          [m.conversations.length, dict.dashboardTrips.conv, <path key="c" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />],
+                          [m.photos.filter((p) => p.stored).length, dict.dashboardTrips.photosLabel, <><path key="p1" d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle key="p2" cx="12" cy="13" r="4" /></>],
                         ].map(([n, unit, icon]) => (
                           <div key={String(unit)} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">{icon as React.ReactNode}</svg>
@@ -413,8 +415,8 @@ export default function TravelAIDashboard() {
                           </div>
                         ))}
                       </div>
-                      <Link href={`/monuments/${m.id}`} className="ta-action-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.09)', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, color: '#0D0D0D', cursor: 'pointer', textDecoration: 'none' }}>
-                        Voir le monument
+                      <Link href={`/${locale}/monuments/${m.id}`} className="ta-action-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#F7F7F7', border: '0.5px solid rgba(0,0,0,0.09)', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, color: '#0D0D0D', cursor: 'pointer', textDecoration: 'none' }}>
+                        {dict.dashboardTrips.viewMonument}
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                       </Link>
                     </div>
@@ -431,17 +433,17 @@ export default function TravelAIDashboard() {
         <div style={{ margin: '0 36px 48px', background: '#fff', borderRadius: 20, border: '0.5px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
           <div style={{ padding: '24px 28px 20px', borderBottom: '0.5px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.4px' }}>Fusionner des voyages</h2>
-              <p style={{ fontSize: 13, color: '#8A8A8A', marginTop: 4, lineHeight: 1.6 }}>Regroupe des monuments sur une plage de dates dans un seul carnet.</p>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.4px' }}>{dict.dashboardTrips.mergeTitle}</h2>
+              <p style={{ fontSize: 13, color: '#8A8A8A', marginTop: 4, lineHeight: 1.6 }}>{dict.dashboardTrips.mergeDesc}</p>
             </div>
             <button onClick={() => setShowMerge(false)} style={{ width: 32, height: 32, borderRadius: '50%', background: '#F7F7F7', border: 'none', cursor: 'pointer', fontSize: 18, color: '#6B6B6B', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>✕</button>
           </div>
           <div className="ta-merge-grid" style={{ padding: '24px 28px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
             {[
-              { label: 'Titre du voyage *', value: mergeTitle, onChange: setMergeTitle, placeholder: 'Ex: Road trip France ete 2026', span: true, type: 'text' },
-              { label: 'Pays (optionnel)', value: mergeCountry, onChange: setMergeCountry, placeholder: 'Ex: France', span: true, type: 'text' },
-              { label: 'Du', value: mergeStart, onChange: setMergeStart, placeholder: '', span: false, type: 'date' },
-              { label: 'Au', value: mergeEnd, onChange: setMergeEnd, placeholder: '', span: false, type: 'date' },
+              { label: dict.dashboardTrips.mergeTitleField, value: mergeTitle, onChange: setMergeTitle, placeholder: dict.dashboardTrips.mergeTitlePlaceholder, span: true, type: 'text' },
+              { label: dict.dashboardTrips.mergeCountry, value: mergeCountry, onChange: setMergeCountry, placeholder: dict.dashboardTrips.mergeCountryPlaceholder, span: true, type: 'text' },
+              { label: dict.dashboardTrips.mergeFrom, value: mergeStart, onChange: setMergeStart, placeholder: '', span: false, type: 'date' },
+              { label: dict.dashboardTrips.mergeTo, value: mergeEnd, onChange: setMergeEnd, placeholder: '', span: false, type: 'date' },
             ].map(({ label, value, onChange, placeholder, span, type }) => (
               <div key={label} style={{ gridColumn: span ? '1 / -1' : undefined }}>
                 <label style={{ fontSize: 11, fontWeight: 700, color: '#8A8A8A', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</label>
@@ -461,7 +463,7 @@ export default function TravelAIDashboard() {
                 style={{ width: '100%', background: '#FFFC00', border: 'none', borderRadius: 10, padding: 14, fontSize: 14, fontWeight: 700, color: '#0D0D0D', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: merging ? 0.6 : 1 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-                {merging ? 'Regroupement...' : 'Regrouper en un carnet de voyage'}
+                {merging ? dict.dashboardTrips.merging : dict.dashboardTrips.mergeSubmit}
               </button>
             </div>
           </div>

@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "@/contexts/LocaleContext";
 
 export default function BetaLensPopup() {
+  const { dict } = useLocale();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -66,15 +68,13 @@ export default function BetaLensPopup() {
           />
 
           <h2 style={{ fontSize: 21, fontWeight: 700, color: "#0D0D0D", letterSpacing: "-0.4px", marginBottom: 10 }}>
-            Notre Lens est en cours d&apos;approbation
+            {dict.betaPopup.title}
           </h2>
           <p style={{ fontSize: 14, lineHeight: 1.65, color: "#6B6B6B", margin: "0 0 16px" }}>
-            TravelAI est actuellement en <strong style={{ color: "#0D0D0D" }}>bêta</strong>. Notre Lens Snapchat est
-            en cours de validation officielle par Snapchat.
+            {dict.betaPopup.p1desc} <strong style={{ color: "#0D0D0D" }}>{dict.betaPopup.beta}</strong>{dict.betaPopup.p1end}
           </p>
           <p style={{ fontSize: 14, lineHeight: 1.65, color: "#6B6B6B", margin: "0 0 26px" }}>
-            Dès qu&apos;elle sera disponible, une information s&apos;affichera ici et tu pourras scanner le Snapcode
-            de la Lens directement pour commencer à interagir avec TravelAI.
+            {dict.betaPopup.p2}
           </p>
 
           <button
@@ -84,7 +84,7 @@ export default function BetaLensPopup() {
               fontSize: 14, fontWeight: 700, color: "#0D0D0D", cursor: "pointer",
             }}
           >
-            J&apos;ai compris
+            {dict.betaPopup.button}
           </button>
         </div>
       </div>

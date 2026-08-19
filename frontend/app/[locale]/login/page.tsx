@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { DEMO_EMAIL } from "@/lib/demo";
+import { useLocale } from "@/contexts/LocaleContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const CSS = `
-  .ta-login-root { background: #F4F3F1; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; -webkit-font-smoothing: antialiased; }
+  .ta-login-root { background: #F4F3F1; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; -webkit-font-smoothing: antialiased; position: relative; }
   .ta-login-card { background: #fff; border-radius: 20px; border: 0.5px solid rgba(0,0,0,0.07); box-shadow: 0 20px 60px rgba(0,0,0,0.06); padding: 40px 36px; width: 100%; max-width: 380px; }
   .ta-login-google { transition: transform .18s ease, box-shadow .18s ease; }
   .ta-login-google:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
@@ -26,24 +28,28 @@ function GoogleIcon() {
 
 function LoginContent() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard/stats";
+  const { locale, dict } = useLocale();
+  const callbackUrl = searchParams.get("callbackUrl") || `/${locale}/dashboard/stats`;
 
   return (
     <div className="ta-login-root">
       <style>{CSS}</style>
+      <div style={{ position: "absolute", top: 20, right: 20 }}>
+        <LanguageSwitcher />
+      </div>
       <div className="ta-login-card">
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none", marginBottom: 28, justifyContent: "center" }}>
+        <Link href={`/${locale}`} style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none", marginBottom: 28, justifyContent: "center" }}>
           <div style={{ width: 30, height: 30, borderRadius: 8, overflow: "hidden" }}>
             <img src="/voyageur.jpg" alt="TravelAI" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
-          <span style={{ fontSize: 18, fontWeight: 700, color: "#0D0D0D", letterSpacing: "-0.4px" }}>TravelAI</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: "#0D0D0D", letterSpacing: "-0.4px" }}>{dict.common.brand}</span>
         </Link>
 
         <h1 style={{ fontSize: 22, fontWeight: 700, color: "#0D0D0D", textAlign: "center", marginBottom: 8, letterSpacing: "-0.4px" }}>
-          Connecte-toi
+          {dict.login.title}
         </h1>
         <p style={{ fontSize: 13.5, color: "#6B6B6B", textAlign: "center", marginBottom: 28, lineHeight: 1.5 }}>
-          Accede a tes voyages, tes monuments et tes carnets de voyage.
+          {dict.login.subtitle}
         </p>
 
         <button
@@ -67,12 +73,12 @@ function LoginContent() {
           }}
         >
           <GoogleIcon />
-          Se connecter avec Google
+          {dict.login.google}
         </button>
 
         <button
           type="button"
-          onClick={() => signIn("email", { email: DEMO_EMAIL, callbackUrl: "/dashboard/stats" })}
+          onClick={() => signIn("email", { email: DEMO_EMAIL, callbackUrl: `/${locale}/dashboard/stats` })}
           style={{
             width: "100%",
             background: "#F7F7F7",
@@ -86,11 +92,11 @@ function LoginContent() {
             marginTop: 10,
           }}
         >
-          Voir une demo
+          {dict.login.demo}
         </button>
 
         <p style={{ fontSize: 11.5, color: "#B0B0B0", textAlign: "center", marginTop: 24, lineHeight: 1.5 }}>
-          En te connectant, tu acceptes que TravelAI associe ton compte a l&apos;UUID anonyme genere par la Lens Snapchat.
+          {dict.login.disclaimer}
         </p>
       </div>
     </div>

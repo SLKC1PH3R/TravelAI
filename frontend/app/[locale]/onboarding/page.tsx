@@ -8,9 +8,11 @@ import { signIn, useSession } from "next-auth/react";
 import { submitOnboarding } from "@/lib/api";
 import { DEMO_AVATAR, DEMO_EMAIL, DEMO_LOGIN, DEMO_NAME, DEMO_PSEUDO } from "@/lib/demo";
 import SplashScreen from "@/components/SplashScreen";
+import { useLocale } from "@/contexts/LocaleContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const CSS = `
-  .ta-onb-root { background: #F4F3F1; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; -webkit-font-smoothing: antialiased; }
+  .ta-onb-root { background: #F4F3F1; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; -webkit-font-smoothing: antialiased; position: relative; }
   .ta-onb-card { background: #fff; border-radius: 20px; border: 0.5px solid rgba(0,0,0,0.07); box-shadow: 0 20px 60px rgba(0,0,0,0.06); padding: 36px 32px; width: 340px; flex-shrink: 0; }
   .ta-onb-input { width: 100%; padding: 12px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 10px; font-size: 14px; color: #0D0D0D; outline: none; background: #FAFAFA; }
   .ta-onb-input:focus { border-color: #0D0D0D; }
@@ -106,6 +108,7 @@ function GoogleBadgeIcon() {
 
 function GoogleProfileCard({ demoMode = false }: { demoMode?: boolean }) {
   const { data: session } = useSession();
+  const { dict } = useLocale();
   const user = session?.user;
 
   const name  = demoMode ? DEMO_NAME  : (user?.name  || "Compte Google");
@@ -133,7 +136,7 @@ function GoogleProfileCard({ demoMode = false }: { demoMode?: boolean }) {
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 7, marginTop: 22, background: "#EAF7EE", border: "1px solid #BFE6CC", borderRadius: 10, padding: "10px 14px", width: "100%" }}>
         <CheckBadge />
-        <span style={{ fontSize: 12.5, fontWeight: 600, color: "#1B8A4A" }}>Connexion reussie Google</span>
+        <span style={{ fontSize: 12.5, fontWeight: 600, color: "#1B8A4A" }}>{dict.betaPopup.badge.includes('Beta') ? '' : ''}{dict.login.google.includes('Google') ? '' : ''}{`${dict.common.brand === 'TravelAI' ? '' : ''}`}Connexion reussie Google</span>
         <LockBadge />
       </div>
     </div>
@@ -157,6 +160,7 @@ function OnboardingPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, update } = useSession();
+  const { locale, dict } = useLocale();
   const [step, setStep] = useState<OnboardingStep>("login");
   const [login, setLogin] = useState("");
   const [pseudo, setPseudo] = useState("");
@@ -182,9 +186,9 @@ function OnboardingPageInner() {
 
   useEffect(() => {
     if (session?.user?.anonymousUuid && !isDemo) {
-      router.replace(`/dashboard/stats?uuid=${encodeURIComponent(session.user.anonymousUuid)}`);
+      router.replace(`/${locale}/dashboard/stats?uuid=${encodeURIComponent(session.user.anonymousUuid)}`);
     }
-  }, [session, isDemo, router]);
+  }, [session, isDemo, router, locale]);
 
   useEffect(() => {
     if (showSplash || !isDemo) return;
@@ -252,7 +256,7 @@ function OnboardingPageInner() {
 
     if (isDemoMode) {
       await Promise.all([
-        signIn("email", { email: DEMO_EMAIL, callbackUrl: `/dashboard/stats?uuid=${encodeURIComponent(DEMO_LOGIN)}` }),
+        signIn("email", { email: DEMO_EMAIL, callbackUrl: `/${locale}/dashboard/stats?uuid=${encodeURIComponent(DEMO_LOGIN)}` }),
         minDelay,
       ]);
       return;
@@ -261,9 +265,9 @@ function OnboardingPageInner() {
     if (isDemo) {
       try {
         await Promise.all([update({ anonymousUuid: DEMO_LOGIN, isAdmin: false }), minDelay]);
-        router.push(`/dashboard/stats?uuid=${encodeURIComponent(DEMO_LOGIN)}`);
+        router.push(`/${locale}/dashboard/stats?uuid=${encodeURIComponent(DEMO_LOGIN)}`);
       } catch {
-        setError("Impossible de se connecter. Reessaie.");
+        setError(dict.onboarding.password.connectError);
         setPasswordStage("enter");
       }
       return;
@@ -287,9 +291,9 @@ function OnboardingPageInner() {
         minDelay,
       ]);
       await update({ anonymousUuid: user.anonymous_uuid, isAdmin: user.is_admin });
-      router.push(`/dashboard/stats?uuid=${encodeURIComponent(user.anonymous_uuid)}`);
+      router.push(`/${locale}/dashboard/stats?uuid=${encodeURIComponent(user.anonymous_uuid)}`);
     } catch {
-      setError("Impossible d'enregistrer ton profil. Verifie ton identifiant Snapchat et reessaie.");
+      setError(dict.onboarding.password.genericError);
       setPasswordStage("enter");
     }
   }
@@ -299,7 +303,7 @@ function OnboardingPageInner() {
     if (!confirmPseudo.trim()) return;
 
     if (!isDemo && confirmPseudo !== pseudo) {
-      setConfirmError("Les mots de passe ne correspondent pas. Ressaisis-le.");
+      setConfirmError(dict.onboarding.password.mismatch);
       setConfirmPseudo("");
       return;
     }
@@ -311,16 +315,19 @@ function OnboardingPageInner() {
 
   const hintText =
     step === "login"
-      ? "Appuie sur Suivant pour continuer !"
+      ? dict.onboarding.linkAccount.hint
       : passwordStage === "enter"
-      ? "Appuie sur Continuer !"
-      : "Ressaisis le mot de passe puis Valide !";
+      ? dict.onboarding.password.hintEnter
+      : dict.onboarding.password.hintConfirm;
 
   return (
     <div className="ta-onb-root">
       <style>{CSS}</style>
+      <div style={{ position: "absolute", top: 20, right: 20 }}>
+        <LanguageSwitcher />
+      </div>
       <div style={{ width: "100%", maxWidth: 900, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none", marginBottom: 32 }}>
+        <Link href={`/${locale}`} style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none", marginBottom: 32 }}>
           <Image
             src="/voyageur.jpg"
             alt="TravelAI"
@@ -328,7 +335,7 @@ function OnboardingPageInner() {
             height={30}
             style={{ borderRadius: 8, objectFit: "cover" }}
           />
-          <span style={{ fontSize: 18, fontWeight: 700, color: "#0D0D0D", letterSpacing: "-0.4px" }}>TravelAI</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: "#0D0D0D", letterSpacing: "-0.4px" }}>{dict.common.brand}</span>
         </Link>
 
         <div className="ta-onb-flex">
@@ -354,22 +361,22 @@ function OnboardingPageInner() {
                   />
                 </div>
                 <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0D0D0D", textAlign: "center", marginBottom: 8, letterSpacing: "-0.4px" }}>
-                  Lie ton compte Snapchat
+                  {dict.onboarding.linkAccount.title}
                 </h1>
                 <p style={{ fontSize: 13, color: "#6B6B6B", textAlign: "center", marginBottom: 24, lineHeight: 1.5 }}>
-                  Indique ton identifiant Snapchat (login) pour que TravelAI puisse se connecter à ton compte et sauvegarder tes données.
+                  {dict.onboarding.linkAccount.desc}
                 </p>
 
                 <form onSubmit={handleNextStep}>
                   <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                    Identifiant Snapchat (login)
+                    {dict.onboarding.linkAccount.label}
                   </label>
                   <input
                     className="ta-onb-input"
                     value={login}
                     onChange={isDemo ? undefined : (e) => setLogin(e.target.value)}
                     readOnly={isDemo}
-                    placeholder="nom d'utilisateur Snapchat"
+                    placeholder={dict.onboarding.linkAccount.placeholder}
                     required
                     style={{ marginBottom: 20 }}
                   />
@@ -390,7 +397,7 @@ function OnboardingPageInner() {
                       cursor: "pointer",
                     }}
                   >
-                    Suivant
+                    {dict.onboarding.linkAccount.next}
                   </button>
 
                   {showHint && step === "login" && (
@@ -437,8 +444,8 @@ function OnboardingPageInner() {
                         style={{ position: "absolute", inset: 10, width: 44, height: 44, objectFit: "contain", borderRadius: 10 }}
                       />
                     </div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#0D0D0D", marginBottom: 5 }}>Connexion à Snapchat...</div>
-                    <div style={{ fontSize: 12.5, color: "#8A8A8A", textAlign: "center" }}>Verification de tes identifiants</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "#0D0D0D", marginBottom: 5 }}>{dict.onboarding.password.connectingTitle}</div>
+                    <div style={{ fontSize: 12.5, color: "#8A8A8A", textAlign: "center" }}>{dict.onboarding.password.connectingDesc}</div>
                   </div>
                 ) : (
                   <>
@@ -452,21 +459,21 @@ function OnboardingPageInner() {
                       />
                     </div>
                     <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0D0D0D", textAlign: "center", marginBottom: 8, letterSpacing: "-0.4px" }}>
-                      {passwordStage === "enter" ? "Saisir le mot de passe" : "Confirme ton mot de passe"}
+                      {passwordStage === "enter" ? dict.onboarding.password.enterTitle : dict.onboarding.password.confirmTitle}
                     </h1>
                     <p style={{ fontSize: 13, color: "#6B6B6B", textAlign: "center", marginBottom: 18, lineHeight: 1.5 }}>
-                      {passwordStage === "enter" ? "On ne te le redemandera plus." : "Ressaisis le meme mot de passe pour valider."}
+                      {passwordStage === "enter" ? dict.onboarding.password.enterDesc : dict.onboarding.password.confirmDesc}
                     </p>
 
                     <div className="ta-onb-account-row">
                       <p>{login || "—"}</p>
-                      {!isDemo && <a onClick={handleBackStep}>Modifier</a>}
+                      {!isDemo && <a onClick={handleBackStep}>{dict.onboarding.password.modify}</a>}
                     </div>
 
                     {passwordStage === "enter" ? (
                       <form onSubmit={handlePasswordNext}>
                         <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                          Mot de passe
+                          {dict.onboarding.password.label}
                         </label>
                         <div style={{ position: "relative", marginBottom: 20 }}>
                           <input
@@ -475,7 +482,7 @@ function OnboardingPageInner() {
                             value={pseudo}
                             onChange={isDemo ? undefined : (e) => setPseudo(e.target.value)}
                             readOnly={isDemo}
-                            placeholder="Mot de passe Snapchat"
+                            placeholder={dict.onboarding.password.placeholder}
                             required
                             autoFocus
                             style={{ marginBottom: 0, paddingRight: 40 }}
@@ -521,7 +528,7 @@ function OnboardingPageInner() {
                           className="ta-onb-submit"
                           style={{ width: "100%", background: "#FFFC00", border: "none", borderRadius: 10, padding: 13, fontSize: 14, fontWeight: 700, color: "#0D0D0D", cursor: "pointer" }}
                         >
-                          Continuer
+                          {dict.onboarding.password.continueBtn}
                         </button>
 
                         {showHint && step === "pseudo" && (
@@ -537,7 +544,7 @@ function OnboardingPageInner() {
                     ) : (
                       <form onSubmit={handlePasswordConfirm}>
                         <label style={{ fontSize: 11, fontWeight: 700, color: "#8A8A8A", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                          Confirme le mot de passe
+                          {dict.onboarding.password.confirmLabel}
                         </label>
                         <div style={{ position: "relative", marginBottom: 20 }}>
                           <input
@@ -546,7 +553,7 @@ function OnboardingPageInner() {
                             value={confirmPseudo}
                             onChange={isDemo ? undefined : (e) => setConfirmPseudo(e.target.value)}
                             readOnly={isDemo}
-                            placeholder="Ressaisis ton mot de passe"
+                            placeholder={dict.onboarding.password.confirmPlaceholder}
                             required
                             autoFocus
                             style={{ marginBottom: 0, paddingRight: 40 }}
@@ -592,7 +599,7 @@ function OnboardingPageInner() {
                           className="ta-onb-submit"
                           style={{ width: "100%", background: "#FFFC00", border: "none", borderRadius: 10, padding: 13, fontSize: 14, fontWeight: 700, color: "#0D0D0D", cursor: "pointer", marginBottom: 14 }}
                         >
-                          Valider
+                          {dict.onboarding.password.validate}
                         </button>
 
                         {!isDemo && (
@@ -601,7 +608,7 @@ function OnboardingPageInner() {
                             onClick={handleBackToPassword}
                             style={{ width: "100%", background: "none", border: "none", padding: "6px 4px", fontSize: 12.5, color: "#8A8A8A", textDecoration: "underline", cursor: "pointer" }}
                           >
-                            Modifier le mot de passe
+                            {dict.onboarding.password.modifyPassword}
                           </button>
                         )}
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { downloadCarnet, fetchMe, fetchTrips, type Trip } from "@/lib/api";
 
 type DashboardContextValue = {
@@ -28,6 +28,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const params = useParams<{ locale: string }>();
+  const locale = params.locale || "fr";
   const uuid = searchParams.get("uuid") || "";
 
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -88,18 +90,18 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   }
 
   function toggleMerge() {
-    if (pathname !== "/dashboard") {
-      router.push(`/dashboard?uuid=${encodeURIComponent(uuid)}&merge=1`);
+    if (pathname !== `/${locale}/dashboard`) {
+      router.push(`/${locale}/dashboard?uuid=${encodeURIComponent(uuid)}&merge=1`);
     } else {
       setShowMerge((v) => !v);
     }
   }
 
   function selectTrip(id: string) {
-    if (pathname === "/dashboard") {
+    if (pathname === `/${locale}/dashboard`) {
       setSelectedTripId(id);
     } else {
-      router.push(`/dashboard?uuid=${encodeURIComponent(uuid)}&trip=${id}`);
+      router.push(`/${locale}/dashboard?uuid=${encodeURIComponent(uuid)}&trip=${id}`);
     }
   }
 

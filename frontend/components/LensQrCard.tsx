@@ -1,6 +1,7 @@
 "use client";
 
 import { QRCodeSVG } from "qrcode.react";
+import { useLocale } from "@/contexts/LocaleContext";
 
 /**
  * A renseigner une fois la Lens validee par Snapchat (Snapcode / lien de deep-link officiel).
@@ -9,6 +10,7 @@ import { QRCodeSVG } from "qrcode.react";
 const LENS_SNAPCODE_URL: string | null = null;
 
 export default function LensQrCard() {
+  const { dict } = useLocale();
   return (
     <div
       style={{
@@ -42,12 +44,10 @@ export default function LensQrCard() {
           🚀 Beta
         </div>
         <div style={{ fontSize: 15, fontWeight: 700, color: "#0D0D0D", marginBottom: 4 }}>
-          {LENS_SNAPCODE_URL ? "Scanne pour lancer la Lens TravelAI" : "QR code de la Lens — bientôt disponible"}
+          {LENS_SNAPCODE_URL ? dict.lensQrCard.ready : dict.lensQrCard.soon}
         </div>
         <p style={{ fontSize: 13, color: "#6B6B6B", lineHeight: 1.55, margin: 0 }}>
-          {LENS_SNAPCODE_URL
-            ? "Ouvre l'appareil photo Snapchat et scanne ce code pour lancer TravelAI."
-            : "Notre Lens est en cours de validation par Snapchat. Dès qu'elle sera approuvée, le QR code à scanner pour la lancer apparaîtra ici automatiquement."}
+          {LENS_SNAPCODE_URL ? dict.lensQrCard.readyDesc : dict.lensQrCard.soonDesc}
         </p>
       </div>
     </div>

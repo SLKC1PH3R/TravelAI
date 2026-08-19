@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { fetchProfile, updateProfile } from "@/lib/api";
+import { useLocale } from "@/contexts/LocaleContext";
 
 const CSS = `
   .ta-profile-root { background: #F4F3F1; color: #0D0D0D; -webkit-font-smoothing: antialiased; }
@@ -26,6 +27,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export default function ProfileSettings() {
+  const { dict } = useLocale();
   const { data: session, update } = useSession();
   const email = session?.user?.email ?? "";
 
@@ -50,7 +52,7 @@ export default function ProfileSettings() {
         setLocation(profile.location || "");
         setAvatarUrl(profile.avatar_url || session?.user?.image || "");
       })
-      .catch(() => setError("Impossible de charger le profil."))
+      .catch(() => setError(dict.profile.loadError))
       .finally(() => setLoading(false));
   }, [email, session?.user?.name, session?.user?.image]);
 
@@ -67,9 +69,9 @@ export default function ProfileSettings() {
         location: location.trim(),
       });
       await update({ name: name.trim(), image: avatarUrl.trim() });
-      setMessage("Profil mis a jour.");
+      setMessage(dict.profile.updated);
     } catch {
-      setError("Impossible d'enregistrer les modifications.");
+      setError(dict.profile.error);
     } finally {
       setSaving(false);
     }
@@ -79,7 +81,7 @@ export default function ProfileSettings() {
     return (
       <div className="ta-profile-root" style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#6B6B6B" }}>
         <style>{CSS}</style>
-        Chargement...
+        {dict.common.loading}
       </div>
     );
   }
@@ -88,12 +90,12 @@ export default function ProfileSettings() {
     <div className="ta-profile-root">
       <style>{CSS}</style>
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "40px 28px 64px" }}>
-        <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.6px", marginBottom: 6 }}>Mon profil</h1>
-        <p style={{ fontSize: 13.5, color: "#6B6B6B", marginBottom: 28 }}>Gere tes informations personnelles affichees sur TravelAI.</p>
+        <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.6px", marginBottom: 6 }}>{dict.profile.title}</h1>
+        <p style={{ fontSize: 13.5, color: "#6B6B6B", marginBottom: 28 }}>{dict.profile.subtitle}</p>
 
         {isLocked && (
           <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#FFF8E1", border: "1px solid rgba(245,158,11,0.35)", borderRadius: 10, padding: "12px 14px", marginBottom: 20, fontSize: 12.5, color: "#92600E" }}>
-            🔒 Ce compte de demonstration est verrouille : seul l&apos;administrateur peut le modifier.
+            {dict.profile.locked}
           </div>
         )}
 
@@ -107,7 +109,7 @@ export default function ProfileSettings() {
               </div>
             )}
             <div style={{ flex: 1 }}>
-              <Field label="URL de l'avatar">
+              <Field label={dict.profile.avatarUrl}>
                 <input
                   className="ta-profile-input"
                   value={avatarUrl}
@@ -119,24 +121,24 @@ export default function ProfileSettings() {
             </div>
           </div>
 
-          <Field label="Email">
+          <Field label={dict.profile.email}>
             <input className="ta-profile-input" value={email} disabled />
           </Field>
 
-          <Field label="Nom">
+          <Field label={dict.profile.name}>
             <input className="ta-profile-input" value={name} onChange={(e) => setName(e.target.value)} disabled={isLocked} />
           </Field>
 
-          <Field label="Pseudo Snapchat">
+          <Field label={dict.profile.snapPseudo}>
             <input className="ta-profile-input" value={login} disabled />
           </Field>
 
-          <Field label="Lieu de residence">
+          <Field label={dict.profile.location}>
             <input
               className="ta-profile-input"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="ex: Paris, France"
+              placeholder={dict.profile.locationPlaceholder}
               disabled={isLocked}
             />
           </Field>
@@ -151,7 +153,7 @@ export default function ProfileSettings() {
               className="ta-profile-submit"
               style={{ width: "100%", background: "#FFFC00", border: "none", borderRadius: 10, padding: 13, fontSize: 14, fontWeight: 700, color: "#0D0D0D", cursor: "pointer" }}
             >
-              {saving ? "Enregistrement..." : "Enregistrer"}
+              {saving ? dict.profile.saving : dict.profile.save}
             </button>
           )}
         </form>

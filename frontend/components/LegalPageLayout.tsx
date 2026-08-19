@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useLocale } from "@/contexts/LocaleContext";
 
 const CSS = `
   .ta-legal-root { background: #F4F3F1; min-height: 100vh; -webkit-font-smoothing: antialiased; }
@@ -31,27 +32,28 @@ export default function LegalPageLayout({
   updated: string;
   children: React.ReactNode;
 }) {
+  const { locale, dict } = useLocale();
   return (
     <div className="ta-legal-root">
       <style>{CSS}</style>
       <div className="ta-legal-header">
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}>
+        <Link href={`/${locale}`} style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}>
           <div style={{ width: 28, height: 28, borderRadius: 7, overflow: "hidden" }}>
             <img src="/voyageur.jpg" alt="TravelAI" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
-          <span style={{ fontSize: 16, fontWeight: 700, color: "#0D0D0D", letterSpacing: "-0.4px" }}>TravelAI</span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: "#0D0D0D", letterSpacing: "-0.4px" }}>{dict.common.brand}</span>
         </Link>
-        <Link href="/" className="ta-legal-back">
+        <Link href={`/${locale}`} className="ta-legal-back">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
-          Retour
+          {dict.legal.backHome}
         </Link>
       </div>
 
       <div className="ta-legal-card">
         <h1>{title}</h1>
-        <p className="ta-legal-updated">Derniere mise a jour : {updated}</p>
+        <p className="ta-legal-updated">{dict.legal.lastUpdated} : {updated}</p>
         {children}
       </div>
     </div>
